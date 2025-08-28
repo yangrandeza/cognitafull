@@ -30,8 +30,8 @@ import type {
   QuizAnswers,
   RawUnifiedProfile,
   Organization,
-  NewLessonPlan,
-  LessonPlan,
+  NewLearningStrategy,
+  LearningStrategy,
 } from '../types';
 import { processProfiles } from '../insights-generator';
 
@@ -290,28 +290,22 @@ export const getClassWithStudentsAndProfiles = async (
   };
 };
 
-// Lesson Plan Functions
+// Learning Strategy Functions
 
-export const saveLessonPlan = async (plan: Omit<NewLessonPlan, 'createdAt'>): Promise<LessonPlan> => {
+export const saveStrategy = async (strategy: NewLearningStrategy): Promise<string> => {
     const dataWithTimestamp = {
-        ...plan,
+        ...strategy,
         createdAt: serverTimestamp()
     };
-    const docRef = await addDoc(collection(db, "lessonPlans"), dataWithTimestamp);
-
-    // To return the full object, we create a client-side version of it.
-    // The server timestamp will be null on the client initially, but we can use the current date as a good-enough placeholder.
-    return {
-        id: docRef.id,
-        ...plan,
-        createdAt: new Date().toISOString(), // Use current date as placeholder
-    };
+    const docRef = await addDoc(collection(db, "learningStrategies"), dataWithTimestamp);
+    return docRef.id;
 }
 
-export const getLessonPlansByClass = async (classId: string): Promise<LessonPlan[]> => {
+export const getStrategiesByClass = async (classId: string): Promise<LearningStrategy[]> => {
     const q = query(
-        collection(db, 'lessonPlans'), 
-        where('classId', '==', classId)
+        collection(db, 'learningStrategies'), 
+        where('classId', '==', classId),
+        // orderBy('createdAt', 'desc') // Requires a composite index, removed for simplicity
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => {
@@ -320,8 +314,6 @@ export const getLessonPlansByClass = async (classId: string): Promise<LessonPlan
             id: doc.id,
             ...data,
             createdAt: (data.createdAt as Timestamp)?.toDate().toISOString(),
-        } as LessonPlan
+        } as LearningStrategy
     });
 }
-
-    

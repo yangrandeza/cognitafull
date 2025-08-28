@@ -121,23 +121,35 @@ export type ClassWithStudentData = Class & {
   profiles: RawUnifiedProfile[]; // Fetch raw profiles
 };
 
-export type LessonPlan = {
+
+export type LearningStrategy = {
     id: string;
     classId: string;
     teacherId: string;
     title: string;
-    originalPlan: string;
-    suggestions: string;
-    reformulatedPlan: string;
+    originalLessonPlan: string; // The user's input
+    suggestions: string; // The AI's suggestions
     createdAt: string;
 }
 
-export type NewLessonPlan = {
+export type NewLearningStrategy = {
     classId: string;
     teacherId: string;
     title: string;
-    originalPlan: string;
+    originalLessonPlan: string;
     suggestions: string;
-    reformulatedPlan: string;
-    createdAt: FieldValue;
+    createdAt: Date;
 }
+
+// --- AI Flow Types ---
+export type OptimizeLessonPlanInput = {
+    lessonPlan: string;
+    classProfile: string;
+};
+
+export type OptimizeLessonPlanOutput = {
+    suggestions: {
+        feature: string;
+        suggestion: string;
+    }[];
+};

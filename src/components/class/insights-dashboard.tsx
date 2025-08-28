@@ -8,7 +8,7 @@ import { StudentsList } from "@/components/class/students-list";
 import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getClassById, getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
-import type { Class, ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile, LessonPlan } from "@/lib/types";
+import type { Class, ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile, LearningStrategy } from "@/lib/types";
 import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby, BookMarked } from "lucide-react";
 import { getDashboardData, processProfiles, getDemographicsData } from "@/lib/insights-generator";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,15 @@ import { CognitiveCompass } from "./cognitive-compass";
 import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
-import { SavedLessonPlans } from "./saved-lesson-plans";
-import { getSavedLessonPlans } from "@/lib/actions";
+import { SavedStrategies } from "./saved-strategies";
+import { getSavedLearningStrategies } from "@/lib/actions";
 
 
 export function InsightsDashboard({ classId }: { classId: string }) {
   const [loading, setLoading] = useState(true);
   const [classData, setClassData] = useState<Class | null>(null);
   const [studentData, setStudentData] = useState<{students: Student[], profiles: RawUnifiedProfile[]} | null>(null);
-  const [savedLessonPlans, setSavedLessonPlans] = useState<LessonPlan[]>([]);
+  const [savedStrategies, setSavedStrategies] = useState<LearningStrategy[]>([]);
   const [dashboardData, setDashboardData] = useState<ReturnType<typeof getDashboardData> | null>(null);
   const [demographicsData, setDemographicsData] = useState<ReturnType<typeof getDemographicsData> | null>(null);
   const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
@@ -36,15 +36,15 @@ export function InsightsDashboard({ classId }: { classId: string }) {
   const fetchClassData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch class details, student/profile data, and lesson plans in parallel
-      const [fetchedClassData, fetchedStudentData, fetchedLessonPlans] = await Promise.all([
+      // Fetch class details, student/profile data, and learning strategies in parallel
+      const [fetchedClassData, fetchedStudentData, fetchedStrategies] = await Promise.all([
         getClassById(classId),
         getClassWithStudentsAndProfiles(classId),
-        getSavedLessonPlans(classId)
+        getSavedLearningStrategies(classId)
       ]);
       
       setClassData(fetchedClassData);
-      setSavedLessonPlans(fetchedLessonPlans);
+      setSavedStrategies(fetchedStrategies);
 
       if (fetchedStudentData) {
         setStudentData({students: fetchedStudentData.students, profiles: fetchedStudentData.profiles });
@@ -72,12 +72,12 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     fetchClassData();
   }, [fetchClassData]);
   
-  const handlePlanSaved = () => {
-    // Re-fetch lesson plans and re-render
-    getSavedLessonPlans(classId).then(setSavedLessonPlans);
+  const handleStrategySaved = () => {
+    // Re-fetch learning strategies and re-render
+    getSavedLearningStrategies(classId).then(setSavedStrategies);
     toast({
-        title: "Plano Salvo!",
-        description: "Seu plano de aula foi salvo. Verifique a aba 'Planos de Aula'.",
+        title: "Estratégia Salva!",
+        description: "Sua nova estratégia de aprendizagem foi salva. Verifique a aba 'Estratégias'.",
     });
   };
 
@@ -119,7 +119,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <TabsList>
             <TabsTrigger value="insights">Mosaico de Aprendizagem</TabsTrigger>
             <TabsTrigger value="students">Alunos ({students.length})</TabsTrigger>
-            <TabsTrigger value="plans">Planos de Aula</TabsTrigger>
+            <TabsTrigger value="strategies">Estratégias</TabsTrigger>
             <TabsTrigger value="optimizer">Oráculo Pedagógico</TabsTrigger>
         </TabsList>
         <ShareClassDialog classId={classId} />
@@ -266,15 +266,15 @@ export function InsightsDashboard({ classId }: { classId: string }) {
       <TabsContent value="students">
         <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
-       <TabsContent value="plans">
-        <SavedLessonPlans savedPlans={savedLessonPlans} />
+       <TabsContent value="strategies">
+        <SavedStrategies savedStrategies={savedStrategies} />
       </TabsContent>
       <TabsContent value="optimizer">
         <LessonOptimizer 
             classProfileSummary={classProfileSummary} 
             classId={classId} 
             teacherId={teacherId}
-            onPlanSaved={handlePlanSaved}
+            onStrategySaved={handleStrategySaved}
         />
       </TabsContent>
     </Tabs>

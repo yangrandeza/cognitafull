@@ -6,15 +6,9 @@ import {
   type OptimizeLessonPlanInput,
   type OptimizeLessonPlanOutput,
 } from '@/ai/flows/lesson-plan-optimizer';
+import { saveStrategy as saveStrategyInDb, getStrategiesByClass as getStrategiesFromDb } from './firebase/firestore';
+import { NewLearningStrategy, LearningStrategy } from './types';
 
-import {
-  reformLessonPlan,
-  type ReformLessonPlanInput,
-  type ReformLessonPlanOutput,
-} from '@/ai/flows/lesson-plan-reformer';
-
-import { saveLessonPlan as savePlanInDb, getLessonPlansByClass as getPlansFromDb } from './firebase/firestore';
-import { NewLessonPlan, LessonPlan } from './types';
 
 export async function getLessonPlanSuggestions(
   input: OptimizeLessonPlanInput
@@ -38,45 +32,30 @@ export async function getLessonPlanSuggestions(
 }
 
 
-export async function getReformedLessonPlan(
-  input: ReformLessonPlanInput
-): Promise<ReformLessonPlanOutput> {
-  try {
-    const output = await reformLessonPlan(input);
-    return output;
-  } catch (error) {
-    console.error("Error in getReformedLessonPlan:", error);
-    return {
-        reformulatedPlan: "Ocorreu um erro ao reformular o plano de aula. Por favor, tente novamente."
-    }
-  }
-}
-
-
-export async function saveGeneratedLessonPlan(planData: Omit<NewLessonPlan, 'createdAt'>): Promise<{success: boolean, error?: string, newPlan?: LessonPlan}> {
-    if (!planData.teacherId) {
+export async function saveLearningStrategy(strategyData: Omit<NewLearningStrategy, 'createdAt'>): Promise<{success: boolean, error?: string}> {
+    if (!strategyData.teacherId) {
         return { success: false, error: 'Usuário não autenticado.' };
     }
 
     try {
-        const fullPlanData: NewLessonPlan = {
-            ...planData,
+        const fullStrategyData: NewLearningStrategy = {
+            ...strategyData,
             createdAt: new Date(),
         };
-        const newPlan = await savePlanInDb(fullPlanData); // Now returns the full plan
-        return { success: true, newPlan };
+        await saveStrategyInDb(fullStrategyData); 
+        return { success: true };
     } catch(error) {
-        console.error("Error saving lesson plan:", error);
-        return { success: false, error: "Falha ao salvar o plano de aula."};
+        console.error("Error saving learning strategy:", error);
+        return { success: false, error: "Falha ao salvar a estratégia."};
     }
 }
 
 
-export async function getSavedLessonPlans(classId: string): Promise<LessonPlan[]> {
+export async function getSavedLearningStrategies(classId: string): Promise<LearningStrategy[]> {
     try {
-        return await getPlansFromDb(classId);
+        return await getStrategiesFromDb(classId);
     } catch (error) {
-        console.error("Error fetching lesson plans:", error);
+        console.error("Error fetching learning strategies:", error);
         return [];
     }
 }

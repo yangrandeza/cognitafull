@@ -4,22 +4,22 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookMarked, Eye } from "lucide-react";
-import type { LessonPlan } from "@/lib/types";
-import { LessonPlanDetailDialog } from "./lesson-plan-detail-dialog"; // Will create this
+import type { LearningStrategy } from "@/lib/types";
+import { StrategyDetailDialog } from "./strategy-detail-dialog"; 
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-interface SavedLessonPlansProps {
-    savedPlans: LessonPlan[];
+interface SavedStrategiesProps {
+    savedStrategies: LearningStrategy[];
 }
 
-export function SavedLessonPlans({ savedPlans }: SavedLessonPlansProps) {
-    const [selectedPlan, setSelectedPlan] = useState<LessonPlan | null>(null);
+export function SavedStrategies({ savedStrategies }: SavedStrategiesProps) {
+    const [selectedStrategy, setSelectedStrategy] = useState<LearningStrategy | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    const handleViewPlan = (plan: LessonPlan) => {
-        setSelectedPlan(plan);
+    const handleViewStrategy = (strategy: LearningStrategy) => {
+        setSelectedStrategy(strategy);
         setIsDialogOpen(true);
     };
 
@@ -28,24 +28,24 @@ export function SavedLessonPlans({ savedPlans }: SavedLessonPlansProps) {
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
-                        <BookMarked className="text-primary" /> Planos de Aula Salvos
+                        <BookMarked className="text-primary" /> Estratégias Salvas
                     </CardTitle>
                     <CardDescription>
-                        Acesse aqui os planos de aula que você já otimizou e salvou para esta turma.
+                        Acesse aqui as estratégias de aprendizagem que você já gerou e salvou para esta turma.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {savedPlans.length > 0 ? (
+                    {savedStrategies.length > 0 ? (
                         <div className="space-y-4">
-                            {savedPlans.map(plan => (
-                                <Card key={plan.id} className="flex items-center justify-between p-4">
+                            {savedStrategies.map(strategy => (
+                                <Card key={strategy.id} className="flex items-center justify-between p-4">
                                    <div>
-                                        <h3 className="font-headline font-semibold">{plan.title}</h3>
+                                        <h3 className="font-headline font-semibold">{strategy.title}</h3>
                                         <p className="text-sm text-muted-foreground">
-                                            Salvo em {format(new Date(plan.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                                            Salvo em {format(new Date(strategy.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                                         </p>
                                    </div>
-                                    <Button variant="outline" size="sm" onClick={() => handleViewPlan(plan)}>
+                                    <Button variant="outline" size="sm" onClick={() => handleViewStrategy(strategy)}>
                                         <Eye className="mr-2 h-4 w-4" />
                                         Ver Detalhes
                                     </Button>
@@ -53,14 +53,14 @@ export function SavedLessonPlans({ savedPlans }: SavedLessonPlansProps) {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-center text-muted-foreground p-4">Nenhum plano salvo ainda.</p>
+                        <p className="text-sm text-center text-muted-foreground p-4">Nenhuma estratégia salva ainda.</p>
                     )}
                 </CardContent>
             </Card>
 
-            {selectedPlan && (
-                <LessonPlanDetailDialog
-                    plan={selectedPlan}
+            {selectedStrategy && (
+                <StrategyDetailDialog
+                    strategy={selectedStrategy}
                     isOpen={isDialogOpen}
                     setIsOpen={setIsDialogOpen}
                 />

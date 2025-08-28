@@ -10,23 +10,23 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { LessonPlan } from "@/lib/types";
-import { FileDown, Wand2, Book, Lightbulb } from "lucide-react";
+import type { LearningStrategy } from "@/lib/types";
+import { FileDown, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 
-interface LessonPlanDetailDialogProps {
-  plan: LessonPlan;
+interface StrategyDetailDialogProps {
+  strategy: LearningStrategy;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
-const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ content }, ref) => {
+const PrintableContent = forwardRef<HTMLDivElement, { content: string, title: string }>(({ content, title }, ref) => {
   return (
     <div ref={ref} className="prose prose-sm dark:prose-invert max-w-none printable-content">
+      <h1 className="font-headline">{title}</h1>
       <ReactMarkdown>{content}</ReactMarkdown>
     </div>
   );
@@ -34,7 +34,7 @@ const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ cont
 PrintableContent.displayName = 'PrintableContent';
 
 
-export function LessonPlanDetailDialog({ plan, isOpen, setIsOpen }: LessonPlanDetailDialogProps) {
+export function StrategyDetailDialog({ strategy, isOpen, setIsOpen }: StrategyDetailDialogProps) {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
@@ -45,50 +45,29 @@ export function LessonPlanDetailDialog({ plan, isOpen, setIsOpen }: LessonPlanDe
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col no-print">
         <DialogHeader>
-          <DialogTitle className="font-headline text-2xl">{plan.title}</DialogTitle>
+          <DialogTitle className="font-headline text-2xl flex items-center gap-2">
+            <Lightbulb className="h-6 w-6 text-primary" />
+            {strategy.title}
+          </DialogTitle>
           <DialogDescription>
-            Detalhes do seu plano de aula otimizado.
+            Estratégias de aprendizagem geradas para esta turma, baseadas na aula sobre: "{strategy.originalLessonPlan}".
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs defaultValue="reformed" className="flex-grow flex flex-col min-h-0">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="original"><Book className="mr-2 h-4 w-4" /> Plano Original</TabsTrigger>
-            <TabsTrigger value="suggestions"><Lightbulb className="mr-2 h-4 w-4" /> Sugestões da IA</TabsTrigger>
-            <TabsTrigger value="reformed"><Wand2 className="mr-2 h-4 w-4" /> Plano Melhorado</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex-grow mt-4 overflow-hidden">
-            <TabsContent value="original" className="h-full">
-               <ScrollArea className="h-full pr-4">
-                 <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-lg bg-muted/20">
-                    <ReactMarkdown>{plan.originalPlan}</ReactMarkdown>
-                 </div>
-               </ScrollArea>
-            </TabsContent>
-            <TabsContent value="suggestions" className="h-full">
-                <ScrollArea className="h-full pr-4">
-                 <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-lg bg-muted/20">
-                    <ReactMarkdown>{plan.suggestions}</ReactMarkdown>
-                 </div>
-               </ScrollArea>
-            </TabsContent>
-            <TabsContent value="reformed" className="h-full flex flex-col">
-                 <ScrollArea className="h-full pr-4 flex-grow">
-                    <PrintableContent content={plan.reformulatedPlan} ref={printRef} />
-                </ScrollArea>
-                 <div className="flex-shrink-0 pt-4 mt-auto">
-                    <button
-                        onClick={handlePrint}
-                        className={cn(buttonVariants({ variant: "default" }))}
-                    >
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Exportar para PDF
-                    </button>
-                 </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+        <div className="flex-grow mt-4 overflow-hidden flex flex-col">
+            <ScrollArea className="h-full pr-4 flex-grow">
+                <PrintableContent content={strategy.suggestions} title={strategy.title} ref={printRef} />
+            </ScrollArea>
+             <div className="flex-shrink-0 pt-4 mt-auto">
+                <button
+                    onClick={handlePrint}
+                    className={cn(buttonVariants({ variant: "default" }))}
+                >
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Exportar para PDF
+                </button>
+             </div>
+        </div>
 
       </DialogContent>
     </Dialog>
