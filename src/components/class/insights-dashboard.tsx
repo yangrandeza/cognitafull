@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CognitiveCompass } from "./cognitive-compass";
 import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
+import { ShareClassDialog } from "./share-class-dialog";
 
 
 export function InsightsDashboard({ classId }: { classId: string }) {
@@ -45,14 +46,6 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     fetchData();
   }, [classId]);
   
-  const handleShareLink = () => {
-    const url = `${window.location.origin}/q/${classId}`;
-    navigator.clipboard.writeText(url);
-    toast({
-        title: "Link Copiado!",
-        description: "O link de convite da turma foi copiado para sua área de transferência."
-    })
-  }
 
   if (loading) {
     return (
@@ -72,10 +65,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
           <p>
             Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, o Mosaico de Aprendizagem aparecerá aqui.
           </p>
-          <Button onClick={handleShareLink}>
-            <Share2 className="mr-2 h-4 w-4" />
-            Copiar Link do Questionário
-          </Button>
+          <ShareClassDialog classId={classId} />
         </CardContent>
       </Card>
     );
@@ -96,10 +86,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             <TabsTrigger value="students">Alunos ({students.length})</TabsTrigger>
             <TabsTrigger value="optimizer">Oráculo Pedagógico</TabsTrigger>
         </TabsList>
-        <Button variant="outline" onClick={handleShareLink}>
-            <Share2 className="mr-2 h-4 w-4" />
-            Copiar Link
-        </Button>
+        <ShareClassDialog classId={classId} />
       </div>
 
       <TabsContent value="insights" className="space-y-6">
