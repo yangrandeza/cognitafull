@@ -79,7 +79,7 @@ export type RawUnifiedProfile = {
   studentId: string;
   classId: string;
   rawAnswers: QuizAnswers;
-  createdAt: FieldValue;
+  createdAt: string; // Changed from FieldValue to string for serialization
 };
 
 

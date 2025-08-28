@@ -168,7 +168,14 @@ export const getStudentsByClass = async (classId: string): Promise<Student[]> =>
 export const getProfilesByClass = async (classId: string): Promise<RawUnifiedProfile[]> => {
     const q = query(collection(db, 'unifiedProfiles'), where('classId', '==', classId));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RawUnifiedProfile));
+    return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+             id: doc.id,
+             ...data,
+             createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+        } as RawUnifiedProfile
+    });
 };
 
 export const getStudentAndProfileById = async (studentId: string): Promise<{student: Student, profile: UnifiedProfile} | null> => {
@@ -191,8 +198,14 @@ export const getStudentAndProfileById = async (studentId: string): Promise<{stud
     const profileSnap = await getDoc(profileRef);
 
     if (!profileSnap.exists()) return null;
+    
+    const profileData = profileSnap.data();
+    const rawProfile = { 
+        id: profileSnap.id, 
+        ...profileData,
+        createdAt: (profileData.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+    } as RawUnifiedProfile;
 
-    const rawProfile = { id: profileSnap.id, ...profileSnap.data() } as RawUnifiedProfile;
     // We process the single raw profile into a full unified profile
     const [processedProfile] = processProfiles([rawProfile]);
 
