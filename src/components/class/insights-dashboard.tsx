@@ -95,7 +95,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
       <TabsContent value="insights" className="space-y-6">
 
         {demographicsData && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Idade Média</CardTitle>
@@ -114,22 +114,15 @@ export function InsightsDashboard({ classId }: { classId: string }) {
                 <div className="text-2xl font-bold">{demographicsData.dominantGeneration}</div>
               </CardContent>
             </Card>
-             {Object.entries(demographicsData.genderDistribution).map(([gender, percentage]) => {
-              if (percentage === 0) return null;
-              return (
-                  <Card key={gender}>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium capitalize">
-                              Gênero ({gender})
-                          </CardTitle>
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                          <div className="text-2xl font-bold">{percentage.toFixed(0)}%</div>
-                      </CardContent>
-                  </Card>
-              )
-            })}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Gênero Predominante</CardTitle>
+                 <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{demographicsData.dominantGender}</div>
+              </CardContent>
+            </Card>
           </div>
         )}
 

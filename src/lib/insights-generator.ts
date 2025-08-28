@@ -420,11 +420,8 @@ export function getDemographicsData(students: Student[]) {
         acc[gender] = (acc[gender] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
-
-    const genderDistribution: Record<string, number> = { Masculino: 0, Feminino: 0, Outro: 0, 'Não informado': 0 };
-    Object.keys(genderCounts).forEach(gender => {
-        genderDistribution[gender] = (genderCounts[gender] / students.length) * 100;
-    });
+    
+    const dominantGender = Object.keys(genderCounts).reduce((a, b) => genderCounts[a] > genderCounts[b] ? a : b, 'N/A');
 
     const generationCounts = students.reduce((acc, s) => {
         const birthYear = currentYear - s.age;
@@ -437,7 +434,7 @@ export function getDemographicsData(students: Student[]) {
 
     return {
         averageAge,
-        genderDistribution,
+        dominantGender,
         dominantGeneration,
     };
 }
