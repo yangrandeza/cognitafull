@@ -8,7 +8,7 @@ import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { ClassWithStudentData, UnifiedProfile, Student } from "@/lib/types";
-import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText } from "lucide-react";
+import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle } from "lucide-react";
 import { getDashboardData } from "@/lib/insights-generator";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -132,13 +132,12 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             />
         </div>
         
-        {/* Keeping these for now, can be integrated into a new "Advanced" tab or removed */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 hidden">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
              <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
                         <Users />
-                        Sugestão de Equipes
+                        Como formar equipes equilibradas?
                     </CardTitle>
                     <CardDescription>Agrupe alunos por perfis complementares para otimizar o trabalho em equipe.</CardDescription>
                 </CardHeader>
@@ -154,19 +153,21 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             </Card>
              <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <Users />
-                        Alertas de Dissonância
+                    <CardTitle className="font-headline flex items-center gap-2 text-amber-600">
+                        <AlertTriangle />
+                        Quem precisa de mais atenção?
                     </CardTitle>
-                     <CardDescription>Alunos com perfis conflitantes, que podem gastar mais energia para se adaptar.</CardDescription>
+                     <CardDescription>Alunos com perfis potencialmente conflitantes, que podem gastar mais energia para se adaptar às atividades do dia a dia.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    {dashboardData.dissonanceData.map((alert, index) => (
-                    <div key={index} className="p-3 bg-destructive/10 rounded-lg">
-                        <p className="font-semibold text-destructive">{alert.studentName}</p>
-                        <p className="text-sm text-destructive/80">{alert.note}</p>
-                    </div>
-                    ))}
+                     {dashboardData.dissonanceData.length > 0 ? dashboardData.dissonanceData.map((alert, index) => (
+                        <div key={index} className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                            <p className="font-semibold text-amber-700">{alert.studentName}</p>
+                            <p className="text-sm text-amber-600/80">{alert.note}</p>
+                        </div>
+                        )) : (
+                        <p className="text-center text-muted-foreground">Nenhum ponto de dissonância notável encontrado na turma.</p>
+                    )}
                 </CardContent>
             </Card>
         </div>
