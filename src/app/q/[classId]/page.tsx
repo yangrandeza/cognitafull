@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -8,7 +10,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { BookHeart, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { BookHeart, ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const questions = [
   // Intro
@@ -22,6 +25,7 @@ const questions = [
     type: 'radio',
     part: 'Parte 1: Como Você Aprende (VARK)',
     question: 'Quando você precisa aprender algo novo e complexo, o que mais te ajuda?',
+    id: 'vark_1',
     options: [
       { value: 'V', label: 'Ver gráficos, infográficos e vídeos que demonstram o conceito.' },
       { value: 'A', label: 'Ouvir uma boa explicação, um podcast, ou discutir o tópico.' },
@@ -33,6 +37,7 @@ const questions = [
     type: 'radio',
     part: 'Parte 1: Como Você Aprende (VARK)',
     question: 'Imagine que você está tentando chegar a um lugar novo. Qual estratégia você escolheria?',
+    id: 'vark_2',
     options: [
       { value: 'V', label: 'Olhar um mapa visual no GPS do seu celular.' },
       { value: 'A', label: 'Pedir ao GPS para dar instruções por voz.' },
@@ -45,6 +50,7 @@ const questions = [
     type: 'disc',
     part: 'Parte 2: Como Você Age e Interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_1',
     words: ['Decidido', 'Influente', 'Paciente', 'Detalhado'],
   },
   // Jungian
@@ -52,6 +58,7 @@ const questions = [
     type: 'radio',
     part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
     question: 'Depois de um dia cheio de atividades em grupo, você se sente:',
+    id: 'jung_1',
     options: [
       { value: 'I', label: 'Esgotado(a), precisando de um tempo sozinho(a) para recarregar.' },
       { value: 'E', label: 'Energizado(a) e animado(a), querendo continuar a interagir.' },
@@ -63,6 +70,7 @@ const questions = [
       part: 'Parte 4: O que Realmente te Move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       statement: 'Ter a liberdade de escolher o que faz e pensa por si mesmo é muito importante para esta pessoa.',
+      id: 'schwartz_1',
       value: 'Autodireção'
   },
   // Finish
@@ -78,10 +86,36 @@ const totalQuestions = questions.filter(q => q.type !== 'intro' && q.type !== 'f
 export default function QuestionnairePage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [studentInfo, setStudentInfo] = useState({ name: '', age: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
+  const params = useParams();
+  const { toast } = useToast();
+  const classId = params.classId as string;
+
   const currentQuestion = questions[step];
 
+  const handleStudentInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setStudentInfo(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleAnswerChange = (questionId: string, value: any) => {
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+
   const handleNext = () => {
+    if (currentQuestion.type === 'intro') {
+      if (!studentInfo.name || !studentInfo.age) {
+        toast({
+          variant: "destructive",
+          title: "Campos obrigatórios",
+          description: "Por favor, preencha seu nome e idade para começar.",
+        });
+        return;
+      }
+    }
+
     if (step < questions.length - 1) {
       setStep(step + 1);
     }
@@ -91,6 +125,25 @@ export default function QuestionnairePage() {
     if (step > 0) {
       setStep(step - 1);
     }
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    // Here we would call the function to save to Firestore
+    console.log("Submitting:", { studentInfo, answers, classId });
+    // TODO: Implement Firestore submission logic
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    toast({
+        title: "Respostas enviadas!",
+        description: "Agradecemos sua participação.",
+    });
+
+    // We change the step to the finish card AFTER submission is successful
+    setStep(questions.length - 1); 
+    setIsSubmitting(false);
   };
   
   const progress = step > 0 ? ((step) / totalQuestions) * 100 : 0;
@@ -119,11 +172,11 @@ export default function QuestionnairePage() {
                 <div className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="name">Nome Completo</Label>
-                        <Input id="name" placeholder="Ex: Mariana" />
+                        <Input id="name" placeholder="Seu nome completo" value={studentInfo.name} onChange={handleStudentInfoChange} />
                     </div>
                      <div className="grid gap-2">
                         <Label htmlFor="age">Idade</Label>
-                        <Input id="age" type="number" placeholder="Ex: 16" />
+                        <Input id="age" type="number" placeholder="Sua idade" value={studentInfo.age} onChange={handleStudentInfoChange}/>
                     </div>
                 </div>
             </CardContent>
@@ -142,7 +195,11 @@ export default function QuestionnairePage() {
             </CardHeader>
             <CardContent>
               {currentQuestion.type === 'radio' && (
-                <RadioGroup className="space-y-3">
+                <RadioGroup 
+                  className="space-y-3"
+                  value={answers[currentQuestion.id] || ''}
+                  onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
+                >
                   {currentQuestion.options.map(opt => (
                     <div key={opt.value} className="flex items-center space-x-2 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
                       <RadioGroupItem value={opt.value} id={opt.value} />
@@ -152,54 +209,43 @@ export default function QuestionnairePage() {
                 </RadioGroup>
               )}
               {currentQuestion.type === 'disc' && (
-                  <div className="space-y-2">
+                   <div className="space-y-2">
                      <div className="grid grid-cols-6 gap-2 text-center items-center">
-                        <span className="col-span-2 font-medium text-sm text-muted-foreground">Mais</span>
+                        <span className="col-span-2 font-medium text-sm text-muted-foreground">MAIS parecido</span>
                         <span className="col-span-2"></span>
-                        <span className="col-span-2 font-medium text-sm text-muted-foreground">Menos</span>
+                        <span className="col-span-2 font-medium text-sm text-muted-foreground">MENOS parecido</span>
                      </div>
-                      <div className="grid grid-cols-6 gap-2 border p-3 rounded-md items-center">
-                          <RadioGroup className="col-span-2 flex justify-around">
-                            <RadioGroupItem value="most_1" id="most_1" />
-                          </RadioGroup>
-                          <Label className="col-span-2 text-center">{currentQuestion.words[0]}</Label>
-                          <RadioGroup className="col-span-2 flex justify-around">
-                            <RadioGroupItem value="least_1" id="least_1" />
-                          </RadioGroup>
-                      </div>
-                       <div className="grid grid-cols-6 gap-2 border p-3 rounded-md items-center">
-                          <RadioGroup className="col-span-2 flex justify-around">
-                            <RadioGroupItem value="most_2" id="most_2" />
-                          </RadioGroup>
-                          <Label className="col-span-2 text-center">{currentQuestion.words[1]}</Label>
-                          <RadioGroup className="col-span-2 flex justify-around">
-                             <RadioGroupItem value="least_2" id="least_2" />
-                          </RadioGroup>
-                      </div>
-                       <div className="grid grid-cols-6 gap-2 border p-3 rounded-md items-center">
-                          <RadioGroup className="col-span-2 flex justify-around">
-                             <RadioGroupItem value="most_3" id="most_3" />
-                          </RadioGroup>
-                          <Label className="col-span-2 text-center">{currentQuestion.words[2]}</Label>
-                          <RadioGroup className="col-span-2 flex justify-around">
-                             <RadioGroupItem value="least_3" id="least_3" />
-                          </RadioGroup>
-                      </div>
-                       <div className="grid grid-cols-6 gap-2 border p-3 rounded-md items-center">
-                          <RadioGroup className="col-span-2 flex justify-around">
-                            <RadioGroupItem value="most_4" id="most_4" />
-                          </RadioGroup>
-                          <Label className="col-span-2 text-center">{currentQuestion.words[3]}</Label>
-                          <RadioGroup className="col-span-2 flex justify-around">
-                             <RadioGroupItem value="least_4" id="least_4" />
-                          </RadioGroup>
-                      </div>
+                      {currentQuestion.words.map((word, index) => (
+                         <div key={index} className="grid grid-cols-6 gap-2 border p-3 rounded-md items-center">
+                            <RadioGroup 
+                                className="col-span-2 flex justify-around"
+                                name={`${currentQuestion.id}_${index}_most`}
+                                value={answers[`${currentQuestion.id}_${index}_most`] || ''}
+                                onValueChange={() => handleAnswerChange(`${currentQuestion.id}_${index}_most`, word)}
+                            >
+                              <RadioGroupItem value={word} id={`most_${index}`} />
+                            </RadioGroup>
+                            <Label className="col-span-2 text-center">{word}</Label>
+                            <RadioGroup 
+                                className="col-span-2 flex justify-around"
+                                name={`${currentQuestion.id}_${index}_least`}
+                                value={answers[`${currentQuestion.id}_${index}_least`] || ''}
+                                onValueChange={() => handleAnswerChange(`${currentQuestion.id}_${index}_least`, word)}
+                            >
+                               <RadioGroupItem value={word} id={`least_${index}`} />
+                            </RadioGroup>
+                        </div>
+                      ))}
                   </div>
               )}
               {currentQuestion.type === 'scale' && (
                 <div>
                     <p className="italic mb-4">"{currentQuestion.statement}"</p>
-                    <RadioGroup className="flex justify-around bg-muted p-2 rounded-lg">
+                    <RadioGroup 
+                        className="flex justify-around bg-muted p-2 rounded-lg"
+                        value={answers[currentQuestion.id] || ''}
+                        onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
+                    >
                         {[1, 2, 3, 4].map(val => (
                             <div key={val} className="flex flex-col items-center space-y-2">
                                 <Label htmlFor={`scale-${val}`} className="text-xs text-muted-foreground text-center">
@@ -216,12 +262,19 @@ export default function QuestionnairePage() {
               )}
             </CardContent>
             <CardFooter className="justify-between">
-                <Button variant="outline" onClick={handleBack} disabled={step === 0}>
+                <Button variant="outline" onClick={handleBack} disabled={step === 1}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
-                <Button onClick={handleNext}>
-                    Próximo <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                {step < totalQuestions ? (
+                     <Button onClick={handleNext}>
+                        Próximo <ArrowRight className="ml-2 h-4 w-4" />
+                     </Button>
+                ) : (
+                    <Button onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Finalizar e Enviar
+                    </Button>
+                )}
             </CardFooter>
             </>
         )}
@@ -236,7 +289,7 @@ export default function QuestionnairePage() {
                 <Check className="mx-auto h-16 w-16 text-green-500 bg-green-100 rounded-full p-2" />
             </CardContent>
             <CardFooter className="justify-end">
-                <Button onClick={() => window.location.href = '/'}>Finalizar</Button>
+                <Button onClick={() => window.location.href = '/'}>Voltar para o início</Button>
             </CardFooter>
             </>
         )}
@@ -244,3 +297,4 @@ export default function QuestionnairePage() {
     </div>
   );
 }
+
