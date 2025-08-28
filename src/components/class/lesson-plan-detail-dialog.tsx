@@ -3,21 +3,19 @@
 
 import { useRef, forwardRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { useReactToPrint } from "react-to-print";
+import ReactToPrint from "react-to-print";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { LessonPlan } from "@/lib/types";
 import { FileDown, Wand2, Book, Lightbulb } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 
 interface LessonPlanDetailDialogProps {
@@ -38,11 +36,6 @@ PrintableContent.displayName = 'PrintableContent';
 
 export function LessonPlanDetailDialog({ plan, isOpen, setIsOpen }: LessonPlanDetailDialogProps) {
   const printRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: plan.title.replace(/ /g, '_'),
-  });
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -81,13 +74,16 @@ export function LessonPlanDetailDialog({ plan, isOpen, setIsOpen }: LessonPlanDe
                     <PrintableContent content={plan.reformulatedPlan} ref={printRef} />
                 </ScrollArea>
                  <div className="flex-shrink-0 pt-4 mt-auto">
-                    <button
-                        onClick={handlePrint}
-                        className={cn(buttonVariants({ variant: "default" }))}
-                    >
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Exportar para PDF
-                    </button>
+                    <ReactToPrint
+                        content={() => printRef.current}
+                        documentTitle={plan.title.replace(/ /g, '_')}
+                        trigger={() => (
+                             <Button>
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Exportar para PDF
+                            </Button>
+                        )}
+                    />
                  </div>
             </TabsContent>
           </div>
@@ -97,4 +93,3 @@ export function LessonPlanDetailDialog({ plan, isOpen, setIsOpen }: LessonPlanDe
     </Dialog>
   );
 }
-
