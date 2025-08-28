@@ -17,7 +17,7 @@ import { CognitiveCompass } from "./cognitive-compass";
 import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
-import { SavedStrategies } from "./saved-strategies";
+import { SavedStrategies } from "@/components/class/saved-strategies";
 import { getSavedLearningStrategies } from "@/lib/actions";
 
 

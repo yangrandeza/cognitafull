@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookMarked, Eye } from "lucide-react";
 import type { LearningStrategy } from "@/lib/types";
-import { StrategyDetailDialog } from "./strategy-detail-dialog"; 
+import { StrategyDetailDialog } from "./lesson-plan-detail-dialog"; 
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -53,7 +53,7 @@ export function SavedStrategies({ savedStrategies }: SavedStrategiesProps) {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-center text-muted-foreground p-4">Nenhuma estratégia salva ainda.</p>
+                        <p className="text-sm text-center text-muted-foreground p-4">Nenhuma estratégia salva ainda. Use o Oráculo Pedagógico para gerar e salvar sua primeira estratégia.</p>
                     )}
                 </CardContent>
             </Card>
