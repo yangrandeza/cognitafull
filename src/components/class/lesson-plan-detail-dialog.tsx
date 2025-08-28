@@ -3,7 +3,6 @@
 
 import { useRef, forwardRef } from "react";
 import ReactMarkdown from "react-markdown";
-import ReactToPrint from "react-to-print";
 import {
   Dialog,
   DialogContent,
@@ -12,10 +11,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { LessonPlan } from "@/lib/types";
 import { FileDown, Wand2, Book, Lightbulb } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 
 interface LessonPlanDetailDialogProps {
@@ -26,7 +26,7 @@ interface LessonPlanDetailDialogProps {
 
 const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ content }, ref) => {
   return (
-    <div ref={ref} className="prose prose-sm dark:prose-invert max-w-none">
+    <div ref={ref} className="prose prose-sm dark:prose-invert max-w-none printable-content">
       <ReactMarkdown>{content}</ReactMarkdown>
     </div>
   );
@@ -37,9 +37,13 @@ PrintableContent.displayName = 'PrintableContent';
 export function LessonPlanDetailDialog({ plan, isOpen, setIsOpen }: LessonPlanDetailDialogProps) {
   const printRef = useRef<HTMLDivElement>(null);
 
+  const handlePrint = () => {
+    window.print();
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col no-print">
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">{plan.title}</DialogTitle>
           <DialogDescription>
@@ -74,16 +78,13 @@ export function LessonPlanDetailDialog({ plan, isOpen, setIsOpen }: LessonPlanDe
                     <PrintableContent content={plan.reformulatedPlan} ref={printRef} />
                 </ScrollArea>
                  <div className="flex-shrink-0 pt-4 mt-auto">
-                    <ReactToPrint
-                        content={() => printRef.current}
-                        documentTitle={plan.title.replace(/ /g, '_')}
-                        trigger={() => (
-                             <Button>
-                                <FileDown className="mr-2 h-4 w-4" />
-                                Exportar para PDF
-                            </Button>
-                        )}
-                    />
+                    <button
+                        onClick={handlePrint}
+                        className={cn(buttonVariants({ variant: "default" }))}
+                    >
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Exportar para PDF
+                    </button>
                  </div>
             </TabsContent>
           </div>

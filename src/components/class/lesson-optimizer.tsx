@@ -6,8 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import ReactMarkdown from "react-markdown";
-import ReactToPrint from "react-to-print";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -26,6 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   lessonPlan: z.string().min(50, {
@@ -43,18 +43,19 @@ interface LessonOptimizerProps {
     classProfileSummary: string;
     classId: string;
     teacherId: string;
+    onPlanSaved: () => void;
 }
 
 const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ content }, ref) => {
   return (
-    <div ref={ref} className="prose prose-sm dark:prose-invert max-w-none p-6 border rounded-lg bg-muted/20">
+    <div ref={ref} id="printable-optimizer" className="prose prose-sm dark:prose-invert max-w-none p-6 border rounded-lg bg-muted/20 printable-content">
       <ReactMarkdown>{content}</ReactMarkdown>
     </div>
   );
 });
 PrintableContent.displayName = 'PrintableContent';
 
-export function LessonOptimizer({ classProfileSummary, classId, teacherId }: LessonOptimizerProps) {
+export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPlanSaved }: LessonOptimizerProps) {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isLoadingReformed, setIsLoadingReformed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,7 +65,6 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
   
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const router = useRouter();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -144,9 +144,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
         form.reset();
         saveForm.reset();
         setIsSaveDialogOpen(false);
-
-        // Force a server-side data refetch for the page
-        router.refresh();
+        onPlanSaved();
         
     } catch (error) {
         console.error("Erro ao salvar o plano:", error);
@@ -158,6 +156,10 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
     } finally {
         setIsSaving(false);
     }
+  }
+  
+  const handlePrint = () => {
+    window.print();
   }
 
   return (
@@ -243,7 +245,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
 
                     {reformulatedPlan && (
                         <div className="space-y-4 pt-6 border-t">
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center no-print">
                                 <h3 className="text-lg font-headline">Plano de Aula Melhorado</h3>
                                 <div className="flex gap-2">
                                      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
@@ -287,16 +289,13 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
                                         </DialogContent>
                                     </Dialog>
                                     
-                                    <ReactToPrint
-                                        content={() => printRef.current}
-                                        documentTitle="plano-de-aula-otimizado"
-                                        trigger={() => (
-                                             <Button variant="outline">
-                                                <FileDown className="mr-2 h-4 w-4" />
-                                                Exportar para PDF
-                                            </Button>
-                                        )}
-                                    />
+                                    <button
+                                        onClick={handlePrint}
+                                        className={cn(buttonVariants({ variant: "outline" }))}
+                                    >
+                                        <FileDown className="mr-2 h-4 w-4" />
+                                        Exportar para PDF
+                                    </button>
                                 </div>
                             </div>
                             <PrintableContent content={reformulatedPlan} ref={printRef} />
