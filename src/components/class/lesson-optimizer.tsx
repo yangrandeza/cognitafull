@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, forwardRef } from "react";
+import { useState, useRef, forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Lightbulb, Loader2, Sparkles, Wand2, FileDown, Save } from "lucide-react";
-import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan } from "@/lib/actions";
-import type { OptimizeLessonPlanOutput } from "@/ai/flows/lesson-plan-optimizer";
+import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan, getSavedLessonPlans } from "@/lib/actions";
+import type { OptimizeLessonPlanOutput, LessonPlan } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,7 +26,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { revalidatePath } from "next/cache";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 
 const formSchema = z.object({
@@ -66,7 +66,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
   const [suggestions, setSuggestions] = useState<OptimizeLessonPlanOutput['suggestions']>([]);
   const [reformulatedPlan, setReformulatedPlan] = useState("");
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
-
+  
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
