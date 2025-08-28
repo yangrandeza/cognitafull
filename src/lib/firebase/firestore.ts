@@ -1,4 +1,5 @@
 
+
 import { db, auth } from './firebase';
 import {
   collection,
@@ -90,6 +91,14 @@ export const getUserProfile = async (userId: string) => {
   if (userSnap.exists()) {
     return { id: userSnap.id, ...userSnap.data() } as UserProfile;
   }
+  // If user exists in Auth but not in Firestore, create their profile.
+  // This can happen if Firestore was set up after initial user registration.
+  const user = auth.currentUser;
+  if (user && user.uid === userId) {
+      console.log(`User ${userId} found in Auth but not Firestore. Creating profile...`);
+      // Use the existing createUserProfileInFirestore function which handles transactions
+      return await createUserProfileInFirestore(user, { name: user.displayName || 'Novo usuário' });
+  }
   return null;
 };
 
@@ -143,9 +152,16 @@ export const createClass = async (className: string, teacherId: string) => {
 export const getClassesByTeacher = async (teacherId: string): Promise<Class[]> => {
   const q = query(collection(db, 'classes'), where('teacherId', '==', teacherId));
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(
+  const classes = querySnapshot.docs.map(
     (doc) => ({ id: doc.id, ...doc.data() } as Class)
   );
+  // Sort manually after fetching to avoid needing a composite index
+  return classes.sort((a, b) => {
+    const aTimestamp = a.createdAt as Timestamp;
+    const bTimestamp = b.createdAt as Timestamp;
+    if (!aTimestamp || !bTimestamp) return 0;
+    return bTimestamp.toMillis() - aTimestamp.toMillis();
+  });
 };
 
 export const getClassById = async (classId: string): Promise<Class | null> => {
