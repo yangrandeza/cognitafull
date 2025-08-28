@@ -19,11 +19,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { Teacher } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 // TODO: Replace with real data from Firestore
-const mockTeachers: any[] = [];
+const mockTeachers: Teacher[] = [];
 
 export function TeachersTable() {
+  const { toast } = useToast();
+
+  const handleAddTeacher = () => {
+     toast({
+      title: "Função em Desenvolvimento",
+      description: "A funcionalidade para adicionar novos professores estará disponível em breve.",
+    });
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -33,54 +44,60 @@ export function TeachersTable() {
             Adicione, visualize e gerencie as contas dos professores da sua instituição.
           </CardDescription>
         </div>
-        <Button>
+        <Button onClick={handleAddTeacher}>
           <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Professor
         </Button>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>E-mail</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {mockTeachers.map((teacher) => (
-              <TableRow key={teacher.id}>
-                <TableCell className="font-medium">{teacher.name}</TableCell>
-                <TableCell>{teacher.email}</TableCell>
-                <TableCell>
-                  <Badge variant={teacher.status === 'active' ? 'default' : 'destructive'} className={teacher.status === 'active' ? 'bg-green-600' : ''}>
-                    {teacher.status === 'active' ? 'Ativo' : 'Desativado'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Abrir menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem>
-                        {teacher.status === 'active' ? 'Desativar' : 'Ativar'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {mockTeachers.length > 0 ? (
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>E-mail</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {mockTeachers.map((teacher) => (
+                <TableRow key={teacher.id}>
+                    <TableCell className="font-medium">{teacher.name}</TableCell>
+                    <TableCell>{teacher.email}</TableCell>
+                    <TableCell>
+                    <Badge variant={teacher.status === 'active' ? 'default' : 'destructive'} className={teacher.status === 'active' ? 'bg-green-600' : ''}>
+                        {teacher.status === 'active' ? 'Ativo' : 'Desativado'}
+                    </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Abrir menu</span>
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                        <DropdownMenuItem>Editar</DropdownMenuItem>
+                        <DropdownMenuItem>
+                            {teacher.status === 'active' ? 'Desativar' : 'Ativar'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                            Excluir
+                        </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    </TableCell>
+                </TableRow>
+                ))}
+            </TableBody>
+            </Table>
+        ) : (
+            <div className="text-center text-muted-foreground py-8">
+                Nenhum professor cadastrado ainda.
+            </div>
+        )}
       </CardContent>
     </Card>
   );
