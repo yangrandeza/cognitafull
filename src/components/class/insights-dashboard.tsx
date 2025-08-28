@@ -7,13 +7,14 @@ import { StudentsList } from "@/components/class/students-list";
 import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
-import type { ClassWithStudentData, UnifiedProfile, Student } from "@/lib/types";
-import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle } from "lucide-react";
+import type { ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile } from "@/lib/types";
+import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic } from "lucide-react";
 import { getDashboardData, processProfiles } from "@/lib/insights-generator";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { CognitiveCompass } from "./cognitive-compass";
 import { InsightCard } from "./insight-card";
+import { AnalysisCard } from "./analysis-card";
 
 
 export function InsightsDashboard({ classId }: { classId: string }) {
@@ -85,7 +86,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
   }
   
   const { students } = classData;
-  const { compassData, insightCards, classProfileSummary } = dashboardData;
+  const { compassData, insightCards, classProfileSummary, teamsData, dissonanceData, communicationData, workPaceData } = dashboardData;
 
   return (
     <Tabs defaultValue="insights" className="space-y-4">
@@ -134,6 +135,36 @@ export function InsightsDashboard({ classId }: { classId: string }) {
                 text={insightCards.explanation}
             />
         </div>
+         <div className="grid gap-6 md:grid-cols-2">
+            {communicationData && (
+                <AnalysisCard
+                    icon={<MessageSquare className="h-8 w-8 text-green-500" />}
+                    title="Comunicação e Feedback"
+                    subtitle="Como se comunicar e dar feedback para esta turma?"
+                    category1Title="Estilo de Comunicação"
+                    category1Value={communicationData.style}
+                    category1Icon={communicationData.style === 'Relacional' ? <Users className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                    category2Title="Estilo de Feedback"
+                    category2Value={communicationData.feedback}
+                    category2Icon={communicationData.feedback === 'Empático' ? <Brain className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
+                    text={communicationData.recommendation}
+                />
+            )}
+            {workPaceData && (
+                 <AnalysisCard
+                    icon={<Telescope className="h-8 w-8 text-cyan-500" />}
+                    title="Ritmo de Trabalho e Foco"
+                    subtitle="Como a turma aborda as tarefas?"
+                    category1Title="Ritmo"
+                    category1Value={workPaceData.pace}
+                    category1Icon={workPaceData.pace === 'Rápido' ? <Rabbit className="h-5 w-5" /> : <Snail className="h-5 w-5" />}
+                    category2Title="Foco"
+                    category2Value={workPaceData.focus}
+                    category2Icon={workPaceData.focus === 'Visão Geral' ? <Telescope className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                    text={workPaceData.recommendation}
+                />
+            )}
+        </div>
         
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
              <Card>
@@ -145,7 +176,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
                     <CardDescription>Agrupe alunos por perfis complementares para otimizar o trabalho em equipe.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {dashboardData.teamsData.map((team, index) => (
+                    {teamsData.map((team, index) => (
                     <div key={index}>
                         <p className="font-semibold">{team.category}</p>
                         <p className="text-xs text-muted-foreground mb-1">{team.description}</p>
@@ -163,7 +194,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
                      <CardDescription>Alunos com perfis potencialmente conflitantes, que podem gastar mais energia para se adaptar às atividades do dia a dia.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                     {dashboardData.dissonanceData.length > 0 ? dashboardData.dissonanceData.map((alert, index) => (
+                     {dissonanceData.length > 0 ? dissonanceData.map((alert, index) => (
                         <div key={index} className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
                             <p className="font-semibold text-amber-700">{alert.studentName}</p>
                             <p className="text-sm text-amber-600/80">{alert.note}</p>

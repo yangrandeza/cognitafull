@@ -149,7 +149,7 @@ function analyzeDissonance(discProfile: DiscProfile, jungianProfile: string): {d
 }
 
 
-// --- NEW INSIGHTS GENERATION FOR COGNITIVE COMPASS ---
+// --- NEW INSIGHTS GENERATION ---
 
 function calculateCompassData(profiles: UnifiedProfile[]) {
     if (profiles.length === 0) return null;
@@ -288,23 +288,81 @@ Com base nisso, aqui estão os insights pedagógicos:
 }
 
 
+function generateCommunicationData(profiles: UnifiedProfile[]) {
+    if (profiles.length === 0) return null;
+
+    let relationalScore = 0; // +F, +I
+    let objectiveScore = 0; // +T, +C
+
+    profiles.forEach(p => {
+        if (p.jungianProfile.includes('F')) relationalScore++;
+        if (p.discProfile.dominant === 'Influência') relationalScore++;
+        
+        if (p.jungianProfile.includes('T')) objectiveScore++;
+        if (p.discProfile.dominant === 'Consciência') objectiveScore++;
+    });
+
+    const isRelational = relationalScore >= objectiveScore;
+    
+    return {
+        style: isRelational ? 'Relacional' : 'Objetivo',
+        feedback: isRelational ? 'Empático' : 'Direto',
+        recommendation: isRelational
+            ? 'A turma responde melhor a uma comunicação que considera os sentimentos e o contexto pessoal. Use storytelling e mostre empatia ao dar feedback.'
+            : 'Foque em fatos, lógica e clareza. Feedbacks devem ser diretos, específicos e baseados em dados, sem rodeios.'
+    };
+}
+
+
+function generateWorkPaceData(profiles: UnifiedProfile[]) {
+    if (profiles.length === 0) return null;
+
+    let fastPaceScore = 0; // +D, +I
+    let consideredPaceScore = 0; // +S, +C
+    let bigPictureScore = 0; // +N
+    let detailScore = 0; // +S (jung)
+
+    profiles.forEach(p => {
+        if (p.discProfile.dominant === 'Dominância' || p.discProfile.dominant === 'Influência') fastPaceScore++;
+        if (p.discProfile.dominant === 'Estabilidade' || p.discProfile.dominant === 'Consciência') consideredPaceScore++;
+
+        if (p.jungianProfile.includes('N')) bigPictureScore++;
+        if (p.jungianProfile.includes('S')) detailScore++;
+    });
+    
+    const isFast = fastPaceScore >= consideredPaceScore;
+    const isBigPicture = bigPictureScore > detailScore;
+
+    return {
+        pace: isFast ? 'Rápido' : 'Cadenciado',
+        focus: isBigPicture ? 'Visão Geral' : 'Detalhes',
+        recommendation: isFast
+            ? `A turma tem um ritmo acelerado e gosta de ver as coisas acontecendo. Defina metas curtas e mantenha a energia alta. ${isBigPicture ? 'Eles preferem focar no objetivo final a se perder em detalhes.' : 'Apesar da rapidez, eles não perdem a atenção aos detalhes importantes.'}`
+            : `Este grupo prefere um ritmo mais calmo e planejado. Dê tempo para que processem a informação. ${isBigPicture ? 'Eles precisam entender o "porquê" antes de mergulhar nos detalhes.' : 'São meticulosos e valorizam um trabalho bem feito e detalhado.'}`
+    }
+}
+
+
+
 // --- Public API for the dashboard ---
-export function getDashboardData(profiles: UnifiedProfile[], students: Student[]) {
+export function getDashboardData(profiles: RawUnifiedProfile[], students: Student[]) {
     const processedProfiles = processProfiles(profiles);
     const compassData = calculateCompassData(processedProfiles);
     const insightCards = generateInsightCards(compassData);
     const classProfileSummary = generateClassProfileSummary(processedProfiles);
-    
-    // Old data generation for compatibility, can be removed later
     const dissonanceData = generateDissonanceData(processedProfiles, students);
     const teamsData = generateTeamData(processedProfiles, students);
+    const communicationData = generateCommunicationData(processedProfiles);
+    const workPaceData = generateWorkPaceData(processedProfiles);
 
     return {
         compassData,
         insightCards,
         classProfileSummary,
-        dissonanceData, // Retaining for now if any component still uses it
+        dissonanceData,
         teamsData,
+        communicationData,
+        workPaceData,
     };
 }
 
