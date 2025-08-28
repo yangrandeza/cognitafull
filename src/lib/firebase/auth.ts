@@ -17,7 +17,7 @@ import { doc, getDoc, setDoc, serverTimestamp, addDoc, collection, updateDoc } f
 import type { UserProfile, Organization } from '../types';
 import { createUserProfileInFirestore } from './firestore';
 
-// Sign up with email and password (intended for the first Admin user)
+// Sign up with email and password
 export const signUpWithEmail = async (email, password, fullName) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
@@ -26,7 +26,7 @@ export const signUpWithEmail = async (email, password, fullName) => {
       password
     );
     const user = userCredential.user;
-    // The first user to sign up is always an admin and creates the organization.
+    // This will create a profile if one doesn't exist.
     await createUserProfileInFirestore(user, { name: fullName });
     return { user, error: null };
   } catch (error) {
@@ -54,10 +54,8 @@ export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    // This will create a profile if one doesn't exist. 
-    // In a real app, you'd need logic to assign them to an org.
-    // For the MVP, we'll assume they are the first user (admin) if no profile exists.
-    await createUserProfileInFirestore(user, { name: user.displayName || 'Admin' });
+    // This will create a profile if one doesn't exist.
+    await createUserProfileInFirestore(user, { name: user.displayName || 'Usuário Google' });
     return { user, error: null };
   } catch (error) {
     return { user: null, error: error.message };

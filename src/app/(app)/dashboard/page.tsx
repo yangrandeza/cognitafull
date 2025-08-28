@@ -74,7 +74,7 @@ export default function DashboardPage() {
        {classes.length === 0 && !loadingClasses && (
           <Card>
               <CardContent className="pt-6">
-                  <p className="text-center text-muted-foreground">Nenhuma turma encontrada. Que tal criar a primeira?</p>
+                  <p className="text-center text-muted-foreground">Nenhuma turma encontrada. que tal criar a primeira?</p>
               </CardContent>
           </Card>
       )}
