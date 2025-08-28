@@ -10,7 +10,7 @@ import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile } from "@/lib/types";
 import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic } from "lucide-react";
 import { getDashboardData, processProfiles } from "@/lib/insights-generator";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { CognitiveCompass } from "./cognitive-compass";
 import { InsightCard } from "./insight-card";
