@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import ReactMarkdown from "react-markdown";
 import { useReactToPrint } from "react-to-print";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -27,6 +27,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 
 const formSchema = z.object({
@@ -40,6 +41,12 @@ const saveFormSchema = z.object({
         message: "O título deve ter pelo menos 5 caracteres.",
     })
 });
+
+interface LessonOptimizerProps {
+    classProfileSummary: string;
+    classId: string;
+}
+
 
 // Create a new component that can be forwarded a ref
 const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ content }, ref) => {
@@ -335,10 +342,13 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
                                         </DialogContent>
                                     </Dialog>
                                     
-                                    <Button variant="outline" onClick={handlePrint}>
+                                     <button
+                                        onClick={handlePrint}
+                                        className={cn(buttonVariants({ variant: "outline" }))}
+                                      >
                                         <FileDown className="mr-2 h-4 w-4" />
                                         Exportar para PDF
-                                    </Button>
+                                      </button>
                                 </div>
                             </div>
                             <PrintableContent content={reformulatedPlan} ref={printRef} />
@@ -351,3 +361,4 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
     </div>
   );
 }
+
