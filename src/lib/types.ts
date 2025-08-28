@@ -74,6 +74,10 @@ export type DiscProfile = {
   scores: { d: number; i: number; s: number; c: number };
 };
 
+export type JungianProfile = {
+  type: string; // e.g., "ENFP"
+}
+
 // This represents the raw data fetched from Firestore before client-side processing
 export type RawUnifiedProfile = {
   id: string;
@@ -88,7 +92,7 @@ export type RawUnifiedProfile = {
 export type UnifiedProfile = Omit<RawUnifiedProfile, 'rawAnswers'> & {
   varkProfile: VarkProfile;
   discProfile: DiscProfile;
-  jungianProfile: string; // e.g., "ENFP"
+  jungianProfile: JungianProfile;
   schwartzValues: {
     top_values: string[];
     scores: Record<string, number>;

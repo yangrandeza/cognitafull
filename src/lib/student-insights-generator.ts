@@ -1,4 +1,4 @@
-import type { UnifiedProfile, DiscProfile, VarkProfile, Student } from "./types";
+import type { UnifiedProfile, DiscProfile, VarkProfile, Student, JungianProfile } from "./types";
 
 export type IndividualStudentInsights = {
     mind: string;
@@ -29,7 +29,7 @@ export function generateStudentInsights(profile: UnifiedProfile, student: Studen
 
 function generateMindInsight(profile: UnifiedProfile, student: Student): string {
     const { jungianProfile, discProfile } = profile;
-    const isIntrovert = jungianProfile.includes('I');
+    const isIntrovert = jungianProfile.type.includes('I');
     const isHighC = discProfile.dominant === 'Consciência';
     const isHighS = discProfile.dominant === 'Estabilidade';
     const birthYear = new Date().getFullYear() - student.age;
@@ -101,19 +101,19 @@ function generateManualInsight(profile: UnifiedProfile): string {
     let tasks = "";
     let participation = "";
 
-    if (discProfile.dominant === 'Dominância' || discProfile.dominant === 'Consciência' || jungianProfile.includes('T')) {
+    if (discProfile.dominant === 'Dominância' || discProfile.dominant === 'Consciência' || jungianProfile.type.includes('T')) {
         feedback = `Prefiro recebê-lo de forma direta, com fatos e exemplos específicos.`;
     } else {
         feedback = `Prefiro recebê-lo de forma privada, com foco no meu desenvolvimento e de maneira empática.`;
     }
 
-    if (jungianProfile.includes('J') || discProfile.dominant === 'Consciência') {
+    if (jungianProfile.type.includes('J') || discProfile.dominant === 'Consciência') {
         tasks = `Dê-me projetos com etapas e critérios de avaliação bem definidos.`;
     } else {
         tasks = `Dê-me a liberdade de explorar diferentes abordagens para resolver um problema.`;
     }
 
-    if (jungianProfile.includes('I')) {
+    if (jungianProfile.type.includes('I')) {
         participation = `Faça perguntas diretas para mim em pequenos grupos, em vez de me colocar no centro das atenções na sala inteira.`;
     } else {
         participation = `Chame-me para debates abertos e brainstorming em grupo. Adoro compartilhar minhas ideias!`;
@@ -139,11 +139,11 @@ function generateTips(profile: UnifiedProfile): string[] {
         tips.push("Sempre que possível, associe o aprendizado a uma ação. Crie modelos, faça experimentos ou simplesmente caminhe enquanto estuda.");
     }
 
-    if (jungianProfile.includes('I') && (discProfile.dominant === 'Dominância' || discProfile.dominant === 'Influência')) {
+    if (jungianProfile.type.includes('I') && (discProfile.dominant === 'Dominância' || discProfile.dominant === 'Influência')) {
         tips.push("Você tem um perfil socialmente ativo mas uma natureza introvertida. Lembre-se de reservar um tempo para 'recarregar as baterias' após interações intensas.");
     }
 
-    if (jungianProfile.includes('P')) {
+    if (jungianProfile.type.includes('P')) {
         tips.push("Sua flexibilidade é uma força, mas lembre-se de usar agendas ou aplicativos de tarefas para não perder os prazos importantes.");
     }
 

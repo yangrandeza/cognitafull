@@ -1,4 +1,4 @@
-import type { UnifiedProfile, Student, QuizAnswers, VarkProfile, DiscProfile, RawUnifiedProfile } from "./types";
+import type { UnifiedProfile, Student, QuizAnswers, VarkProfile, DiscProfile, RawUnifiedProfile, JungianProfile } from "./types";
 
 /**
  * Main processing function to convert raw profiles into fully typed profiles.
@@ -92,13 +92,13 @@ function calculateDisc(answers: QuizAnswers): DiscProfile {
     return { dominant: dominantLabel, scores };
 }
 
-function calculateJungian(answers: QuizAnswers): string {
-    let profile = '';
-    profile += answers['jung_1'] === 'I' ? 'I' : 'E';
-    profile += answers['jung_2'] === 'S' ? 'S' : 'N';
-    profile += answers['jung_3'] === 'T' ? 'T' : 'F';
-    profile += answers['jung_4'] === 'J' ? 'J' : 'P';
-    return profile;
+function calculateJungian(answers: QuizAnswers): JungianProfile {
+    let type = '';
+    type += answers['jung_1'] === 'I' ? 'I' : 'E';
+    type += answers['jung_2'] === 'S' ? 'S' : 'N';
+    type += answers['jung_3'] === 'T' ? 'T' : 'F';
+    type += answers['jung_4'] === 'J' ? 'J' : 'P';
+    return { type };
 }
 
 function calculateSchwartz(answers: QuizAnswers): { top_values: string[], scores: Record<string, number> } {
@@ -130,15 +130,15 @@ function calculateSchwartz(answers: QuizAnswers): { top_values: string[], scores
     return { top_values, scores };
 }
 
-function analyzeDissonance(discProfile: DiscProfile, jungianProfile: string): {dissonanceAlert: boolean, dissonanceNotes: string} {
-    const isIntrovert = jungianProfile.startsWith('I');
+function analyzeDissonance(discProfile: DiscProfile, jungianProfile: JungianProfile): {dissonanceAlert: boolean, dissonanceNotes: string} {
+    const isIntrovert = jungianProfile.type.startsWith('I');
     const isHighInfluence = discProfile.dominant === 'Influência';
     const isHighDominance = discProfile.dominant === 'Dominância';
 
     if (isIntrovert && (isHighInfluence || isHighDominance)) {
         return {
             dissonanceAlert: true,
-            dissonanceNotes: `Perfil naturalmente introvertido (${jungianProfile}) com um comportamento de alta exposição social (${discProfile.dominant}). Isso pode levar a um alto consumo de energia em interações sociais.`
+            dissonanceNotes: `Perfil naturalmente introvertido (${jungianProfile.type}) com um comportamento de alta exposição social (${discProfile.dominant}). Isso pode levar a um alto consumo de energia em interações sociais.`
         }
     }
     
@@ -161,13 +161,13 @@ function calculateCompassData(profiles: UnifiedProfile[]) {
 
     profiles.forEach(p => {
         // Rhythm & Structure
-        if (p.jungianProfile.includes('J')) rhythmStructure++;
-        if (p.jungianProfile.includes('P')) rhythmStructure--;
+        if (p.jungianProfile.type.includes('J')) rhythmStructure++;
+        if (p.jungianProfile.type.includes('P')) rhythmStructure--;
         if (p.discProfile.dominant === 'Consciência' || p.discProfile.dominant === 'Estabilidade') rhythmStructure++;
 
         // Social Interaction
-        if (p.jungianProfile.includes('E')) socialInteraction++;
-        if (p.jungianProfile.includes('I')) socialInteraction--;
+        if (p.jungianProfile.type.includes('E')) socialInteraction++;
+        if (p.jungianProfile.type.includes('I')) socialInteraction--;
         if (p.discProfile.dominant === 'Influência') socialInteraction++;
         if (p.discProfile.dominant === 'Estabilidade') socialInteraction--;
         
@@ -178,8 +178,8 @@ function calculateCompassData(profiles: UnifiedProfile[]) {
         // Content Absorption
         if (p.varkProfile.dominant === 'Visual' || p.varkProfile.dominant === 'Cinestésico') contentAbsorption++;
         if (p.varkProfile.dominant === 'Auditivo' || p.varkProfile.dominant === 'Leitura/Escrita') contentAbsorption--;
-        if (p.jungianProfile.includes('S')) contentAbsorption++;
-        if (p.jungianProfile.includes('N')) contentAbsorption--;
+        if (p.jungianProfile.type.includes('S')) contentAbsorption++;
+        if (p.jungianProfile.type.includes('N')) contentAbsorption--;
     });
     
     // Normalize scores to a 0-100 scale
@@ -295,10 +295,10 @@ function generateCommunicationData(profiles: UnifiedProfile[]) {
     let objectiveScore = 0; // +T, +C
 
     profiles.forEach(p => {
-        if (p.jungianProfile.includes('F')) relationalScore++;
+        if (p.jungianProfile.type.includes('F')) relationalScore++;
         if (p.discProfile.dominant === 'Influência') relationalScore++;
         
-        if (p.jungianProfile.includes('T')) objectiveScore++;
+        if (p.jungianProfile.type.includes('T')) objectiveScore++;
         if (p.discProfile.dominant === 'Consciência') objectiveScore++;
     });
 
@@ -326,8 +326,8 @@ function generateWorkPaceData(profiles: UnifiedProfile[]) {
         if (p.discProfile.dominant === 'Dominância' || p.discProfile.dominant === 'Influência') fastPaceScore++;
         if (p.discProfile.dominant === 'Estabilidade' || p.discProfile.dominant === 'Consciência') consideredPaceScore++;
 
-        if (p.jungianProfile.includes('N')) bigPictureScore++;
-        if (p.jungianProfile.includes('S')) detailScore++;
+        if (p.jungianProfile.type.includes('N')) bigPictureScore++;
+        if (p.jungianProfile.type.includes('S')) detailScore++;
     });
     
     const isFast = fastPaceScore >= consideredPaceScore;
@@ -381,10 +381,10 @@ export function generateDissonanceData(profiles: UnifiedProfile[], students: Stu
 }
 
 export function generateTeamData(profiles: UnifiedProfile[], students: Student[]) {
-    const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominância' || p.jungianProfile.includes('TJ'));
-    const communicators = profiles.filter(p => p.discProfile.dominant === 'Influência' || p.jungianProfile.includes('EF'));
-    const planners = profiles.filter(p => p.discProfile.dominant === 'Consciência' || p.jungianProfile.includes('SJ'));
-    const harmonizers = profiles.filter(p => p.discProfile.dominant === 'Estabilidade' || p.jungianProfile.includes('FP'));
+    const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominância' || p.jungianProfile.type.includes('TJ'));
+    const communicators = profiles.filter(p => p.discProfile.dominant === 'Influência' || p.jungianProfile.type.includes('EF'));
+    const planners = profiles.filter(p => p.discProfile.dominant === 'Consciência' || p.jungianProfile.type.includes('SJ'));
+    const harmonizers = profiles.filter(p => p.discProfile.dominant === 'Estabilidade' || p.jungianProfile.type.includes('FP'));
 
     const getName = (profile: UnifiedProfile) => students.find(s => s.id === profile.studentId)?.name || 'Desconhecido';
 

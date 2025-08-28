@@ -28,14 +28,13 @@ import { EditStudentDialog } from "./edit-student-dialog";
 import { DeleteStudentDialog } from "./delete-student-dialog";
 import { deleteStudent } from "@/lib/firebase/firestore";
 
-export function StudentsList({ students, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
+export function StudentsList({ students: initialStudents, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [studentList, setStudentList] = useState(students);
+  const [studentList, setStudentList] = useState(initialStudents);
 
-  // Ensure the list updates if the parent component's data changes
   useEffect(() => {
-    setStudentList(students);
-  }, [students]);
+    setStudentList(initialStudents);
+  }, [initialStudents]);
 
   const getStudentProfile = (studentId: string) => {
     return profiles.find(p => p.studentId === studentId);
@@ -44,7 +43,7 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
   const handleStudentUpdated = (updatedStudent: Pick<Student, 'id' | 'name' | 'age'>) => {
     setStudentList(currentList => 
       currentList.map(s => 
-        s.id === updatedStudent.id ? { ...s, ...updatedStudent } : s
+        s.id === updatedStudent.id ? { ...s, name: updatedStudent.name, age: updatedStudent.age } : s
       )
     );
   };
@@ -119,7 +118,7 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                     </TableCell>
                      <TableCell>
                        {profile?.jungianProfile ? (
-                        <Badge variant="secondary">{profile.jungianProfile}</Badge>
+                        <Badge variant="secondary">{profile.jungianProfile.type}</Badge>
                       ) : (
                         <Badge variant="outline">Pendente</Badge>
                       )}
