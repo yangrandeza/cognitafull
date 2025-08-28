@@ -1,3 +1,4 @@
+
 import { db, auth } from './firebase';
 import {
   collection,
@@ -310,8 +311,7 @@ export const saveLessonPlan = async (plan: Omit<NewLessonPlan, 'createdAt'>): Pr
 export const getLessonPlansByClass = async (classId: string): Promise<LessonPlan[]> => {
     const q = query(
         collection(db, 'lessonPlans'), 
-        where('classId', '==', classId),
-        orderBy('createdAt', 'desc')
+        where('classId', '==', classId)
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => {
@@ -323,3 +323,5 @@ export const getLessonPlansByClass = async (classId: string): Promise<LessonPlan
         } as LessonPlan
     });
 }
+
+    
