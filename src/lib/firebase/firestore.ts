@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   runTransaction,
 } from 'firebase/firestore';
+import { updateProfile } from "firebase/auth";
 import type {
   UserProfile,
   Class,
@@ -45,6 +46,22 @@ export const getUserProfile = async (userId: string) => {
   }
   return null;
 };
+
+export const updateUserProfile = async (userId: string, data: Partial<Pick<UserProfile, 'name'>>) => {
+    const user = auth.currentUser;
+    if (!user || user.uid !== userId) {
+        throw new Error("Não autorizado.");
+    }
+    
+    // Update Firestore
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, data);
+
+    // Update Firebase Auth display name
+    if (data.name) {
+        await updateProfile(user, { displayName: data.name });
+    }
+}
 
 export const getTeachersByOrganization = async (organizationId: string) => {
     const q = query(

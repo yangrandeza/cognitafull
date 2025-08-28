@@ -10,9 +10,10 @@ import {
   signInWithPopup,
   signOut,
   User,
-  updateProfile
+  updateProfile,
+  updatePassword,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp, addDoc, collection } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, addDoc, collection, updateDoc } from 'firebase/firestore';
 import type { UserProfile, Organization } from '../types';
 
 const createOrganizationAndAdmin = async (user: User, fullName: string) => {
@@ -129,3 +130,17 @@ export const userSignOut = async () => {
     return { success: false, error: error.message };
   }
 };
+
+// Update user password
+export const updateUserPassword = async (newPassword) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Nenhum usuário autenticado encontrado.");
+    
+    try {
+        await updatePassword(user, newPassword);
+        return { success: true, error: null };
+    } catch (error) {
+        console.error("Erro ao atualizar senha:", error);
+        return { success: false, error: error.message };
+    }
+}

@@ -55,7 +55,7 @@ export function AppSidebar() {
     if (userProfile?.role === 'admin') {
       router.push('/admin');
     } else {
-      router.push('/dashboard');
+      router.push('/settings');
     }
   }
 
