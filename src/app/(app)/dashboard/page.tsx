@@ -50,11 +50,11 @@ export default function DashboardPage() {
      return (
         <div className="flex-1 space-y-4 p-8 pt-6">
              <h1 className="text-3xl font-bold tracking-tight font-headline">
-                Acesso Negado
+                Acesso negado
             </h1>
             <p>Você precisa estar logado para ver suas turmas.</p>
              <Button asChild>
-                <Link href="/login">Ir para o Login</Link>
+                <Link href="/login">Ir para o login</Link>
             </Button>
         </div>
      )
@@ -64,7 +64,7 @@ export default function DashboardPage() {
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Minhas Turmas
+          Minhas turmas
         </h1>
         <div className="flex items-center space-x-2">
            <CreateClassDialog onClassCreated={handleClassCreated} />
@@ -96,7 +96,7 @@ export default function DashboardPage() {
             <CardFooter>
                <Button asChild className="w-full font-headline">
                   <Link href={`/class/${classItem.id}`}>
-                      {classItem.studentCount > 0 ? "Ver Insights" : "Acessar"}
+                      {classItem.studentCount > 0 ? "Ver insights" : "Acessar"}
                       <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
               </Button>

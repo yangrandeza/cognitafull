@@ -53,7 +53,7 @@ export default function LoginPage() {
     if (error) {
       toast({
         variant: "destructive",
-        title: "Erro de Login",
+        title: "Erro de login",
         description: "Credenciais inválidas. Por favor, tente novamente.",
       });
     } else {
@@ -66,7 +66,7 @@ export default function LoginPage() {
     if (error) {
       toast({
         variant: "destructive",
-        title: "Erro de Login com Google",
+        title: "Erro de login com Google",
         description: "Não foi possível fazer login com o Google. Tente novamente.",
       });
     } else {
@@ -79,7 +79,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm mx-auto">
         <CardHeader className="text-center">
           <BookHeart className="mx-auto h-10 w-10 text-primary mb-2" />
-          <CardTitle className="text-2xl font-headline">Bem-vindo de Volta</CardTitle>
+          <CardTitle className="text-2xl font-headline">Bem-vindo de volta</CardTitle>
           <CardDescription>Insira suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>
         <CardContent>

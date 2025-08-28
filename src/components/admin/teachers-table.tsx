@@ -46,7 +46,7 @@ export function TeachersTable() {
 
   const handleAddTeacher = () => {
      toast({
-      title: "Função em Desenvolvimento",
+      title: "Função em desenvolvimento",
       description: "A funcionalidade para adicionar novos professores estará disponível em breve.",
     });
   }
@@ -61,7 +61,7 @@ export function TeachersTable() {
           </CardDescription>
         </div>
         <Button onClick={handleAddTeacher}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Professor
+          <PlusCircle className="mr-2 h-4 w-4" /> Adicionar professor
         </Button>
       </CardHeader>
       <CardContent>

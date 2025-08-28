@@ -25,18 +25,18 @@ export function StrategyCard({ strategy }: StrategyCardProps) {
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
                 <div>
-                    <h4 className="font-semibold text-sm mb-1">Como Fazer:</h4>
+                    <h4 className="font-semibold text-sm mb-1">Como fazer:</h4>
                     <p className="text-muted-foreground">{strategy.details}</p>
                 </div>
                  <div>
-                    <h4 className="font-semibold text-sm mb-1">Por que Funciona (para esta turma):</h4>
+                    <h4 className="font-semibold text-sm mb-1">Por que funciona (para esta turma):</h4>
                     <p className="text-muted-foreground">{strategy.connection}</p>
                 </div>
             </CardContent>
             <CardFooter>
                  <Button variant="link" asChild className="p-0 h-auto">
                     <Link href={strategy.reference} target="_blank" rel="noopener noreferrer">
-                        Saber Mais sobre {strategy.methodology}
+                        Saber mais sobre {strategy.methodology}
                         <LucideIcons.ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                 </Button>

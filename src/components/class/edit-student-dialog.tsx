@@ -78,7 +78,7 @@ export function EditStudentDialog({ student, onStudentUpdated, isOpen, setIsOpen
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-headline">Editar Aluno</DialogTitle>
+          <DialogTitle className="font-headline">Editar aluno</DialogTitle>
           <DialogDescription>
             Altere as informações do aluno abaixo.
           </DialogDescription>
@@ -90,7 +90,7 @@ export function EditStudentDialog({ student, onStudentUpdated, isOpen, setIsOpen
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome do Aluno</FormLabel>
+                  <FormLabel>Nome do aluno</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -117,7 +117,7 @@ export function EditStudentDialog({ student, onStudentUpdated, isOpen, setIsOpen
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Salvar Alterações
+                Salvar alterações
               </Button>
             </DialogFooter>
           </form>

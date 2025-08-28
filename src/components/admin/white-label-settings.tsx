@@ -13,7 +13,7 @@ export function WhiteLabelSettings() {
 
   const handleSaveChanges = () => {
     toast({
-      title: "Função em Desenvolvimento",
+      title: "Função em desenvolvimento",
       description: "A personalização da marca estará disponível em breve.",
     });
   };
@@ -21,7 +21,7 @@ export function WhiteLabelSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">White-Labeling</CardTitle>
+        <CardTitle className="font-headline">White-labeling</CardTitle>
         <CardDescription>
           Personalize a plataforma com a identidade visual da sua instituição.
         </CardDescription>
@@ -29,7 +29,7 @@ export function WhiteLabelSettings() {
       <CardContent className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6 items-center">
             <div>
-                <Label htmlFor="logo" className="mb-2 block">Logo da Instituição</Label>
+                <Label htmlFor="logo" className="mb-2 block">Logo da instituição</Label>
                 <div className="flex items-center gap-4">
                     <div className="w-24 h-24 rounded-md border flex items-center justify-center bg-muted">
                         <Image src="/logo-placeholder.svg" alt="logo placeholder" width={40} height={40} />
@@ -44,14 +44,14 @@ export function WhiteLabelSettings() {
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <Label htmlFor="primary-color">Cor Primária</Label>
+                    <Label htmlFor="primary-color">Cor primária</Label>
                     <div className="flex items-center gap-2">
                         <Input id="primary-color" defaultValue="#4A148C" />
                         <div className="w-8 h-8 rounded-md border" style={{ backgroundColor: "#4A148C" }}></div>
                     </div>
                 </div>
                 <div>
-                    <Label htmlFor="secondary-color">Cor Secundária</Label>
+                    <Label htmlFor="secondary-color">Cor secundária</Label>
                     <div className="flex items-center gap-2">
                         <Input id="secondary-color" defaultValue="#E6E6FA" />
                         <div className="w-8 h-8 rounded-md border" style={{ backgroundColor: "#E6E6FA" }}></div>
@@ -60,7 +60,7 @@ export function WhiteLabelSettings() {
             </div>
         </div>
         <div className="flex justify-end">
-            <Button onClick={handleSaveChanges}>Salvar Alterações</Button>
+            <Button onClick={handleSaveChanges}>Salvar alterações</Button>
         </div>
       </CardContent>
     </Card>

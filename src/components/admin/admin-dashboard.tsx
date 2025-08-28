@@ -8,8 +8,8 @@ export function AdminDashboard() {
   return (
     <Tabs defaultValue="teachers" className="space-y-4">
       <TabsList>
-        <TabsTrigger value="teachers">Gerenciamento de Professores</TabsTrigger>
-        <TabsTrigger value="settings">Configurações da Marca</TabsTrigger>
+        <TabsTrigger value="teachers">Gerenciamento de professores</TabsTrigger>
+        <TabsTrigger value="settings">Configurações da marca</TabsTrigger>
       </TabsList>
       <TabsContent value="teachers">
         <TeachersTable />

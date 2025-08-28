@@ -36,8 +36,8 @@ export function StrategyDetailDialog({ strategy, isOpen, setIsOpen }: StrategyDe
         
         <Tabs defaultValue="suggestions" className="flex-grow mt-4 overflow-hidden flex flex-col">
             <TabsList className="flex-shrink-0">
-                <TabsTrigger value="suggestions"><WandSparkles className="mr-2 h-4 w-4" /> Sugestões do Oráculo</TabsTrigger>
-                <TabsTrigger value="original"><Book className="mr-2 h-4 w-4" /> Plano Original</TabsTrigger>
+                <TabsTrigger value="suggestions"><WandSparkles className="mr-2 h-4 w-4" /> Sugestões do oráculo</TabsTrigger>
+                <TabsTrigger value="original"><Book className="mr-2 h-4 w-4" /> Plano original</TabsTrigger>
             </TabsList>
             
             <div className="flex-grow mt-4 overflow-hidden">

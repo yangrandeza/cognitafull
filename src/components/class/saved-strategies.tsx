@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookMarked, Eye, Trash2 } from "lucide-react";
 import type { LearningStrategy } from "@/lib/types";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { StrategyDetailDialog } from "./lesson-plan-detail-dialog"; 
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
@@ -52,7 +51,7 @@ export function SavedStrategies({ savedStrategies: initialStrategies }: SavedStr
         } else {
              toast({
                 variant: "destructive",
-                title: "Erro ao Excluir",
+                title: "Erro ao excluir",
                 description: result.error || "Não foi possível excluir as estratégias.",
             });
         }
@@ -69,7 +68,7 @@ export function SavedStrategies({ savedStrategies: initialStrategies }: SavedStr
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline flex items-center gap-2">
-                        <BookMarked className="text-primary" /> Estratégias Salvas
+                        <BookMarked className="text-primary" /> Estratégias salvas
                     </CardTitle>
                     <CardDescription>
                         Acesse aqui as estratégias de aprendizagem que você já gerou e salvou para esta turma. Clique em um item para ver os detalhes.
@@ -114,7 +113,7 @@ export function SavedStrategies({ savedStrategies: initialStrategies }: SavedStr
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-center text-muted-foreground p-4">Nenhuma estratégia salva ainda. Use o Oráculo Pedagógico para gerar e salvar sua primeira estratégia.</p>
+                        <p className="text-sm text-center text-muted-foreground p-4">Nenhuma estratégia salva ainda. Use o oráculo pedagógico para gerar e salvar sua primeira estratégia.</p>
                     )}
                 </CardContent>
             </Card>

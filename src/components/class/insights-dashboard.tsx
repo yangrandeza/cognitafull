@@ -76,7 +76,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     // Re-fetch learning strategies and re-render
     getSavedLearningStrategies(classId).then(setSavedStrategies);
     toast({
-        title: "Estratégia Salva!",
+        title: "Estratégia salva!",
         description: "Sua nova estratégia de aprendizagem foi salva. Verifique a aba 'Estratégias'.",
     });
   };
@@ -97,7 +97,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         </CardHeader>
         <CardContent className="pt-6 text-center text-muted-foreground space-y-4">
           <p>
-            Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, o Mosaico de Aprendizagem aparecerá aqui.
+            Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, o mosaico de aprendizagem aparecerá aqui.
           </p>
           <ShareClassDialog classId={classId} />
         </CardContent>
@@ -117,10 +117,10 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     <Tabs defaultValue="insights" className="space-y-4">
       <div className="flex justify-between items-center">
         <TabsList>
-            <TabsTrigger value="insights">Mosaico de Aprendizagem</TabsTrigger>
+            <TabsTrigger value="insights">Mosaico de aprendizagem</TabsTrigger>
             <TabsTrigger value="students">Alunos ({students.length})</TabsTrigger>
             <TabsTrigger value="strategies">Estratégias</TabsTrigger>
-            <TabsTrigger value="optimizer">Oráculo Pedagógico</TabsTrigger>
+            <TabsTrigger value="optimizer">Oráculo pedagógico</TabsTrigger>
         </TabsList>
         <ShareClassDialog classId={classId} />
       </div>
@@ -131,7 +131,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Idade Média</CardTitle>
+                <CardTitle className="text-sm font-medium">Idade média</CardTitle>
                 <Cake className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -140,7 +140,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Geração Predominante</CardTitle>
+                <CardTitle className="text-sm font-medium">Geração predominante</CardTitle>
                 <Baby className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -149,7 +149,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Gênero Predominante</CardTitle>
+                <CardTitle className="text-sm font-medium">Gênero predominante</CardTitle>
                  <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -161,7 +161,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
 
         <Card>
             <CardHeader>
-                <CardTitle className="font-headline text-2xl">A Bússola Cognitiva da Turma</CardTitle>
+                <CardTitle className="font-headline text-2xl">A bússola cognitiva da turma</CardTitle>
                 <CardDescription>
                     Esta é a "personalidade" da sua turma. O formato do gráfico mostra rapidamente as tendências gerais do grupo, ajudando você a adaptar suas aulas de forma intuitiva.
                 </CardDescription>
@@ -174,19 +174,19 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <div className="grid gap-6 md:grid-cols-3">
             <InsightCard 
                 icon={<Wind className="h-8 w-8 text-blue-500" />}
-                title="O Clima da Sala 🌡️"
+                title="O clima da sala 🌡️"
                 subtitle="Como eles se sentem mais confortáveis para aprender?"
                 text={insightCards.climate}
             />
             <InsightCard 
                 icon={<Sparkles className="h-8 w-8 text-amber-500" />}
-                title="A Faísca do Engajamento ✨"
+                title="A faísca do engajamento ✨"
                 subtitle="O que os faz inclinar para a frente na cadeira?"
                 text={insightCards.engagement}
             />
             <InsightCard 
                 icon={<Brain className="h-8 w-8 text-violet-500" />}
-                title="A Melhor Forma de Explicação 🧠"
+                title="A melhor forma de explicação 🧠"
                 subtitle="Qual abordagem de ensino ressoará mais forte?"
                 text={insightCards.explanation}
             />
@@ -195,12 +195,12 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             {communicationData && (
                 <AnalysisCard
                     icon={<MessageSquare className="h-8 w-8 text-green-500" />}
-                    title="Comunicação e Feedback"
+                    title="Comunicação e feedback"
                     subtitle="Como se comunicar e dar feedback para esta turma?"
-                    category1Title="Estilo de Comunicação"
+                    category1Title="Estilo de comunicação"
                     category1Value={communicationData.style}
                     category1Icon={communicationData.style === 'Relacional' ? <Users className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                    category2Title="Estilo de Feedback"
+                    category2Title="Estilo de feedback"
                     category2Value={communicationData.feedback}
                     category2Icon={communicationData.feedback === 'Empático' ? <Brain className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
                     text={communicationData.recommendation}
@@ -209,7 +209,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             {workPaceData && (
                  <AnalysisCard
                     icon={<Telescope className="h-8 w-8 text-cyan-500" />}
-                    title="Ritmo de Trabalho e Foco"
+                    title="Ritmo de trabalho e foco"
                     subtitle="Como a turma aborda as tarefas?"
                     category1Title="Ritmo"
                     category1Value={workPaceData.pace}

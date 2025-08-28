@@ -114,7 +114,7 @@ export function StudentsList({ students: initialStudents, profiles }: { students
     <>
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Lista de Alunos e Perfis Individuais</CardTitle>
+        <CardTitle className="font-headline">Lista de alunos e perfis individuais</CardTitle>
         <CardDescription>
           Visualize, pesquise, edite e remova os alunos da sua turma.
         </CardDescription>
@@ -152,10 +152,10 @@ export function StudentsList({ students: initialStudents, profiles }: { students
               </Select>
                <Select value={filters.jung} onValueChange={(value) => handleFilterChange('jung', value)}>
                 <SelectTrigger>
-                    <SelectValue placeholder="Filtrar por Tipo Junguiano" />
+                    <SelectValue placeholder="Filtrar por tipo junguiano" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="all">Tipo Junguiano (Todos)</SelectItem>
+                    <SelectItem value="all">Tipo junguiano (Todos)</SelectItem>
                     {jungianOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -228,7 +228,7 @@ export function StudentsList({ students: initialStudents, profiles }: { students
                           <DropdownMenuItem asChild disabled={!profile}>
                             <Link href={`/student/${student.id}`}>
                               <User className="mr-2 h-4 w-4" />
-                              Ver Painel
+                              Ver painel
                             </Link>
                           </DropdownMenuItem>
                           

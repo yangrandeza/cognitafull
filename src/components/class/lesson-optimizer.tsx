@@ -113,7 +113,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
         console.error("Erro ao salvar as estratégias:", error);
         toast({
             variant: "destructive",
-            title: "Erro ao Salvar",
+            title: "Erro ao salvar",
             description: "Não foi possível salvar as estratégias. Tente novamente.",
         });
     } finally {
@@ -126,10 +126,10 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
         <Card>
             <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-                <Sparkles className="text-primary" /> Oráculo Pedagógico
+                <Sparkles className="text-primary" /> Oráculo pedagógico
             </CardTitle>
             <CardDescription>
-                Descreva sua próxima aula e o Oráculo usará a Bússola Cognitiva da turma para sugerir estratégias de aprendizagem para torná-la inesquecível.
+                Descreva sua próxima aula e o oráculo usará a bússola cognitiva da turma para sugerir estratégias de aprendizagem para torná-la inesquecível.
             </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -161,7 +161,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
                         ) : (
                            <>
                             <WandSparkles className="mr-2 h-4 w-4" />
-                            Revelar Estratégias
+                            Revelar estratégias
                            </>
                         )}
                     </Button>
@@ -173,7 +173,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
                 <div className="flex items-center justify-center pt-10 border-t">
                     <div className="text-center space-y-2">
                         <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                        <p className="text-muted-foreground">O Oráculo está mergulhando nos dados da sua turma...</p>
+                        <p className="text-muted-foreground">O oráculo está mergulhando nos dados da sua turma...</p>
                     </div>
                 </div>
                 )}
@@ -182,17 +182,17 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
                 <div className="space-y-8 pt-6 border-t">
                     <div>
                          <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-headline">Cards de Estratégia</h3>
+                            <h3 className="text-xl font-headline">Cards de estratégia</h3>
                              <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="default">
                                         <Save className="mr-2 h-4 w-4" />
-                                        Salvar Estratégias
+                                        Salvar estratégias
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
-                                        <DialogTitle>Salvar Estratégias de Aprendizagem</DialogTitle>
+                                        <DialogTitle>Salvar estratégias de aprendizagem</DialogTitle>
                                         <DialogDescription>
                                             Dê um título para este conjunto de estratégias para que possa encontrá-lo mais tarde.
                                         </DialogDescription>

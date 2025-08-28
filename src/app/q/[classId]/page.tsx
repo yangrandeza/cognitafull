@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from 'react';
@@ -27,7 +28,7 @@ const questions = [
   // VARK
   {
     type: 'radio',
-    part: 'Parte 1: Como Você Aprende (VARK)',
+    part: 'Parte 1: Como você aprende (VARK)',
     question: 'Quando você precisa aprender algo novo e complexo, o que mais te ajuda?',
     id: 'vark_1',
     options: [
@@ -39,7 +40,7 @@ const questions = [
   },
   {
     type: 'radio',
-    part: 'Parte 1: Como Você Aprende (VARK)',
+    part: 'Parte 1: Como você aprende (VARK)',
     question: 'Imagine que você está tentando chegar a um lugar novo. Qual estratégia você escolheria?',
     id: 'vark_2',
     options: [
@@ -51,7 +52,7 @@ const questions = [
   },
    {
     type: 'radio',
-    part: 'Parte 1: Como Você Aprende (VARK)',
+    part: 'Parte 1: Como você aprende (VARK)',
     question: 'Para se lembrar de algo importante para uma prova, qual método funciona melhor para você?',
     id: 'vark_3',
     options: [
@@ -63,7 +64,7 @@ const questions = [
   },
    {
     type: 'radio',
-    part: 'Parte 1: Como Você Aprende (VARK)',
+    part: 'Parte 1: Como você aprende (VARK)',
     question: 'Em uma apresentação ou palestra, o que mais prende a sua atenção?',
     id: 'vark_4',
     options: [
@@ -76,56 +77,56 @@ const questions = [
   // DISC
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_1',
     words: ['Decidido', 'Influente', 'Paciente', 'Detalhado'],
   },
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_2',
     words: ['Competitivo', 'Otimista', 'Estável', 'Cauteloso'],
   },
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_3',
     words: ['Direto', 'Sociável', 'Previsível', 'Perfeccionista'],
   },
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_4',
     words: ['Ousado', 'Entusiasmado', 'Calmo', 'Sistemático'],
   },
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_5',
     words: ['Focado em resultados', 'Inspirador', 'Apoiador', 'Lógico'],
   },
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_6',
     words: ['Exigente', 'Comunicativo', 'Consistente', 'Preciso'],
   },
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_7',
     words: ['Pioneiro', 'Convincente', 'Leal', 'Cuidadoso'],
   },
    {
     type: 'disc',
-    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    part: 'Parte 2: Como você age e interage (DISC)',
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_8',
     words: ['Independente', 'Divertido', 'Harmonioso', 'Organizado'],
@@ -133,7 +134,7 @@ const questions = [
   // Jungian
   {
     type: 'radio',
-    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    part: 'Parte 3: Como sua mente funciona (Jungiano)',
     question: 'Depois de um dia cheio de atividades em grupo, você se sente:',
     id: 'jung_1',
     options: [
@@ -143,7 +144,7 @@ const questions = [
   },
   {
     type: 'radio',
-    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    part: 'Parte 3: Como sua mente funciona (Jungiano)',
     question: 'Ao lidar com uma nova tarefa, você tende a:',
     id: 'jung_2',
     options: [
@@ -153,7 +154,7 @@ const questions = [
   },
   {
     type: 'radio',
-    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    part: 'Parte 3: Como sua mente funciona (Jungiano)',
     question: 'Na hora de tomar uma decisão, o que pesa mais para você?',
     id: 'jung_3',
     options: [
@@ -163,7 +164,7 @@ const questions = [
   },
   {
     type: 'radio',
-    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    part: 'Parte 3: Como sua mente funciona (Jungiano)',
     question: 'Seu estilo de trabalho preferido é:',
     id: 'jung_4',
     options: [
@@ -174,7 +175,7 @@ const questions = [
   // Schwartz
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_1',
       statement: 'Ter a liberdade de escolher o que faz e pensa por si mesmo é muito importante para esta pessoa.',
@@ -182,7 +183,7 @@ const questions = [
   },
    {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_2',
       statement: 'Ela busca uma vida cheia de emoção, novidades e desafios.',
@@ -190,7 +191,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_3',
       statement: 'Para ela, sentir prazer e aproveitar os bons momentos da vida é uma prioridade.',
@@ -198,7 +199,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_4',
       statement: 'Ser bem-sucedido(a) e mostrar aos outros que é capaz é algo que a motiva muito.',
@@ -206,7 +207,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_5',
       statement: 'Ela gosta de liderar, ser responsável e ter influência sobre as coisas.',
@@ -214,7 +215,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_6',
       statement: 'Viver em um ambiente seguro, estável e organizado é fundamental para seu bem-estar.',
@@ -222,7 +223,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_7',
       statement: 'Ela se esforça para seguir as regras e nunca decepcionar as pessoas ao seu redor.',
@@ -230,7 +231,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_8',
       statement: 'Para ela, é importante respeitar os costumes e as tradições de sua família e cultura.',
@@ -238,7 +239,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_9',
       statement: 'Ajudar as pessoas que ama e ser um amigo(a) leal é uma de suas maiores qualidades.',
@@ -246,7 +247,7 @@ const questions = [
   },
   {
       type: 'scale',
-      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      part: 'Parte 4: O que realmente te move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
       id: 'schwartz_10',
       statement: 'Ela se preocupa muito com a igualdade, a justiça social e a proteção do meio ambiente.',
@@ -412,11 +413,11 @@ export default function QuestionnairePage() {
             <CardContent>
                 <div className="grid gap-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Nome Completo</Label>
+                        <Label htmlFor="name">Nome completo</Label>
                         <Input id="name" placeholder="Seu nome completo" value={studentInfo.name} onChange={handleStudentInfoChange} required/>
                     </div>
                      <div className="grid gap-2">
-                        <Label htmlFor="email">E-mail (Opcional)</Label>
+                        <Label htmlFor="email">E-mail (opcional)</Label>
                         <Input id="email" type="email" placeholder="seu.email@exemplo.com" value={studentInfo.email} onChange={handleStudentInfoChange} />
                     </div>
                      <div className="grid grid-cols-2 gap-4">
@@ -425,7 +426,7 @@ export default function QuestionnairePage() {
                             <Input id="age" type="number" placeholder="Sua idade" value={studentInfo.age} onChange={handleStudentInfoChange} required/>
                         </div>
                         <div className="grid gap-2">
-                           <Label htmlFor="gender">Gênero (Opcional)</Label>
+                           <Label htmlFor="gender">Gênero (opcional)</Label>
                            <Select value={studentInfo.gender} onValueChange={handleGenderChange}>
                                 <SelectTrigger id="gender">
                                     <SelectValue placeholder="Selecione" />
@@ -526,7 +527,7 @@ export default function QuestionnairePage() {
                 {isLastQuestion ? (
                     <Button onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Finalizar e Enviar
+                        Finalizar e enviar
                     </Button>
                 ) : (
                      <Button onClick={handleNext}>

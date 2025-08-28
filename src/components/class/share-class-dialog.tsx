@@ -34,7 +34,7 @@ export function ShareClassDialog({ classId, className }: ShareClassDialogProps) 
   const handleOpen = () => {
     navigator.clipboard.writeText(url);
     toast({
-      title: "Link Copiado!",
+      title: "Link copiado!",
       description:
         "O link de convite da turma foi copiado para sua área de transferência.",
     });
@@ -44,7 +44,7 @@ export function ShareClassDialog({ classId, className }: ShareClassDialogProps) 
   const handleCopyToClipboard = () => {
      navigator.clipboard.writeText(url);
     toast({
-      title: "Link Copiado!",
+      title: "Link copiado!",
     });
   }
 
@@ -64,7 +64,7 @@ export function ShareClassDialog({ classId, className }: ShareClassDialogProps) 
       console.error("Failed to download QR code:", error);
       toast({
         variant: "destructive",
-        title: "Erro no Download",
+        title: "Erro no download",
         description: "Não foi possível baixar o QR Code. Tente novamente.",
       });
     }
@@ -75,13 +75,13 @@ export function ShareClassDialog({ classId, className }: ShareClassDialogProps) 
       <DialogTrigger asChild>
         <Button variant="outline" onClick={handleOpen} className={className}>
           <Share2 className="mr-2 h-4 w-4" />
-          Compartilhar Turma
+          Compartilhar turma
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-headline">
-            Compartilhe com a Turma
+            Compartilhe com a turma
           </DialogTitle>
           <DialogDescription>
             Os alunos podem usar o QR Code ou o link direto para acessar o

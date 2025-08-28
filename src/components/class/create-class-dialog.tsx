@@ -56,7 +56,7 @@ export function CreateClassDialog({ onClassCreated }: CreateClassDialogProps) {
     if (!user) {
         toast({
             variant: "destructive",
-            title: "Erro de Autenticação",
+            title: "Erro de autenticação",
             description: "Você precisa estar logado para criar uma turma.",
         });
         return;
@@ -86,12 +86,12 @@ export function CreateClassDialog({ onClassCreated }: CreateClassDialogProps) {
       <DialogTrigger asChild>
         <Button className="font-headline">
           <PlusCircle className="mr-2 h-4 w-4" />
-          Criar Turma
+          Criar turma
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-headline">Criar Nova Turma</DialogTitle>
+          <DialogTitle className="font-headline">Criar nova turma</DialogTitle>
           <DialogDescription>
             Dê um nome para sua nova turma. Ex: "3º Ano A - Manhã".
           </DialogDescription>
@@ -104,7 +104,7 @@ export function CreateClassDialog({ onClassCreated }: CreateClassDialogProps) {
               render={({ field }) => (
                 <FormItem>
                   <Label htmlFor="name" className="text-right">
-                    Nome da Turma
+                    Nome da turma
                   </Label>
                   <FormControl>
                     <Input id="name" {...field} />

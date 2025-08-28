@@ -71,7 +71,7 @@ export default function SignupPage() {
     if (error) {
        toast({
         variant: "destructive",
-        title: "Erro de Login com Google",
+        title: "Erro de login com Google",
         description: "Não foi possível fazer login com o Google. Tente novamente.",
       });
     } else {
@@ -84,7 +84,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-sm mx-auto">
         <CardHeader className="text-center">
           <BookHeart className="mx-auto h-10 w-10 text-primary mb-2" />
-          <CardTitle className="text-2xl font-headline">Criar uma Conta</CardTitle>
+          <CardTitle className="text-2xl font-headline">Criar uma conta</CardTitle>
           <CardDescription>
             Insira suas informações para começar
           </CardDescription>
@@ -97,7 +97,7 @@ export default function SignupPage() {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nome Completo</FormLabel>
+                    <FormLabel>Nome completo</FormLabel>
                     <FormControl>
                       <Input placeholder="João da Silva" {...field} />
                     </FormControl>
