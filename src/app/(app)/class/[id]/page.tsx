@@ -1,11 +1,17 @@
 import { InsightsDashboard } from "@/components/class/insights-dashboard";
+import { getSavedLessonPlans } from "@/lib/actions";
 import { getClassById } from "@/lib/firebase/firestore";
 import { AlertTriangle, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function ClassDetailsPage({ params }: { params: { id: string } }) {
   const classId = params.id;
-  const classData = await getClassById(classId);
+  
+  // Fetch all data on the server in parallel
+  const [classData, savedLessonPlans] = await Promise.all([
+    getClassById(classId),
+    getSavedLessonPlans(classId)
+  ]);
 
   if (!classData) {
     return (
@@ -35,7 +41,7 @@ export default async function ClassDetailsPage({ params }: { params: { id: strin
             </h1>
         </div>
       </div>
-      <InsightsDashboard classId={classId} />
+      <InsightsDashboard classId={classId} initialLessonPlans={savedLessonPlans} />
     </div>
   );
 }

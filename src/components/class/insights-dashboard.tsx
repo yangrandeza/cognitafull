@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentsList } from "@/components/class/students-list";
 import { LessonOptimizer } from "@/components/class/lesson-optimizer";
@@ -17,10 +18,9 @@ import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
 import { SavedLessonPlans } from "./saved-lesson-plans";
-import { getSavedLessonPlans } from "@/lib/actions";
 
 
-export function InsightsDashboard({ classId }: { classId: string }) {
+export function InsightsDashboard({ classId, initialLessonPlans }: { classId: string, initialLessonPlans: LessonPlan[] }) {
   const [loading, setLoading] = useState(true);
   const [classData, setClassData] = useState<Class | null>(null);
   const [studentData, setStudentData] = useState<{students: Student[], profiles: RawUnifiedProfile[]} | null>(null);
@@ -28,6 +28,8 @@ export function InsightsDashboard({ classId }: { classId: string }) {
   const [demographicsData, setDemographicsData] = useState<ReturnType<typeof getDemographicsData> | null>(null);
   const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
   const { toast } = useToast();
+  const router = useRouter();
+
 
   const fetchClassData = useCallback(async () => {
     setLoading(true);
@@ -66,6 +68,15 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     fetchClassData();
   }, [fetchClassData]);
   
+  const handlePlanSaved = () => {
+    // Re-fetch server-side props and re-render the page with new data.
+    router.refresh();
+    toast({
+        title: "Plano Salvo!",
+        description: "Seu plano de aula foi salvo. Verifique a aba 'Planos de Aula'.",
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center rounded-lg border bg-card p-8">
@@ -252,13 +263,14 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
        <TabsContent value="plans">
-        <SavedLessonPlans classId={classId} />
+        <SavedLessonPlans savedPlans={initialLessonPlans} />
       </TabsContent>
       <TabsContent value="optimizer">
         <LessonOptimizer 
             classProfileSummary={classProfileSummary} 
             classId={classId} 
             teacherId={teacherId}
+            onPlanSaved={handlePlanSaved}
         />
       </TabsContent>
     </Tabs>

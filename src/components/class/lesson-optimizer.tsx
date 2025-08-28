@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Lightbulb, Loader2, Sparkles, Wand2, FileDown, Save } from "lucide-react";
 import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan } from "@/lib/actions";
-import type { OptimizeLessonPlanOutput, LessonPlan } from "@/lib/types";
+import type { OptimizeLessonPlanOutput } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,6 +43,7 @@ interface LessonOptimizerProps {
     classProfileSummary: string;
     classId: string;
     teacherId: string;
+    onPlanSaved: () => void;
 }
 
 const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ content }, ref) => {
@@ -54,7 +55,7 @@ const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ cont
 });
 PrintableContent.displayName = 'PrintableContent';
 
-export function LessonOptimizer({ classProfileSummary, classId, teacherId }: LessonOptimizerProps) {
+export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPlanSaved }: LessonOptimizerProps) {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isLoadingReformed, setIsLoadingReformed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -138,10 +139,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
         });
 
         if (result.success && result.newPlan) {
-            toast({
-                title: "Sucesso!",
-                description: "Seu plano de aula foi salvo. Você pode vê-lo na aba 'Planos de Aula'.",
-            });
+            onPlanSaved(); // Notify parent to refresh
             
             // Reset state
             setReformulatedPlan("");
