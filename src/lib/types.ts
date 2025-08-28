@@ -42,6 +42,7 @@ export type Student = {
   id:string;
   name: string;
   age: number;
+  email?: string;
   classId: string;
   gender?: string;
   quizStatus: 'pending' | 'completed';
@@ -53,6 +54,7 @@ export type QuizAnswers = Record<string, any>;
 export type NewStudent = {
     name: string;
     age: number;
+    email?: string;
     gender?: string;
     classId: string;
     quizStatus: 'completed';
@@ -112,3 +114,5 @@ export type ClassWithStudentData = Class & {
   students: Student[];
   profiles: RawUnifiedProfile[]; // Fetch raw profiles
 };
+
+    

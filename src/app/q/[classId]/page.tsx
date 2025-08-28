@@ -264,7 +264,7 @@ const totalQuestions = questions.filter(q => q.type !== 'intro' && q.type !== 'f
 export default function QuestionnairePage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
-  const [studentInfo, setStudentInfo] = useState({ name: '', age: '', gender: '' });
+  const [studentInfo, setStudentInfo] = useState({ name: '', age: '', email: '', gender: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const params = useParams();
@@ -302,6 +302,24 @@ export default function QuestionnairePage() {
           return newAnswers;
       });
   };
+  
+  const validateCurrentStep = () => {
+    if (!currentQuestion || !('id' in currentQuestion)) {
+      return true;
+    }
+    
+    const questionId = currentQuestion.id;
+
+    if (currentQuestion.type === 'radio' || currentQuestion.type === 'scale') {
+        return !!answers[questionId];
+    }
+    
+    if (currentQuestion.type === 'disc') {
+        return !!answers[`${questionId}_most`] && !!answers[`${questionId}_least`];
+    }
+
+    return true; // No validation needed for other types
+  };
 
   const handleNext = () => {
     if (currentQuestion.type === 'intro') {
@@ -313,6 +331,15 @@ export default function QuestionnairePage() {
         });
         return;
       }
+    }
+    
+    if (!validateCurrentStep()) {
+       toast({
+          variant: "destructive",
+          title: "Resposta pendente",
+          description: "Por favor, responda à pergunta atual para continuar.",
+        });
+        return;
     }
 
     if (step < questions.length - 1) {
@@ -327,6 +354,15 @@ export default function QuestionnairePage() {
   };
 
   const handleSubmit = async () => {
+     if (!validateCurrentStep()) {
+       toast({
+          variant: "destructive",
+          title: "Resposta pendente",
+          description: "Por favor, responda à última pergunta antes de finalizar.",
+        });
+        return;
+    }
+
     setIsSubmitting(true);
     try {
         await submitQuizAnswers(classId, studentInfo, answers);
@@ -375,6 +411,10 @@ export default function QuestionnairePage() {
                     <div className="grid gap-2">
                         <Label htmlFor="name">Nome Completo</Label>
                         <Input id="name" placeholder="Seu nome completo" value={studentInfo.name} onChange={handleStudentInfoChange} required/>
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="email">E-mail (Opcional)</Label>
+                        <Input id="email" type="email" placeholder="seu.email@exemplo.com" value={studentInfo.email} onChange={handleStudentInfoChange} />
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
@@ -512,3 +552,5 @@ export default function QuestionnairePage() {
     </div>
   );
 }
+
+    
