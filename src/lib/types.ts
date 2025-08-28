@@ -47,6 +47,7 @@ export type Student = {
   gender?: string;
   quizStatus: 'pending' | 'completed';
   unifiedProfileId?: string;
+  createdAt: string; // Changed from FieldValue to string for serialization
 };
 
 export type QuizAnswers = Record<string, any>;

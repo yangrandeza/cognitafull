@@ -13,6 +13,7 @@ import {
   documentId,
   serverTimestamp,
   runTransaction,
+  Timestamp,
 } from 'firebase/firestore';
 import { updateProfile } from "firebase/auth";
 import type {
@@ -175,7 +176,14 @@ export const getStudentAndProfileById = async (studentId: string): Promise<{stud
     const studentSnap = await getDoc(studentRef);
 
     if (!studentSnap.exists()) return null;
-    const student = { id: studentSnap.id, ...studentSnap.data() } as Student;
+    const studentData = studentSnap.data();
+    
+    // Convert Firestore Timestamp to a serializable format (ISO string)
+    const student: Student = { 
+        id: studentSnap.id,
+        ...studentData,
+        createdAt: (studentData.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+    } as Student;
 
     if (!student.unifiedProfileId) return null;
 
@@ -207,5 +215,3 @@ export const getClassWithStudentsAndProfiles = async (
     profiles,
   };
 };
-
-    
