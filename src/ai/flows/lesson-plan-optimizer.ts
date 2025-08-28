@@ -5,7 +5,7 @@
  *
  * - optimizeLessonPlan - A function that accepts a lesson plan and class profile and returns optimized suggestions.
  * - OptimizeLessonPlanInput - The input type for the optimizeLessonPlan function.
- * - OptimizeLessonPlanOutput - The return type for the optimizeLessonPlan function.
+ * - OptimizeLessonPlanOutput - The return type for the optimizeLessonan function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -21,15 +21,19 @@ const OptimizeLessonPlanInputSchema = z.object({
 });
 export type OptimizeLessonPlanInput = z.infer<typeof OptimizeLessonPlanInputSchema>;
 
+const StrategyCardSchema = z.object({
+  methodology: z.string().describe("The name of the innovative teaching methodology being suggested. E.g., 'Gamificação', 'Sala de Aula Invertida'."),
+  iconName: z.string().describe("The name of a relevant icon from the lucide-react library. E.g., 'Swords', 'BookUp', 'Trophy'."),
+  headline: z.string().describe("A catchy, impactful headline for the strategy."),
+  details: z.string().describe("A practical, step-by-step description of how to implement the suggestion."),
+  connection: z.string().describe("A brief explanation of WHY this strategy works for this specific class, referencing their profile."),
+  reference: z.string().url().describe("A URL to an article or video for the teacher to learn more about the methodology.")
+});
+
 const OptimizeLessonPlanOutputSchema = z.object({
-  suggestions: z
-    .array(
-        z.object({
-            feature: z.string().describe("The class feature the suggestion is based on. E.g., 'Para o lado Prático deles'"),
-            suggestion: z.string().describe("The practical suggestion for the teacher.")
-        })
-    )
-    .describe('A list of 3-5 practical suggestions to improve the lesson plan.'),
+  strategies: z
+    .array(StrategyCardSchema)
+    .describe('A list of 2-4 disruptive and practical strategy cards to improve the lesson plan.'),
 });
 export type OptimizeLessonPlanOutput = z.infer<typeof OptimizeLessonPlanOutputSchema>;
 
@@ -41,28 +45,45 @@ const prompt = ai.definePrompt({
   name: 'optimizeLessonPlanPrompt',
   input: {schema: OptimizeLessonPlanInputSchema},
   output: {schema: OptimizeLessonPlanOutputSchema},
-  prompt: `Você é um designer instrucional e coach pedagógico especialista em aprendizado personalizado. Sua missão é ajudar um professor a tornar sua aula inesquecível, usando insights profundos sobre a "personalidade" da turma.
+  prompt: `Você é um "Hacker de Design Instrucional" e um especialista em educação disruptiva. Sua missão é transformar uma aula comum em uma experiência de aprendizagem memorável, aplicando metodologias ativas e inovadoras que se conectem profundamente com a "personalidade" da turma.
 
 Você receberá um resumo do perfil da turma (o "Mosaico de Aprendizagem") e a descrição de uma aula que o professor planejou.
 
-Sua tarefa é fornecer 3 a 5 sugestões práticas e criativas que conectem diretamente o plano de aula com as características da turma. Para cada sugestão, explique QUAL característica da turma você está usando como base no campo 'feature'.
+Sua tarefa é hackear o plano de aula, devolvendo de 2 a 4 "Cards de Estratégia" práticos e criativos. Cada card deve ser baseado em uma metodologia de ensino ativa (ex: Gamificação, Sala de Aula Invertida, Rotação por Estações, Aprendizagem Baseada em Projetos, Peer Instruction, etc.).
 
-Exemplo de como responder:
-[
-  {
-    "feature": "Para o lado 'Colaborativo' deles",
-    "suggestion": "Em vez de uma palestra, transforme a aula em um 'Conselho Revolucionário'. Divida a turma em grupos e dê a cada um um papel para debater."
-  },
-  {
-    "feature": "Para a necessidade de 'Estrutura' deles",
-    "suggestion": "Forneça um 'mapa mental' com a linha do tempo e os principais eventos antes de começar. Isso dará a segurança que eles precisam."
-  },
-  {
-    "feature": "Para engajar o lado 'Prático' deles",
-    "suggestion": "Peça que cada grupo crie um post de rede social (como se fosse da época) defendendo suas ideias. Isso torna o conteúdo concreto."
-  }
-]
+Para cada card, forneça:
+- methodology: O nome da metodologia.
+- iconName: O nome de um ícone da biblioteca 'lucide-react' que represente a estratégia (ex: Swords, BookUp, Trophy, Puzzle, Users, Lightbulb). Verifique se o ícone existe.
+- headline: Um título de impacto para a estratégia.
+- details: Uma descrição prática de como implementar a sugestão.
+- connection: A justificativa de por que essa estratégia funciona para ESTA turma específica, conectando com o perfil dela.
+- reference: Um link para um artigo ou vídeo de alta qualidade para o professor se aprofundar na metodologia.
 
+Seja criativo, ousado e prático.
+
+---
+
+**Exemplo de Resposta (Formato JSON):**
+{
+  "strategies": [
+    {
+      "methodology": "Gamificação",
+      "iconName": "Swords",
+      "headline": "A Batalha das Ideias",
+      "details": "Transforme o debate em um jogo. Divida a turma em 'guildas' (grupos). Cada argumento bem-sucedido concede 'pontos de persuasão'. A guilda com mais pontos ao final 'conquista o parlamento'. Crie um placar visível para aumentar o engajamento.",
+      "connection": "Funciona para esta turma pois eles são motivados por 'Desafio & Conquista'. A competição saudável e as metas claras irão engajá-los profundamente.",
+      "reference": "https://www.youtube.com/watch?v=your_gamification_video_link"
+    },
+    {
+      "methodology": "Sala de Aula Invertida",
+      "iconName": "BookUp",
+      "headline": "Detetives da História",
+      "details": "Envie um vídeo curto ou um artigo intrigante sobre a Revolução Francesa para casa. Na sala de aula, em vez de expor o conteúdo, use o tempo para que eles, em grupos, resolvam um 'mistério' histórico usando as informações que aprenderam.",
+      "connection": "Ideal para o perfil 'Absorção de Conteúdo Concreto & Prático' desta turma. Eles chegam na aula com a base e usam o tempo com o professor para aplicar o conhecimento de forma ativa.",
+      "reference": "https://www.example.com/flipped-classroom-article"
+    }
+  ]
+}
 
 ---
 
@@ -76,7 +97,7 @@ Exemplo de como responder:
 
 ---
 
-**Suas Sugestões Otimizadas:**
+**Seus Cards de Estratégia (Formato JSON):**
 `,
 });
 

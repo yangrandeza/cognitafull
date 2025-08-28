@@ -141,15 +141,23 @@ export type NewLearningStrategy = {
     createdAt: Date;
 }
 
+
 // --- AI Flow Types ---
+
 export type OptimizeLessonPlanInput = {
     lessonPlan: string;
     classProfile: string;
 };
 
+export type StrategyCard = {
+  methodology: string;
+  iconName: string;
+  headline: string;
+  details: string;
+  connection: string;
+  reference: string;
+}
+
 export type OptimizeLessonPlanOutput = {
-    suggestions: {
-        feature: string;
-        suggestion: string;
-    }[];
+    strategies: StrategyCard[];
 };

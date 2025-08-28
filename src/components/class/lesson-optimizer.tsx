@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Lightbulb, Loader2, Sparkles, Save } from "lucide-react";
+import { Loader2, Sparkles, Save, WandSparkles } from "lucide-react";
 import { getLessonPlanSuggestions, saveLearningStrategy } from "@/lib/actions";
 import type { OptimizeLessonPlanOutput } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { StrategyCard } from "./strategy-card";
+
 
 const formSchema = z.object({
   lessonPlan: z.string().min(50, {
@@ -47,7 +49,7 @@ interface LessonOptimizerProps {
 export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStrategySaved }: LessonOptimizerProps) {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [suggestions, setSuggestions] = useState<OptimizeLessonPlanOutput['suggestions']>([]);
+  const [strategies, setStrategies] = useState<OptimizeLessonPlanOutput['strategies']>([]);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   
   const { toast } = useToast();
@@ -68,14 +70,14 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
 
   async function onGetSuggestions(values: z.infer<typeof formSchema>) {
     setIsLoadingSuggestions(true);
-    setSuggestions([]);
+    setStrategies([]);
     try {
       const result = await getLessonPlanSuggestions({
         lessonPlan: values.lessonPlan,
         classProfile: classProfileSummary,
       });
-      if (result && result.suggestions) {
-        setSuggestions(result.suggestions);
+      if (result && result.strategies) {
+        setStrategies(result.strategies);
       }
     } catch (error) {
       console.error("Erro ao otimizar o plano de aula:", error);
@@ -92,7 +94,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
   async function onSaveStrategies(values: z.infer<typeof saveFormSchema>) {
     setIsSaving(true);
     try {
-        const suggestionsText = suggestions.map(s => `* **${s.feature}:** ${s.suggestion}`).join('\n');
+        const suggestionsText = strategies.map(s => `### ${s.methodology}: ${s.headline}\n\n**Como Fazer:** ${s.details}\n\n**Por que Funciona:** ${s.connection}\n\n**Para Saber Mais:** [Clique aqui](${s.reference})`).join('\n\n---\n\n');
         
         await saveLearningStrategy({
             classId,
@@ -103,7 +105,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
         });
 
         // Reset state and notify parent
-        setSuggestions([]);
+        setStrategies([]);
         form.reset();
         saveForm.reset();
         setIsSaveDialogOpen(false);
@@ -159,7 +161,10 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
                             Consultando...
                         </>
                         ) : (
-                        "Revelar Estratégias"
+                           <>
+                            <WandSparkles className="mr-2 h-4 w-4" />
+                            Revelar Estratégias
+                           </>
                         )}
                     </Button>
                     </form>
@@ -167,16 +172,19 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
 
                 {/* --- Results Area --- */}
                 {isLoadingSuggestions && (
-                <div className="flex items-center justify-center pt-6 border-t">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <div className="flex items-center justify-center pt-10 border-t">
+                    <div className="text-center space-y-2">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+                        <p className="text-muted-foreground">O Oráculo está mergulhando nos dados da sua turma...</p>
+                    </div>
                 </div>
                 )}
 
-                {suggestions.length > 0 && (
-                <div className="space-y-6 pt-6 border-t">
+                {strategies.length > 0 && (
+                <div className="space-y-8 pt-6 border-t">
                     <div>
-                         <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-headline mb-4">Estratégias Sugeridas</h3>
+                         <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-headline">Cards de Estratégia</h3>
                              <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="default">
@@ -219,15 +227,9 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
                             </Dialog>
                          </div>
 
-                        <div className="space-y-6 mt-4">
-                            {suggestions.map((item, index) => (
-                                <div key={index} className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
-                                    <Lightbulb className="h-6 w-6 mt-1 text-yellow-500 flex-shrink-0" />
-                                    <div>
-                                        <p className="font-semibold text-primary">{item.feature}:</p>
-                                        <p className="text-muted-foreground">{item.suggestion}</p>
-                                    </div>
-                                </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {strategies.map((item, index) => (
+                                <StrategyCard key={index} strategy={item} />
                             ))}
                         </div>
                     </div>

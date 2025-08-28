@@ -20,11 +20,14 @@ export async function getLessonPlanSuggestions(
     console.error('Error in getLessonPlanSuggestions:', error);
     // Retornar um objeto de erro estruturado pode ser melhor para o frontend
     return {
-      suggestions: [
+      strategies: [
         {
-          feature: 'Erro do Oráculo',
-          suggestion:
-            'Ocorreu um erro ao contatar a IA. Por favor, tente novamente mais tarde.',
+          methodology: 'Erro do Oráculo',
+          iconName: 'AlertTriangle',
+          headline: 'Ocorreu um erro ao contatar a IA',
+          details: 'Não foi possível gerar sugestões no momento. Por favor, verifique o formato do seu plano de aula e tente novamente mais tarde.',
+          connection: 'A conexão com o serviço de inteligência artificial falhou.',
+          reference: 'https://status.openai.com/'
         },
       ],
     };
