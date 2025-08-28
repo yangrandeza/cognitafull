@@ -28,10 +28,26 @@ import { User, MoreHorizontal, FilePenLine, Trash2 } from "lucide-react";
 import { EditStudentDialog } from "./edit-student-dialog";
 import { DeleteStudentDialog } from "./delete-student-dialog";
 import { deleteStudent } from "@/lib/firebase/firestore";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+
+const varkOptions = ['Visual', 'Auditivo', 'Leitura/Escrita', 'Cinestésico'];
+const discOptions = ['Dominância', 'Influência', 'Estabilidade', 'Consciência'];
+const jungianOptions = [
+    'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
+    'ISTP', 'ISFP', 'INFP', 'INTP',
+    'ESTP', 'ESFP', 'ENFP', 'ENTP',
+    'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
+];
 
 export function StudentsList({ students: initialStudents, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [studentList, setStudentList] = useState<Student[]>(initialStudents);
+  const [filters, setFilters] = useState({
+      vark: 'all',
+      disc: 'all',
+      jung: 'all',
+  });
 
   useEffect(() => {
     setStudentList(initialStudents);
@@ -52,15 +68,23 @@ export function StudentsList({ students: initialStudents, profiles }: { students
   const handleStudentDeleted = (studentId: string) => {
      setStudentList(currentList => currentList.filter(s => s.id !== studentId));
   }
+  
+  const handleFilterChange = (filterType: 'vark' | 'disc' | 'jung', value: string) => {
+      setFilters(prev => ({...prev, [filterType]: value}));
+  }
 
   const filteredStudents = useMemo(() => {
-    if (!searchTerm) {
-      return studentList;
-    }
-    return studentList.filter(student =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, studentList]);
+    return studentList.filter(student => {
+        const profile = getStudentProfile(student.id);
+
+        const nameMatch = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const varkMatch = !profile || filters.vark === 'all' || profile.varkProfile.dominant === filters.vark;
+        const discMatch = !profile || filters.disc === 'all' || profile.discProfile.dominant === filters.disc;
+        const jungMatch = !profile || filters.jung === 'all' || profile.jungianProfile.type === filters.jung;
+
+        return nameMatch && varkMatch && discMatch && jungMatch;
+    });
+  }, [searchTerm, studentList, filters, profiles]);
   
   const handleDeleteConfirm = async (studentId: string) => {
     await deleteStudent(studentId);
@@ -74,13 +98,42 @@ export function StudentsList({ students: initialStudents, profiles }: { students
         <CardDescription>
           Visualize, pesquise, edite e remova os alunos da sua turma.
         </CardDescription>
-        <div className="pt-4">
+        <div className="pt-4 flex flex-col md:flex-row gap-4">
           <Input
             placeholder="Pesquisar por nome..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
+            className="md:max-w-xs"
           />
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Select value={filters.vark} onValueChange={(value) => handleFilterChange('vark', value)}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Filtrar por VARK" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">VARK (Todos)</SelectItem>
+                    {varkOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                </SelectContent>
+              </Select>
+               <Select value={filters.disc} onValueChange={(value) => handleFilterChange('disc', value)}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Filtrar por DISC" />
+                </SelectTrigger>
+                <SelectContent>
+                     <SelectItem value="all">DISC (Todos)</SelectItem>
+                    {discOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                </SelectContent>
+              </Select>
+               <Select value={filters.jung} onValueChange={(value) => handleFilterChange('jung', value)}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Filtrar por Tipo Junguiano" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">Tipo Junguiano (Todos)</SelectItem>
+                    {jungianOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                </SelectContent>
+              </Select>
+           </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -186,7 +239,7 @@ export function StudentsList({ students: initialStudents, profiles }: { students
         </Table>
          {filteredStudents.length === 0 && (
           <div className="text-center p-8 text-muted-foreground">
-            Nenhum aluno encontrado.
+            Nenhum aluno encontrado com os filtros aplicados.
           </div>
         )}
       </CardContent>
