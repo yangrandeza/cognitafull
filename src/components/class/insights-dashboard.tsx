@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -72,11 +73,11 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     return (
       <Card>
         <CardHeader>
-            <CardTitle>Nenhum aluno respondeu ainda</CardTitle>
+            <CardTitle className="font-headline">Sua turma ainda está vazia</CardTitle>
         </CardHeader>
         <CardContent className="pt-6 text-center text-muted-foreground space-y-4">
           <p>
-            Compartilhe o link abaixo com seus alunos para que eles possam responder ao questionário e você possa começar a ver os insights.
+            Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, os dados aparecerão aqui.
           </p>
           <Button onClick={handleShareLink}>
             <Share2 className="mr-2 h-4 w-4" />
@@ -115,8 +116,8 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle className="font-headline">Mapa de Perfis (DISC)</CardTitle>
-              <CardDescription>Como a turma se distribui em termos de Dominância, Influência, Estabilidade (Steadiness) e Conformidade (Conscientiousness).</CardDescription>
+              <CardTitle className="font-headline">"Qual é a dinâmica do grupo?"</CardTitle>
+              <CardDescription>O Mapa de Perfis (DISC) mostra a distribuição comportamental da turma. Ex: Grupos focados em colaboração (Influência) vs. focados em resultados (Dominância).</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <DiscChart data={discData} />
@@ -124,8 +125,8 @@ export function InsightsDashboard({ classId }: { classId: string }) {
           </Card>
           <Card className="col-span-3">
             <CardHeader>
-              <CardTitle className="font-headline">Estilos de Aprendizagem (VARK)</CardTitle>
-               <CardDescription>A preferência da turma para aprender: Visual, Auditivo, Leitura/Escrita ou Cinestésico.</CardDescription>
+              <CardTitle className="font-headline">"Como esta turma aprende melhor?"</CardTitle>
+               <CardDescription>O Gráfico de Modalidades (VARK) revela as preferências de aprendizagem. Ex: "40% da turma tem preferência Visual. Use mais diagramas e vídeos."</CardDescription>
             </CardHeader>
             <CardContent>
               <VarkChart data={varkData} />

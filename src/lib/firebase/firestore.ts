@@ -110,7 +110,7 @@ export const getClassById = async (classId: string): Promise<Class | null> => {
 
 
 // Student and Profile Functions
-export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string}, answers: QuizAnswers) => {
+export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string, gender?: string}, answers: QuizAnswers) => {
      await runTransaction(db, async (transaction) => {
         const classRef = doc(db, 'classes', classId);
         const classDoc = await transaction.get(classRef);
@@ -122,6 +122,7 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
         const newStudentData: NewStudent = {
             name: studentInfo.name,
             age: parseInt(studentInfo.age, 10),
+            gender: studentInfo.gender || 'Não informado',
             classId,
             quizStatus: 'completed',
             createdAt: serverTimestamp(),

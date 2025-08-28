@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -10,9 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Student, UnifiedProfile } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { FileText } from "lucide-react";
 
 export function StudentsList({ students, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
   const { toast } = useToast();
@@ -31,7 +33,8 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Lista de Alunos</CardTitle>
+        <CardTitle className="font-headline">Lista de Alunos e Perfis Individuais</CardTitle>
+        <CardDescription>Visualize o perfil dominante de cada aluno e gere relatórios individuais detalhados.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -67,11 +70,12 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={() => handleGeneratePdf(student.name)}
                         disabled={!profile}
                       >
+                        <FileText className="mr-2 h-4 w-4" />
                         Gerar PDF
                       </Button>
                     </TableCell>

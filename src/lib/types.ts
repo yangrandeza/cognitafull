@@ -53,6 +53,7 @@ export type QuizAnswers = Record<string, any>;
 export type NewStudent = {
     name: string;
     age: number;
+    gender?: string;
     classId: string;
     quizStatus: 'completed';
     createdAt: FieldValue;

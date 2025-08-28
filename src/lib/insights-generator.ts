@@ -12,14 +12,23 @@ export function processProfiles(rawProfiles: RawUnifiedProfile[]): UnifiedProfil
         return rest as UnifiedProfile;
     }
     
+    const varkProfile = calculateVark(rawAnswers);
+    const discProfile = calculateDisc(rawAnswers);
+    const jungianProfile = calculateJungian(rawAnswers);
+    const schwartzValues = calculateSchwartz(rawAnswers);
+
+    // Dissonance analysis
+    const {dissonanceAlert, dissonanceNotes} = analyzeDissonance(discProfile, jungianProfile);
+
+
     return {
       ...rest,
-      varkProfile: calculateVark(rawAnswers),
-      discProfile: calculateDisc(rawAnswers),
-      jungianProfile: calculateJungian(rawAnswers),
-      schwartzValues: calculateSchwartz(rawAnswers),
-      dissonanceAlert: false, // Placeholder
-      dissonanceNotes: "", // Placeholder
+      varkProfile,
+      discProfile,
+      jungianProfile,
+      schwartzValues,
+      dissonanceAlert,
+      dissonanceNotes,
     };
   });
 }
@@ -121,6 +130,26 @@ function calculateSchwartz(answers: QuizAnswers): { top_values: string[], scores
     return { top_values, scores };
 }
 
+function analyzeDissonance(discProfile: DiscProfile, jungianProfile: string): {dissonanceAlert: boolean, dissonanceNotes: string} {
+    const isIntrovert = jungianProfile.startsWith('I');
+    const isExtrovert = jungianProfile.startsWith('E');
+    const isHighInfluence = discProfile.dominant === 'Influence';
+    const isHighDominance = discProfile.dominant === 'Dominance';
+
+    if (isIntrovert && (isHighInfluence || isHighDominance)) {
+        return {
+            dissonanceAlert: true,
+            dissonanceNotes: `Perfil naturalmente introvertido (${jungianProfile}) com um comportamento de alta exposição social (${discProfile.dominant}). Isso pode levar a um alto consumo de energia em interações sociais.`
+        }
+    }
+    
+    return {
+        dissonanceAlert: false,
+        dissonanceNotes: ""
+    };
+}
+
+
 // --- Data Generation Functions for Charts ---
 
 /**
@@ -169,7 +198,8 @@ export function generateSchwartzData(profiles: UnifiedProfile[]) {
 
     return Array.from(valueCounts.entries())
         .map(([value, count]) => ({ value, count }))
-        .sort((a, b) => b.count - a.count);
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5); // Show top 5 dominant values for clarity
 }
 
 /**
@@ -191,18 +221,18 @@ export function generateDissonanceData(profiles: UnifiedProfile[], students: Stu
  * Generates suggested teams based on profiles.
  */
 export function generateTeamData(profiles: UnifiedProfile[], students: Student[]) {
-    const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominance');
-    const communicators = profiles.filter(p => p.discProfile.dominant === 'Influence');
-    const planners = profiles.filter(p => p.discProfile.dominant === 'Conscientiousness');
-    const harmonizers = profiles.filter(p => p.discProfile.dominant === 'Steadiness');
+    const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominance' || p.jungianProfile.includes('TJ'));
+    const communicators = profiles.filter(p => p.discProfile.dominant === 'Influence' || p.jungianProfile.includes('EF'));
+    const planners = profiles.filter(p => p.discProfile.dominant === 'Conscientiousness' || p.jungianProfile.includes('SJ'));
+    const harmonizers = profiles.filter(p => p.discProfile.dominant === 'Steadiness' || p.jungianProfile.includes('FP'));
 
     const getName = (profile: UnifiedProfile) => students.find(s => s.id === profile.studentId)?.name || 'Desconhecido';
 
     return [
-        { category: 'Líderes e Inovadores (Dominância)', students: leaders.map(getName) },
-        { category: 'Comunicadores e Influenciadores (Influência)', students: communicators.map(getName) },
-        { category: 'Planejadores e Analistas (Conformidade)', students: planners.map(getName) },
-        { category: 'Harmonizadores e Executores (Estabilidade)', students: harmonizers.map(getName) },
+        { category: 'Líderes e Inovadores', description: 'Bons para iniciar tarefas e tomar decisões.', students: leaders.map(getName).filter((v, i, a) => a.indexOf(v) === i) },
+        { category: 'Comunicadores e Influenciadores', description: 'Ideais para apresentar ideias e engajar o grupo.', students: communicators.map(getName).filter((v, i, a) => a.indexOf(v) === i) },
+        { category: 'Planejadores e Analistas', description: 'Ótimos para organizar o trabalho e focar nos detalhes.', students: planners.map(getName).filter((v, i, a) => a.indexOf(v) === i) },
+        { category: 'Harmonizadores e Apoiadores', description: 'Essenciais para manter o time unido e motivado.', students: harmonizers.map(getName).filter((v, i, a) => a.indexOf(v) === i) },
     ].filter(team => team.students.length > 0);
 }
 

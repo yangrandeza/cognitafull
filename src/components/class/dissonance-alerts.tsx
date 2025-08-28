@@ -7,9 +7,9 @@ export function DissonanceAlerts({ data }: { data: { studentName: string; note: 
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
             <AlertCircle className="text-destructive" />
-            Alertas de Dissonância
+            "Quem precisa de mais atenção?"
         </CardTitle>
-        <CardDescription>Alunos com traços de perfil conflitantes.</CardDescription>
+        <CardDescription>Alertas de Dissonância destacam alunos com perfis conflitantes, que podem estar gastando mais energia para se adaptar. Ex: Um introvertido agindo como extrovertido.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {data.length > 0 ? data.map((alert, index) => (

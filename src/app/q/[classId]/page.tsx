@@ -15,6 +15,7 @@ import { BookHeart, ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { submitQuizAnswers } from '@/lib/firebase/firestore';
 import type { QuizAnswers } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 const questions = [
@@ -265,7 +266,7 @@ const totalQuestions = questions.filter(q => q.type !== 'intro' && q.type !== 'f
 export default function QuestionnairePage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
-  const [studentInfo, setStudentInfo] = useState({ name: '', age: '' });
+  const [studentInfo, setStudentInfo] = useState({ name: '', age: '', gender: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const params = useParams();
@@ -280,6 +281,10 @@ export default function QuestionnairePage() {
     const { id, value } = e.target;
     setStudentInfo(prev => ({ ...prev, [id]: value }));
   };
+
+  const handleGenderChange = (value: string) => {
+    setStudentInfo(prev => ({ ...prev, gender: value }));
+  }
 
   const handleAnswerChange = (questionId: string, value: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -373,10 +378,26 @@ export default function QuestionnairePage() {
                         <Label htmlFor="name">Nome Completo</Label>
                         <Input id="name" placeholder="Seu nome completo" value={studentInfo.name} onChange={handleStudentInfoChange} required/>
                     </div>
-                     <div className="grid gap-2">
-                        <Label htmlFor="age">Idade</Label>
-                        <Input id="age" type="number" placeholder="Sua idade" value={studentInfo.age} onChange={handleStudentInfoChange} required/>
-                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="age">Idade</Label>
+                            <Input id="age" type="number" placeholder="Sua idade" value={studentInfo.age} onChange={handleStudentInfoChange} required/>
+                        </div>
+                        <div className="grid gap-2">
+                           <Label htmlFor="gender">Gênero (Opcional)</Label>
+                           <Select value={studentInfo.gender} onValueChange={handleGenderChange}>
+                                <SelectTrigger id="gender">
+                                    <SelectValue placeholder="Selecione" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Masculino">Masculino</SelectItem>
+                                    <SelectItem value="Feminino">Feminino</SelectItem>
+                                    <SelectItem value="Outro">Outro</SelectItem>
+                                    <SelectItem value="Prefiro não dizer">Prefiro não dizer</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                     </div>
                 </div>
             </CardContent>
             <CardFooter className="justify-end">
