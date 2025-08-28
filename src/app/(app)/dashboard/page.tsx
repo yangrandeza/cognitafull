@@ -5,31 +5,38 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { PlusCircle, Users, ArrowRight, Loader2 } from "lucide-react";
+import { Users, ArrowRight, Loader2 } from "lucide-react";
 import { getClassesByTeacher } from "@/lib/firebase/firestore";
 import { auth } from "@/lib/firebase/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import type { Class } from "@/lib/types";
+import { CreateClassDialog } from "@/components/class/create-class-dialog";
 
 export default function DashboardPage() {
   const [user, loadingAuth] = useAuthState(auth);
   const [classes, setClasses] = useState<Class[]>([]);
   const [loadingClasses, setLoadingClasses] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      const fetchClasses = async () => {
+  const fetchClasses = async () => {
+      if (user) {
         setLoadingClasses(true);
         const userClasses = await getClassesByTeacher(user.uid);
         setClasses(userClasses);
         setLoadingClasses(false);
-      };
+      }
+  }
+
+  useEffect(() => {
+    if (user) {
       fetchClasses();
     } else if (!loadingAuth) {
-      // Handle case where there is no user
       setLoadingClasses(false);
     }
   }, [user, loadingAuth]);
+  
+  const handleClassCreated = () => {
+    fetchClasses();
+  }
 
   if (loadingAuth || loadingClasses) {
     return (
@@ -60,17 +67,14 @@ export default function DashboardPage() {
           Minhas Turmas
         </h1>
         <div className="flex items-center space-x-2">
-          <Button className="font-headline">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Criar Turma
-          </Button>
+           <CreateClassDialog onClassCreated={handleClassCreated} />
         </div>
       </div>
 
-       {classes.length === 0 && (
+       {classes.length === 0 && !loadingClasses && (
           <Card>
               <CardContent className="pt-6">
-                  <p className="text-center text-muted-foreground">Nenhuma turma encontrada. Que tal criar uma?</p>
+                  <p className="text-center text-muted-foreground">Nenhuma turma encontrada. Que tal criar a primeira?</p>
               </CardContent>
           </Card>
       )}
@@ -87,7 +91,7 @@ export default function DashboardPage() {
               <p className="text-xs text-muted-foreground">
                 {classItem.responsesCount} de {classItem.studentCount} completaram o questionário
               </p>
-              <Progress value={(classItem.responsesCount / classItem.studentCount) * 100} className="mt-4" />
+              <Progress value={classItem.studentCount > 0 ? (classItem.responsesCount / classItem.studentCount) * 100 : 0} className="mt-4" />
             </CardContent>
             <CardFooter>
               <Button asChild className="w-full font-headline">

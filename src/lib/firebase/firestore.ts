@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import {
   collection,
   query,
@@ -11,6 +11,7 @@ import {
   deleteDoc,
   writeBatch,
   documentId,
+  serverTimestamp,
 } from 'firebase/firestore';
 import type {
   UserProfile,
@@ -18,6 +19,7 @@ import type {
   Student,
   UnifiedProfile,
   ClassWithStudentData,
+  NewClass,
 } from '../types';
 
 // User Profile Functions
@@ -39,6 +41,19 @@ export const getUserProfile = async (userId: string) => {
 };
 
 // Class Functions
+export const createClass = async (className: string, teacherId: string) => {
+    const newClass: NewClass = {
+        name: className,
+        teacherId,
+        studentCount: 0,
+        responsesCount: 0,
+        createdAt: serverTimestamp(),
+    };
+    const docRef = await addDoc(collection(db, "classes"), newClass);
+    return docRef.id;
+}
+
+
 export const getClassesByTeacher = async (teacherId: string): Promise<Class[]> => {
   const q = query(collection(db, 'classes'), where('teacherId', '==', teacherId));
   const querySnapshot = await getDocs(q);

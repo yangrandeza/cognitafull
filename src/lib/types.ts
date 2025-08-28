@@ -1,3 +1,5 @@
+import { FieldValue } from "firebase/firestore";
+
 export type UserRole = 'teacher' | 'admin';
 
 export type UserProfile = {
@@ -8,6 +10,14 @@ export type UserProfile = {
   organizationId?: string;
 };
 
+export type NewClass = {
+  name: string;
+  teacherId: string;
+  studentCount: number;
+  responsesCount: number;
+  createdAt: FieldValue;
+}
+
 export type Class = {
   id: string;
   name: string;
@@ -15,6 +25,7 @@ export type Class = {
   organizationId?: string;
   studentCount: number;
   responsesCount: number;
+  createdAt: FieldValue;
 };
 
 export type Student = {
