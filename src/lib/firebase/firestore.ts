@@ -245,7 +245,11 @@ export const getStudentAndProfileById = async (studentId: string): Promise<{stud
         createdAt: (studentData.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
     } as Student;
 
-    if (!student.unifiedProfileId) return null;
+    if (!student.unifiedProfileId) {
+         // This case might happen if the quiz submission failed midway.
+         // For now, we return null, but a more robust solution could be to return the student data anyway.
+         return null;
+    };
 
     const profileRef = doc(db, 'unifiedProfiles', student.unifiedProfileId);
     const profileSnap = await getDoc(profileRef);
