@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   runTransaction,
   Timestamp,
+  orderBy,
 } from 'firebase/firestore';
 import { updateProfile } from "firebase/auth";
 import type {
@@ -28,6 +29,8 @@ import type {
   QuizAnswers,
   RawUnifiedProfile,
   Organization,
+  NewLessonPlan,
+  LessonPlan,
 } from '../types';
 import { processProfiles } from '../insights-generator';
 
@@ -130,8 +133,7 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
         const studentData = studentDoc.data() as Student;
         const classId = studentData.classId;
         const profileId = studentData.unifiedProfileId;
-
-        // Perform all reads first
+        
         let classRef;
         let classDoc;
         if (classId) {
@@ -139,7 +141,6 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
             classDoc = await transaction.get(classRef);
         }
 
-        // Now, perform all writes
         transaction.delete(studentRef);
 
         if (profileId) {
@@ -286,3 +287,27 @@ export const getClassWithStudentsAndProfiles = async (
     profiles,
   };
 };
+
+// Lesson Plan Functions
+
+export const saveLessonPlan = async (plan: NewLessonPlan): Promise<string> => {
+    const docRef = await addDoc(collection(db, "lessonPlans"), plan);
+    return docRef.id;
+}
+
+export const getLessonPlansByClass = async (classId: string): Promise<LessonPlan[]> => {
+    const q = query(
+        collection(db, 'lessonPlans'), 
+        where('classId', '==', classId),
+        orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            createdAt: (data.createdAt as Timestamp)?.toDate().toISOString(),
+        } as LessonPlan
+    });
+}

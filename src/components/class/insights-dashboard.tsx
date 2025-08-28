@@ -234,7 +234,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
       <TabsContent value="optimizer">
-        <LessonOptimizer classProfileSummary={classProfileSummary} />
+        <LessonOptimizer classProfileSummary={classProfileSummary} classId={classId} />
       </TabsContent>
     </Tabs>
   );

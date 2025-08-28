@@ -120,3 +120,24 @@ export type ClassWithStudentData = Class & {
   students: Student[];
   profiles: RawUnifiedProfile[]; // Fetch raw profiles
 };
+
+export type LessonPlan = {
+    id: string;
+    classId: string;
+    teacherId: string;
+    title: string;
+    originalPlan: string;
+    suggestions: string;
+    reformulatedPlan: string;
+    createdAt: string;
+}
+
+export type NewLessonPlan = {
+    classId: string;
+    teacherId: string;
+    title: string;
+    originalPlan: string;
+    suggestions: string;
+    reformulatedPlan: string;
+    createdAt: FieldValue;
+}
