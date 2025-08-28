@@ -94,10 +94,11 @@ export default function DashboardPage() {
               <Progress value={classItem.studentCount > 0 ? (classItem.responsesCount / classItem.studentCount) * 100 : 0} className="mt-4" />
             </CardContent>
             <CardFooter>
-              <Button asChild className="w-full font-headline">
-                <Link href={`/class/${classItem.id}`}>
-                    Ver Insights <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+               <Button asChild className="w-full font-headline">
+                  <Link href={`/class/${classItem.id}`}>
+                      {classItem.studentCount > 0 ? "Ver Insights" : "Acessar"}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
               </Button>
             </CardFooter>
           </Card>
