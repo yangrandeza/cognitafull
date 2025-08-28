@@ -36,8 +36,10 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Idade</TableHead>
-              <TableHead>Perfil Dominante (DISC)</TableHead>
-              <TableHead>Estilo de Aprendizagem (VARK)</TableHead>
+              <TableHead>Perfil (DISC)</TableHead>
+              <TableHead>Aprendizagem (VARK)</TableHead>
+              <TableHead>Tipo (Jung)</TableHead>
+              <TableHead>Valores (Schwartz)</TableHead>
               <TableHead className="text-right">Painel Individual</TableHead>
             </TableRow>
           </TableHeader>
@@ -58,6 +60,24 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                     <TableCell>
                        {profile?.varkProfile ? (
                         <Badge variant="secondary">{profile.varkProfile.dominant}</Badge>
+                      ) : (
+                        <Badge variant="outline">Pendente</Badge>
+                      )}
+                    </TableCell>
+                     <TableCell>
+                       {profile?.jungianProfile ? (
+                        <Badge variant="secondary">{profile.jungianProfile}</Badge>
+                      ) : (
+                        <Badge variant="outline">Pendente</Badge>
+                      )}
+                    </TableCell>
+                     <TableCell>
+                       {profile?.schwartzValues ? (
+                        <div className="flex flex-wrap gap-1">
+                          {profile.schwartzValues.top_values.map(value => (
+                             <Badge key={value} variant="outline" className="text-xs">{value}</Badge>
+                          ))}
+                        </div>
                       ) : (
                         <Badge variant="outline">Pendente</Badge>
                       )}
