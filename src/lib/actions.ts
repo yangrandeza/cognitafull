@@ -27,7 +27,7 @@ export async function getLessonPlanSuggestions(
           headline: 'Ocorreu um erro ao contatar a IA',
           details: 'Não foi possível gerar sugestões no momento. Por favor, verifique o formato do seu plano de aula e tente novamente mais tarde.',
           connection: 'A conexão com o serviço de inteligência artificial falhou.',
-          reference: 'https://status.openai.com/'
+          reference: 'https://status.cloud.google.com/'
         },
       ],
     };
