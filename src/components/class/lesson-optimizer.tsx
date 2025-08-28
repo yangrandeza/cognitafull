@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,13 +11,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Lightbulb, Loader2, Sparkles, Wand2, FileDown, BookMarked, Save, Trash2 } from "lucide-react";
+import { Lightbulb, Loader2, Sparkles, Wand2, FileDown, BookMarked, Save } from "lucide-react";
 import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan, getSavedLessonPlans } from "@/lib/actions";
 import type { OptimizeLessonPlanOutput } from "@/ai/flows/lesson-plan-optimizer";
 import type { LessonPlan } from "@/lib/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 
 const formSchema = z.object({
@@ -26,10 +35,22 @@ const formSchema = z.object({
   }),
 });
 
-interface LessonOptimizerProps {
-  classProfileSummary: string;
-  classId: string;
-}
+const saveFormSchema = z.object({
+    title: z.string().min(5, {
+        message: "O título deve ter pelo menos 5 caracteres.",
+    })
+});
+
+// Create a new component that can be forwarded a ref
+const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ content }, ref) => {
+  return (
+    <div ref={ref} className="prose prose-sm dark:prose-invert max-w-none p-6 border rounded-lg bg-muted/20">
+      <ReactMarkdown>{content}</ReactMarkdown>
+    </div>
+  );
+});
+PrintableContent.displayName = 'PrintableContent';
+
 
 export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimizerProps) {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
@@ -39,6 +60,7 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
   const [reformulatedPlan, setReformulatedPlan] = useState("");
   const [savedPlans, setSavedPlans] = useState<LessonPlan[]>([]);
   const [isLoadingSaved, setIsLoadingSaved] = useState(true);
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
 
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -64,6 +86,13 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
     defaultValues: {
       lessonPlan: "",
     },
+  });
+
+  const saveForm = useForm<z.infer<typeof saveFormSchema>>({
+    resolver: zodResolver(saveFormSchema),
+    defaultValues: {
+        title: "",
+    }
   });
   
   const originalLessonPlan = form.getValues("lessonPlan");
@@ -106,16 +135,13 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
     }
   }
 
-  async function onSavePlan() {
-    const title = prompt("Por favor, dê um título para este plano de aula:", "Meu Novo Plano de Aula");
-    if (!title) return; // User cancelled
-
+  async function onSavePlan(values: z.infer<typeof saveFormSchema>) {
     setIsSaving(true);
     try {
         const suggestionsText = suggestions.map(s => `Para ${s.feature}: ${s.suggestion}`).join('\n');
         const result = await saveGeneratedLessonPlan({
             classId,
-            title,
+            title: values.title,
             originalPlan: originalLessonPlan,
             suggestions: suggestionsText,
             reformulatedPlan: reformulatedPlan,
@@ -130,6 +156,8 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
             setReformulatedPlan("");
             setSuggestions([]);
             form.reset();
+            saveForm.reset();
+            setIsSaveDialogOpen(false);
             // Refresh the list of saved plans
             fetchSavedPlans();
         } else {
@@ -266,23 +294,54 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
                             <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-headline">Plano de Aula Melhorado</h3>
                                 <div className="flex gap-2">
-                                     <Button onClick={onSavePlan} disabled={isSaving} variant="default">
-                                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        Salvar Plano
+                                     <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button variant="default">
+                                                <Save className="mr-2 h-4 w-4" />
+                                                Salvar Plano
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Salvar Plano de Aula</DialogTitle>
+                                                <DialogDescription>
+                                                    Dê um título para o seu plano de aula para que possa encontrá-lo mais tarde.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                             <Form {...saveForm}>
+                                                <form onSubmit={saveForm.handleSubmit(onSavePlan)} className="space-y-4">
+                                                     <FormField
+                                                        control={saveForm.control}
+                                                        name="title"
+                                                        render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>Título do Plano</FormLabel>
+                                                            <FormControl>
+                                                                <Input placeholder="Ex: Revolução Francesa Interativa" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                        )}
+                                                    />
+                                                    <DialogFooter>
+                                                        <Button type="button" variant="ghost" onClick={() => setIsSaveDialogOpen(false)}>Cancelar</Button>
+                                                        <Button type="submit" disabled={isSaving}>
+                                                            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                            Salvar
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </form>
+                                            </Form>
+                                        </DialogContent>
+                                    </Dialog>
+                                    
+                                    <Button variant="outline" onClick={handlePrint}>
+                                        <FileDown className="mr-2 h-4 w-4" />
+                                        Exportar para PDF
                                     </Button>
-                                    <div onClick={handlePrint} className="cursor-pointer">
-                                        <Button variant="outline" asChild>
-                                            <span>
-                                                <FileDown className="mr-2 h-4 w-4" />
-                                                Exportar para PDF
-                                            </span>
-                                        </Button>
-                                    </div>
                                 </div>
                             </div>
-                            <div ref={printRef} className="prose prose-sm dark:prose-invert max-w-none p-6 border rounded-lg bg-muted/20">
-                                <ReactMarkdown>{reformulatedPlan}</ReactMarkdown>
-                            </div>
+                            <PrintableContent content={reformulatedPlan} ref={printRef} />
                         </div>
                     )}
                 </div>
