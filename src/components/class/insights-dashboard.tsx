@@ -22,34 +22,34 @@ import { getSavedLessonPlans } from "@/lib/actions";
 
 export function InsightsDashboard({ classId }: { classId: string }) {
   const [loading, setLoading] = useState(true);
-  const [classData, setClassData] = useState<ClassWithStudentData | null>(null);
+  const [classData, setClassData] = useState<Class | null>(null);
+  const [studentData, setStudentData] = useState<{students: Student[], profiles: RawUnifiedProfile[]} | null>(null);
   const [dashboardData, setDashboardData] = useState<ReturnType<typeof getDashboardData> | null>(null);
   const [demographicsData, setDemographicsData] = useState<ReturnType<typeof getDemographicsData> | null>(null);
   const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
-  const [savedPlans, setSavedPlans] = useState<LessonPlan[]>([]);
-  const [loadingPlans, setLoadingPlans] = useState(true);
   const { toast } = useToast();
 
   const fetchClassData = useCallback(async () => {
     setLoading(true);
-    setLoadingPlans(true);
     try {
-      const [fetchedClassData, fetchedPlans] = await Promise.all([
-        getClassWithStudentsAndProfiles(classId),
-        getSavedLessonPlans(classId)
+      // Fetch class details and student/profile data in parallel
+      const [fetchedClassData, fetchedStudentData] = await Promise.all([
+        getClassById(classId),
+        getClassWithStudentsAndProfiles(classId)
       ]);
       
       setClassData(fetchedClassData);
-      setSavedPlans(fetchedPlans);
 
-      if (fetchedClassData && fetchedClassData.profiles) {
-          const data = getDashboardData(fetchedClassData.profiles, fetchedClassData.students);
-          setDashboardData(data);
-          const demos = getDemographicsData(fetchedClassData.students);
-          setDemographicsData(demos);
-          const profiles = processProfiles(fetchedClassData.profiles);
-          setProcessedProfiles(profiles);
+      if (fetchedStudentData) {
+        setStudentData({students: fetchedStudentData.students, profiles: fetchedStudentData.profiles });
+        const data = getDashboardData(fetchedStudentData.profiles, fetchedStudentData.students);
+        setDashboardData(data);
+        const demos = getDemographicsData(fetchedStudentData.students);
+        setDemographicsData(demos);
+        const profiles = processProfiles(fetchedStudentData.profiles);
+        setProcessedProfiles(profiles);
       }
+      
     } catch (error) {
       console.error("Failed to fetch class data:", error);
       toast({
@@ -59,7 +59,6 @@ export function InsightsDashboard({ classId }: { classId: string }) {
       })
     } finally {
       setLoading(false);
-      setLoadingPlans(false);
     }
   }, [classId, toast]);
 
@@ -67,10 +66,6 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     fetchClassData();
   }, [fetchClassData]);
   
-  const handlePlanSaved = (newPlan: LessonPlan) => {
-    setSavedPlans(prevPlans => [newPlan, ...prevPlans]);
-  }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center rounded-lg border bg-card p-8">
@@ -79,7 +74,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     );
   }
 
-  if (!classData || classData.students.length === 0) {
+  if (!studentData || studentData.students.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -95,11 +90,12 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     );
   }
 
-  if (!dashboardData) {
+  if (!dashboardData || !classData) {
     return <p>Erro ao gerar os dados do painel.</p>
   }
   
-  const { students, teacherId } = classData;
+  const { students } = studentData;
+  const { teacherId } = classData;
   const { compassData, insightCards, classProfileSummary, teamsData, dissonanceData, communicationData, workPaceData } = dashboardData;
 
   return (
@@ -256,17 +252,13 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
        <TabsContent value="plans">
-        <SavedLessonPlans 
-          savedPlans={savedPlans}
-          isLoading={loadingPlans}
-        />
+        <SavedLessonPlans classId={classId} />
       </TabsContent>
       <TabsContent value="optimizer">
         <LessonOptimizer 
             classProfileSummary={classProfileSummary} 
             classId={classId} 
             teacherId={teacherId}
-            onPlanSaved={handlePlanSaved}
         />
       </TabsContent>
     </Tabs>

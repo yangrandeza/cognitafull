@@ -1,18 +1,39 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { BookMarked, Loader2 } from "lucide-react";
 import type { LessonPlan } from "@/lib/types";
+import { getSavedLessonPlans } from "@/lib/actions";
 import ReactMarkdown from "react-markdown";
 
 interface SavedLessonPlansProps {
-    savedPlans: LessonPlan[];
-    isLoading: boolean;
+    classId: string;
 }
 
-export function SavedLessonPlans({ savedPlans, isLoading }: SavedLessonPlansProps) {
+export function SavedLessonPlans({ classId }: SavedLessonPlansProps) {
+    const [savedPlans, setSavedPlans] = useState<LessonPlan[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPlans = async () => {
+            setIsLoading(true);
+            try {
+                const plans = await getSavedLessonPlans(classId);
+                setSavedPlans(plans);
+            } catch (error) {
+                console.error("Failed to fetch lesson plans:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (classId) {
+            fetchPlans();
+        }
+    }, [classId]);
 
     return (
         <Card>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, forwardRef, useEffect } from "react";
+import { useState, useRef, forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,8 +26,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-
 
 const formSchema = z.object({
   lessonPlan: z.string().min(50, {
@@ -45,11 +43,8 @@ interface LessonOptimizerProps {
     classProfileSummary: string;
     classId: string;
     teacherId: string;
-    onPlanSaved: (newPlan: LessonPlan) => void;
 }
 
-
-// Create a new component that can be forwarded a ref
 const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ content }, ref) => {
   return (
     <div ref={ref} className="prose prose-sm dark:prose-invert max-w-none p-6 border rounded-lg bg-muted/20">
@@ -59,8 +54,7 @@ const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ cont
 });
 PrintableContent.displayName = 'PrintableContent';
 
-
-export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPlanSaved }: LessonOptimizerProps) {
+export function LessonOptimizer({ classProfileSummary, classId, teacherId }: LessonOptimizerProps) {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isLoadingReformed, setIsLoadingReformed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -76,7 +70,6 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPla
     documentTitle: "plano-de-aula-otimizado",
   });
   
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -150,8 +143,6 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPla
                 description: "Seu plano de aula foi salvo. Você pode vê-lo na aba 'Planos de Aula'.",
             });
             
-            onPlanSaved(result.newPlan);
-
             // Reset state
             setReformulatedPlan("");
             setSuggestions([]);
