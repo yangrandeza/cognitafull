@@ -1,17 +1,79 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { BookHeart } from "lucide-react"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { BookHeart } from "lucide-react";
+import { signInWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
+  password: z.string().min(1, { message: "A senha é obrigatória." }),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
+    const { email, password } = data;
+    const { error } = await signInWithEmail(email, password);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro de Login",
+        description: "Credenciais inválidas. Por favor, tente novamente.",
+      });
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    const { error } = await signInWithGoogle();
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro de Login com Google",
+        description: "Não foi possível fazer login com o Google. Tente novamente.",
+      });
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-light-lavender p-4">
       <Card className="w-full max-w-sm mx-auto">
@@ -21,35 +83,54 @@ export default function LoginPage() {
           <CardDescription>Insira suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@exemplo.com"
-                required
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="m@exemplo.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Senha</Label>
-                <Link
-                  href="/forgot-password"
-                  className="ml-auto inline-block text-sm underline"
-                >
-                  Esqueceu sua senha?
-                </Link>
-              </div>
-              <Input id="password" type="password" required />
-            </div>
-            <Button type="submit" className="w-full font-headline">
-              Entrar
-            </Button>
-            <Button variant="outline" className="w-full">
-              Entrar com Google
-            </Button>
-          </div>
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                     <div className="flex items-center">
+                        <FormLabel>Senha</FormLabel>
+                        <Link
+                        href="#"
+                        className="ml-auto inline-block text-sm underline"
+                        >
+                        Esqueceu sua senha?
+                        </Link>
+                    </div>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full font-headline" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Entrando..." : "Entrar"}
+              </Button>
+            </form>
+          </Form>
+          <Button variant="outline" className="w-full mt-4" onClick={handleGoogleSignIn}>
+            Entrar com Google
+          </Button>
           <div className="mt-4 text-center text-sm">
             Não tem uma conta?{" "}
             <Link href="/signup" className="underline">
@@ -59,5 +140,5 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
