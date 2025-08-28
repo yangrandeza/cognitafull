@@ -141,7 +141,7 @@ export const createClass = async (className: string, teacherId: string) => {
 
 
 export const getClassesByTeacher = async (teacherId: string): Promise<Class[]> => {
-  const q = query(collection(db, 'classes'), where('teacherId', '==', teacherId), orderBy('createdAt', 'desc'));
+  const q = query(collection(db, 'classes'), where('teacherId', '==', teacherId));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(
     (doc) => ({ id: doc.id, ...doc.data() } as Class)
