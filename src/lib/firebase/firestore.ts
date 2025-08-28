@@ -319,3 +319,8 @@ export const getStrategiesByClass = async (classId: string): Promise<LearningStr
     // Sort manually after fetching to avoid needing a composite index
     return strategies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
+
+export const deleteStrategy = async (strategyId: string): Promise<void> => {
+    const strategyRef = doc(db, 'learningStrategies', strategyId);
+    await deleteDoc(strategyRef);
+};
