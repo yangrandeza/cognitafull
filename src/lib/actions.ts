@@ -65,7 +65,6 @@ export async function saveGeneratedLessonPlan(planData: Omit<NewLessonPlan, 'cre
             createdAt: new Date(),
         };
         const newPlan = await savePlanInDb(fullPlanData); // Now returns the full plan
-        revalidatePath(`/class/${planData.classId}`);
         return { success: true, newPlan };
     } catch(error) {
         console.error("Error saving lesson plan:", error);

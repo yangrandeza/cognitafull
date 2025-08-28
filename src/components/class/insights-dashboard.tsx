@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentsList } from "@/components/class/students-list";
 import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
-import type { ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile } from "@/lib/types";
+import { getClassWithStudentsAndProfiles, getLessonPlansByClass } from "@/lib/firebase/firestore";
+import type { ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile, LessonPlan } from "@/lib/types";
 import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby, BookMarked } from "lucide-react";
 import { getDashboardData, processProfiles, getDemographicsData } from "@/lib/insights-generator";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
 import { SavedLessonPlans } from "./saved-lesson-plans";
+import { getSavedLessonPlans } from "@/lib/actions";
 
 
 export function InsightsDashboard({ classId }: { classId: string }) {
@@ -25,7 +26,16 @@ export function InsightsDashboard({ classId }: { classId: string }) {
   const [dashboardData, setDashboardData] = useState<ReturnType<typeof getDashboardData> | null>(null);
   const [demographicsData, setDemographicsData] = useState<ReturnType<typeof getDemographicsData> | null>(null);
   const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
+  const [savedPlans, setSavedPlans] = useState<LessonPlan[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState(true);
   const { toast } = useToast();
+
+  const fetchSavedPlans = useCallback(async () => {
+        setLoadingPlans(true);
+        const plans = await getSavedLessonPlans(classId);
+        setSavedPlans(plans);
+        setLoadingPlans(false);
+  }, [classId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +58,8 @@ export function InsightsDashboard({ classId }: { classId: string }) {
       }
     };
     fetchData();
-  }, [classId]);
+    fetchSavedPlans();
+  }, [classId, fetchSavedPlans]);
   
 
   if (loading) {
@@ -236,10 +247,18 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
        <TabsContent value="plans">
-        <SavedLessonPlans classId={classId} />
+        <SavedLessonPlans 
+          savedPlans={savedPlans}
+          isLoading={loadingPlans}
+        />
       </TabsContent>
       <TabsContent value="optimizer">
-        <LessonOptimizer classProfileSummary={classProfileSummary} classId={classId} teacherId={teacherId} />
+        <LessonOptimizer 
+            classProfileSummary={classProfileSummary} 
+            classId={classId} 
+            teacherId={teacherId}
+            onPlanSaved={fetchSavedPlans}
+        />
       </TabsContent>
     </Tabs>
   );

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Lightbulb, Loader2, Sparkles, Wand2, FileDown, Save } from "lucide-react";
-import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan, getSavedLessonPlans } from "@/lib/actions";
+import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan } from "@/lib/actions";
 import type { OptimizeLessonPlanOutput, LessonPlan } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,7 @@ interface LessonOptimizerProps {
     classProfileSummary: string;
     classId: string;
     teacherId: string;
+    onPlanSaved: () => void;
 }
 
 
@@ -59,7 +60,7 @@ const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ cont
 PrintableContent.displayName = 'PrintableContent';
 
 
-export function LessonOptimizer({ classProfileSummary, classId, teacherId }: LessonOptimizerProps) {
+export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPlanSaved }: LessonOptimizerProps) {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isLoadingReformed, setIsLoadingReformed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -149,6 +150,8 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
                 description: "Seu plano de aula foi salvo. Você pode vê-lo na aba 'Planos de Aula'.",
             });
             
+            onPlanSaved();
+
             // Reset state
             setReformulatedPlan("");
             setSuggestions([]);

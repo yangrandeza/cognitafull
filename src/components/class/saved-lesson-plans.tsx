@@ -5,29 +5,15 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { BookMarked, Loader2 } from "lucide-react";
-import { getSavedLessonPlans } from "@/lib/actions";
 import type { LessonPlan } from "@/lib/types";
 import ReactMarkdown from "react-markdown";
 
 interface SavedLessonPlansProps {
-    classId: string;
+    savedPlans: LessonPlan[];
+    isLoading: boolean;
 }
 
-export function SavedLessonPlans({ classId }: SavedLessonPlansProps) {
-    const [savedPlans, setSavedPlans] = useState<LessonPlan[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchSavedPlans = async () => {
-            setIsLoading(true);
-            const plans = await getSavedLessonPlans(classId);
-            setSavedPlans(plans);
-            setIsLoading(false);
-        };
-
-        fetchSavedPlans();
-    }, [classId]);
-
+export function SavedLessonPlans({ savedPlans, isLoading }: SavedLessonPlansProps) {
 
     return (
         <Card>
