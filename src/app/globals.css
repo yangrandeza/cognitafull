@@ -84,3 +84,13 @@ body {
 .bg-light-lavender {
    background-image: linear-gradient(to top right, #f3e8ff, #e6e6fa, #fce4ec);
 }
+
+/* Custom styles for react-to-print */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,15 +1,17 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import ReactMarkdown from "react-markdown";
+import { useReactToPrint } from "react-to-print";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Lightbulb, Loader2, Sparkles, Wand2 } from "lucide-react";
+import { Lightbulb, Loader2, Sparkles, Wand2, FileDown } from "lucide-react";
 import { getLessonPlanSuggestions, getReformedLessonPlan } from "@/lib/actions";
 import type { OptimizeLessonPlanOutput } from "@/ai/flows/lesson-plan-optimizer";
 
@@ -24,6 +26,13 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
   const [isLoadingReformed, setIsLoadingReformed] = useState(false);
   const [suggestions, setSuggestions] = useState<OptimizeLessonPlanOutput['suggestions']>([]);
   const [reformulatedPlan, setReformulatedPlan] = useState("");
+  
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "plano-de-aula-otimizado",
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -116,18 +125,17 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
             </Form>
 
             {/* --- Results Area --- */}
-            {(isLoadingSuggestions || suggestions.length > 0) && (
-              <div className="grid md:grid-cols-2 gap-8 pt-6 border-t">
-                  {/* Suggestions Column */}
-                  <div className="flex flex-col rounded-lg">
+            {isLoadingSuggestions && (
+              <div className="flex items-center justify-center pt-6 border-t">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+
+            {suggestions.length > 0 && (
+              <div className="space-y-6 pt-6 border-t">
+                  <div>
                       <h3 className="text-lg font-headline mb-4">Sugestões do Oráculo</h3>
-                      {isLoadingSuggestions && (
-                          <div className="flex items-center justify-center h-full">
-                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                          </div>
-                      )}
-                      {suggestions.length > 0 && (
-                          <div className="space-y-6">
+                      <div className="space-y-6">
                           {suggestions.map((item, index) => (
                               <div key={index} className="flex items-start gap-4">
                                   <Lightbulb className="h-6 w-6 mt-1 text-yellow-500 flex-shrink-0" />
@@ -144,30 +152,29 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                                 <><Wand2 className="mr-2 h-4 w-4" /> Melhorar para Mim</>
                             )}
                             </Button>
+                      </div>
+                  </div>
+
+                  {isLoadingReformed && (
+                     <div className="flex items-center justify-center h-full pt-6">
+                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                     </div>
+                  )}
+
+                  {reformulatedPlan && (
+                      <div className="space-y-4 pt-6 border-t">
+                          <div className="flex justify-between items-center">
+                            <h3 className="text-lg font-headline">Plano de Aula Melhorado</h3>
+                             <Button variant="outline" onClick={handlePrint}>
+                                <FileDown className="mr-2 h-4 w-4" />
+                                Exportar para PDF
+                            </Button>
                           </div>
-                      )}
-                  </div>
-                   {/* Reformulated Plan Column */}
-                  <div className="flex flex-col rounded-lg">
-                      <h3 className="text-lg font-headline mb-4">Plano de Aula Melhorado</h3>
-                       {!isLoadingReformed && !reformulatedPlan && (
-                        <div className="flex items-center justify-center h-full text-center text-muted-foreground bg-muted/30 rounded-md p-4 min-h-[200px]">
-                            <p>Clique em "Melhorar para Mim" e a IA reescreverá seu plano aqui.</p>
-                        </div>
-                      )}
-                      {isLoadingReformed && (
-                         <div className="flex items-center justify-center h-full">
-                           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                         </div>
-                      )}
-                      {reformulatedPlan && (
-                        <Textarea
-                            value={reformulatedPlan}
-                            onChange={(e) => setReformulatedPlan(e.target.value)}
-                            className="min-h-[300px] bg-muted/20"
-                        />
-                      )}
-                  </div>
+                          <div ref={printRef} className="prose prose-sm dark:prose-invert max-w-none p-6 border rounded-lg bg-muted/20">
+                            <ReactMarkdown>{reformulatedPlan}</ReactMarkdown>
+                          </div>
+                      </div>
+                  )}
               </div>
             )}
         </CardContent>

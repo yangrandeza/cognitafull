@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
   output: {schema: ReformLessonPlanOutputSchema},
   prompt: `Você é um designer instrucional sênior. Sua tarefa é pegar um plano de aula inicial e uma lista de sugestões de melhoria e reescrever o plano de aula original de forma coesa e criativa, incorporando as sugestões.
 
-O resultado deve ser um plano de aula completo e prático, em formato markdown, que o professor possa usar diretamente. Use títulos, listas e negritos para organizar bem o conteúdo.
+O resultado deve ser um plano de aula completo e prático, em formato markdown, que o professor possa usar diretamente. Use títulos (h1, h2), listas (com marcadores ou numeradas) e negrito para organizar bem o conteúdo. Não inclua a palavra 'Markdown' no resultado.
 
 **Plano de Aula Original do Professor:**
 ---
