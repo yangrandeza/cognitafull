@@ -28,6 +28,7 @@ import { userSignOut } from "@/lib/firebase/auth";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Painel", role: "teacher" },
+  { href: "/settings", icon: Settings, label: "Configurações", role: "teacher"},
   { href: "/admin", icon: Users, label: "Admin", role: "admin" },
 ];
 
@@ -72,7 +73,6 @@ export function AppSidebar() {
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2">
           {navItems.map((item) => {
-            // Render item if it's not for a specific role or if the user has that role
             if (!item.role || item.role === userRole) {
               return (
                   <li key={item.label}>

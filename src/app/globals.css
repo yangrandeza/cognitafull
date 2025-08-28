@@ -78,10 +78,9 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    background-image: linear-gradient(to top right, #f3e8ff, #e6e6fa, #fce4ec);
   }
 }
 
 .bg-light-lavender {
-  background-color: transparent;
+   background-image: linear-gradient(to top right, #f3e8ff, #e6e6fa, #fce4ec);
 }
