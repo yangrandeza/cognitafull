@@ -112,6 +112,59 @@ export const getClassById = async (classId: string): Promise<Class | null> => {
 
 
 // Student and Profile Functions
+
+export const updateStudent = async (studentId: string, data: Partial<Pick<Student, 'name' | 'age'>>) => {
+    const studentRef = doc(db, 'students', studentId);
+    await updateDoc(studentRef, data);
+}
+
+export const deleteStudent = async (studentId: string): Promise<void> => {
+    await runTransaction(db, async (transaction) => {
+        const studentRef = doc(db, 'students', studentId);
+        const studentDoc = await transaction.get(studentRef);
+
+        if (!studentDoc.exists()) {
+            throw new Error("Aluno não existe!");
+        }
+
+        const studentData = studentDoc.data() as Student;
+        const classId = studentData.classId;
+        const profileId = studentData.unifiedProfileId;
+
+        // 1. Delete student document
+        transaction.delete(studentRef);
+
+        // 2. Delete unified profile if it exists
+        if (profileId) {
+            const profileRef = doc(db, 'unifiedProfiles', profileId);
+            transaction.delete(profileRef);
+        }
+
+        // 3. Atomically decrement class counters
+        if (classId) {
+            const classRef = doc(db, 'classes', classId);
+            const classDoc = await transaction.get(classRef);
+            if (classDoc.exists()) {
+                const currentStudentCount = classDoc.data().studentCount || 0;
+                const currentResponsesCount = classDoc.data().responsesCount || 0;
+                
+                const newStudentCount = Math.max(0, currentStudentCount - 1);
+                // Decrement responses count only if the student had a completed quiz
+                const newResponsesCount = studentData.quizStatus === 'completed' 
+                    ? Math.max(0, currentResponsesCount - 1)
+                    : currentResponsesCount;
+                
+                transaction.update(classRef, { 
+                    studentCount: newStudentCount,
+                    responsesCount: newResponsesCount,
+                });
+            }
+        }
+    });
+};
+
+
+
 export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string, email?: string, gender?: string}, answers: QuizAnswers): Promise<string> => {
      let studentId = "";
      await runTransaction(db, async (transaction) => {

@@ -1,6 +1,8 @@
 
 "use client";
 
+import { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -9,26 +11,71 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Student, UnifiedProfile } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { User } from "lucide-react";
-import Link from "next/link";
+import { User, MoreHorizontal, FilePenLine, Trash2 } from "lucide-react";
+import { EditStudentDialog } from "./edit-student-dialog";
+import { DeleteStudentDialog } from "./delete-student-dialog";
+import { deleteStudent } from "@/lib/firebase/firestore";
 
 export function StudentsList({ students, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
   const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [studentList, setStudentList] = useState(students);
 
   const getStudentProfile = (studentId: string) => {
     return profiles.find(p => p.studentId === studentId);
   }
+  
+  const handleStudentUpdated = (updatedStudent: Student) => {
+    setStudentList(currentList => currentList.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+  };
+  
+  const handleStudentDeleted = (studentId: string) => {
+     setStudentList(currentList => currentList.filter(s => s.id !== studentId));
+  }
+
+  const filteredStudents = useMemo(() => {
+    if (!searchTerm) {
+      return studentList;
+    }
+    return studentList.filter(student =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, studentList]);
+  
+  const handleDeleteConfirm = async (studentId: string) => {
+    await deleteStudent(studentId);
+    handleStudentDeleted(studentId);
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-headline">Lista de Alunos e Perfis Individuais</CardTitle>
-        <CardDescription>Visualize o perfil dominante de cada aluno e acesse o painel individual detalhado.</CardDescription>
+        <CardDescription>
+          Visualize, pesquise, edite e remova os alunos da sua turma.
+        </CardDescription>
+        <div className="pt-4">
+          <Input
+            placeholder="Pesquisar por nome..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -40,11 +87,11 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
               <TableHead>Aprendizagem (VARK)</TableHead>
               <TableHead>Tipo (Jung)</TableHead>
               <TableHead>Valores (Schwartz)</TableHead>
-              <TableHead className="text-right">Painel Individual</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.map((student) => {
+            {filteredStudents.map((student) => {
               const profile = getStudentProfile(student.id);
               return (
                  <TableRow key={student.id}>
@@ -73,7 +120,7 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                     </TableCell>
                      <TableCell>
                        {profile?.schwartzValues ? (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
                           {profile.schwartzValues.top_values.map(value => (
                              <Badge key={value} variant="outline" className="text-xs">{value}</Badge>
                           ))}
@@ -83,18 +130,59 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                       <Button asChild variant="outline" size="sm" disabled={!profile}>
-                          <Link href={`/student/${student.id}`}>
-                            <User className="mr-2 h-4 w-4" />
-                            Painel do Aluno
-                          </Link>
-                      </Button>
+                       <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Abrir menu de ações</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild disabled={!profile}>
+                            <Link href={`/student/${student.id}`}>
+                              <User className="mr-2 h-4 w-4" />
+                              Ver Painel
+                            </Link>
+                          </DropdownMenuItem>
+                          
+                          <EditStudentDialog 
+                             student={student} 
+                             onStudentUpdated={() => setStudentList(prev => prev.map(s => s.id === student.id ? {...s, name: student.name, age: student.age} : s))}
+                          >
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                               <FilePenLine className="mr-2 h-4 w-4" />
+                               Editar
+                            </DropdownMenuItem>
+                          </EditStudentDialog>
+
+                          <DeleteStudentDialog
+                             studentName={student.name}
+                             onConfirm={() => handleDeleteConfirm(student.id)}
+                          >
+                            <DropdownMenuItem 
+                                onSelect={(e) => e.preventDefault()}
+                                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Excluir
+                            </DropdownMenuItem>
+                          </DeleteStudentDialog>
+                          
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
               )
             })}
           </TableBody>
         </Table>
+         {filteredStudents.length === 0 && (
+          <div className="text-center p-8 text-muted-foreground">
+            Nenhum aluno encontrado.
+          </div>
+        )}
       </CardContent>
     </Card>
   );
