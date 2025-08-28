@@ -100,7 +100,7 @@ export function SavedStrategies({ savedStrategies: initialStrategies }: SavedStr
                                             Baseado na aula sobre: <span className="italic">"{strategySet.lessonPlan}"</span>
                                         </p>
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                            {strategySet.strategies.map((strategy, index) => (
+                                            {Array.isArray(strategySet.strategies) && strategySet.strategies.map((strategy, index) => (
                                                 <StrategyCard key={index} strategy={strategy} />
                                             ))}
                                         </div>
