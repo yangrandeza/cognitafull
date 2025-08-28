@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Lightbulb, Loader2, Sparkles } from "lucide-react";
-import { getLessonPlanSuggestions } from "@/lib/actions";
+import { Lightbulb, Loader2, Sparkles, Wand2 } from "lucide-react";
+import { getLessonPlanSuggestions, getReformedLessonPlan } from "@/lib/actions";
 import type { OptimizeLessonPlanOutput } from "@/ai/flows/lesson-plan-optimizer";
 
 const formSchema = z.object({
@@ -20,8 +20,10 @@ const formSchema = z.object({
 });
 
 export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: string }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [isLoadingReformed, setIsLoadingReformed] = useState(false);
   const [suggestions, setSuggestions] = useState<OptimizeLessonPlanOutput['suggestions']>([]);
+  const [reformulatedPlan, setReformulatedPlan] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -29,10 +31,13 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
       lessonPlan: "",
     },
   });
+  
+  const originalLessonPlan = form.getValues("lessonPlan");
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
+  async function onGetSuggestions(values: z.infer<typeof formSchema>) {
+    setIsLoadingSuggestions(true);
     setSuggestions([]);
+    setReformulatedPlan("");
     try {
       const result = await getLessonPlanSuggestions({
         lessonPlan: values.lessonPlan,
@@ -44,7 +49,26 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
     } catch (error) {
       console.error("Erro ao otimizar o plano de aula:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingSuggestions(false);
+    }
+  }
+
+  async function onReformPlan() {
+    setIsLoadingReformed(true);
+    try {
+        const suggestionsText = suggestions.map(s => `Para ${s.feature}: ${s.suggestion}`).join('\n');
+        const result = await getReformedLessonPlan({
+            lessonPlan: originalLessonPlan,
+            suggestions: suggestionsText,
+        });
+        if (result && result.reformulatedPlan) {
+            setReformulatedPlan(result.reformulatedPlan);
+        }
+    } catch (error) {
+        console.error("Erro ao reformular o plano de aula:", error);
+        setReformulatedPlan("Ocorreu um erro ao tentar melhorar o plano. Tente novamente.");
+    } finally {
+        setIsLoadingReformed(false);
     }
   }
 
@@ -58,10 +82,9 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
             Descreva sua próxima aula e o Oráculo usará a Bússola Cognitiva da turma para sugerir como torná-la inesquecível.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid md:grid-cols-2 gap-8">
-            <div>
+        <CardContent className="space-y-6">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onGetSuggestions)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="lessonPlan"
@@ -71,7 +94,7 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                         <FormControl>
                         <Textarea
                             placeholder="Ex: 'Aula sobre a Revolução Francesa. Pretendo fazer uma exposição e depois um debate...'"
-                            className="min-h-[200px]"
+                            className="min-h-[150px]"
                             {...field}
                         />
                         </FormControl>
@@ -79,8 +102,8 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                     </FormItem>
                     )}
                 />
-                <Button type="submit" disabled={isLoading}>
-                    {isLoading ? (
+                <Button type="submit" disabled={isLoadingSuggestions}>
+                    {isLoadingSuggestions ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Consultando...
@@ -91,34 +114,62 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                 </Button>
                 </form>
             </Form>
-            </div>
-            <div className="flex flex-col rounded-lg border bg-muted/30 p-4">
-                <div className="flex-grow">
-                {isLoading && (
-                    <div className="flex items-center justify-center h-full">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                )}
-                {!isLoading && suggestions.length === 0 && (
-                    <div className="flex items-center justify-center h-full text-center text-muted-foreground">
-                    <p>As sugestões do Oráculo aparecerão aqui.</p>
-                    </div>
-                )}
-                {suggestions.length > 0 && (
-                    <div className="space-y-6">
-                    {suggestions.map((item, index) => (
-                        <div key={index} className="flex items-start gap-4">
-                            <Lightbulb className="h-6 w-6 mt-1 text-yellow-500 flex-shrink-0" />
-                            <div>
-                                <p className="font-semibold text-primary">{item.feature}:</p>
-                                <p className="text-muted-foreground">{item.suggestion}</p>
-                            </div>
+
+            {/* --- Results Area --- */}
+            {(isLoadingSuggestions || suggestions.length > 0) && (
+              <div className="grid md:grid-cols-2 gap-8 pt-6 border-t">
+                  {/* Suggestions Column */}
+                  <div className="flex flex-col rounded-lg">
+                      <h3 className="text-lg font-headline mb-4">Sugestões do Oráculo</h3>
+                      {isLoadingSuggestions && (
+                          <div className="flex items-center justify-center h-full">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          </div>
+                      )}
+                      {suggestions.length > 0 && (
+                          <div className="space-y-6">
+                          {suggestions.map((item, index) => (
+                              <div key={index} className="flex items-start gap-4">
+                                  <Lightbulb className="h-6 w-6 mt-1 text-yellow-500 flex-shrink-0" />
+                                  <div>
+                                      <p className="font-semibold text-primary">{item.feature}:</p>
+                                      <p className="text-muted-foreground">{item.suggestion}</p>
+                                  </div>
+                              </div>
+                          ))}
+                          <Button onClick={onReformPlan} disabled={isLoadingReformed} className="mt-4">
+                            {isLoadingReformed ? (
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Melhorando...</>
+                            ) : (
+                                <><Wand2 className="mr-2 h-4 w-4" /> Melhorar para Mim</>
+                            )}
+                            </Button>
+                          </div>
+                      )}
+                  </div>
+                   {/* Reformulated Plan Column */}
+                  <div className="flex flex-col rounded-lg">
+                      <h3 className="text-lg font-headline mb-4">Plano de Aula Melhorado</h3>
+                       {!isLoadingReformed && !reformulatedPlan && (
+                        <div className="flex items-center justify-center h-full text-center text-muted-foreground bg-muted/30 rounded-md p-4 min-h-[200px]">
+                            <p>Clique em "Melhorar para Mim" e a IA reescreverá seu plano aqui.</p>
                         </div>
-                    ))}
-                    </div>
-                )}
-                </div>
-            </div>
+                      )}
+                      {isLoadingReformed && (
+                         <div className="flex items-center justify-center h-full">
+                           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                         </div>
+                      )}
+                      {reformulatedPlan && (
+                        <Textarea
+                            value={reformulatedPlan}
+                            onChange={(e) => setReformulatedPlan(e.target.value)}
+                            className="min-h-[300px] bg-muted/20"
+                        />
+                      )}
+                  </div>
+              </div>
+            )}
         </CardContent>
     </Card>
   );
