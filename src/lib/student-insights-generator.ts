@@ -1,4 +1,4 @@
-import type { UnifiedProfile, DiscProfile, VarkProfile } from "./types";
+import type { UnifiedProfile, DiscProfile, VarkProfile, Student } from "./types";
 
 export type IndividualStudentInsights = {
     mind: string;
@@ -8,9 +8,18 @@ export type IndividualStudentInsights = {
     tips: string[];
 };
 
-export function generateStudentInsights(profile: UnifiedProfile): IndividualStudentInsights {
+function getGeneration(birthYear: number) {
+    if (birthYear >= 2013) return 'Geração Alpha';
+    if (birthYear >= 1997) return 'Geração Z';
+    if (birthYear >= 1981) return 'Millennial';
+    if (birthYear >= 1965) return 'Geração X';
+    if (birthYear >= 1946) return 'Boomer';
+    return 'Silent';
+}
+
+export function generateStudentInsights(profile: UnifiedProfile, student: Student): IndividualStudentInsights {
     return {
-        mind: generateMindInsight(profile),
+        mind: generateMindInsight(profile, student),
         superpowers: generateSuperpowersInsight(profile),
         motivation: generateMotivationInsight(profile),
         manual: generateManualInsight(profile),
@@ -18,18 +27,20 @@ export function generateStudentInsights(profile: UnifiedProfile): IndividualStud
     };
 }
 
-function generateMindInsight(profile: UnifiedProfile): string {
+function generateMindInsight(profile: UnifiedProfile, student: Student): string {
     const { jungianProfile, discProfile } = profile;
     const isIntrovert = jungianProfile.includes('I');
     const isHighC = discProfile.dominant === 'Consciência';
     const isHighS = discProfile.dominant === 'Estabilidade';
+    const birthYear = new Date().getFullYear() - student.age;
+    const generation = getGeneration(birthYear);
 
-    let text = "";
+    let text = `Eu faço parte da ${generation}. `;
 
     if (isIntrovert) {
-        text += "Eu preciso de um momento de silêncio para organizar minhas ideias antes de compartilhar. ";
+        text += "Preciso de um momento de silêncio para organizar minhas ideias antes de compartilhar. ";
     } else {
-        text += "Eu penso melhor em voz alta, trocando ideias com os outros. O diálogo me ajuda a clarear meus pensamentos. ";
+        text += "Penso melhor em voz alta, trocando ideias com os outros. O diálogo me ajuda a clarear meus pensamentos. ";
     }
 
     if (isHighC || isHighS) {

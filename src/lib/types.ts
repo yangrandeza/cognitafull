@@ -45,6 +45,7 @@ export type Student = {
   email?: string;
   classId: string;
   gender?: string;
+  generation?: string;
   quizStatus: 'pending' | 'completed';
   unifiedProfileId?: string;
   createdAt: string; // Changed from FieldValue to string for serialization

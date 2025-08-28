@@ -395,3 +395,49 @@ export function generateTeamData(profiles: UnifiedProfile[], students: Student[]
         { category: 'Harmonizadores e Apoiadores', description: 'Essenciais para manter o time unido e motivado.', students: harmonizers.map(getName).filter((v, i, a) => a.indexOf(v) === i) },
     ].filter(team => team.students.length > 0);
 }
+
+
+function getGeneration(birthYear: number) {
+    if (birthYear >= 2013) return 'Alpha';
+    if (birthYear >= 1997) return 'Gen Z';
+    if (birthYear >= 1981) return 'Millennial';
+    if (birthYear >= 1965) return 'Gen X';
+    if (birthYear >= 1946) return 'Boomer';
+    return 'Silent';
+}
+
+export function getDemographicsData(students: Student[]) {
+    if (students.length === 0) {
+        return null;
+    }
+    const currentYear = new Date().getFullYear();
+
+    const totalAge = students.reduce((sum, s) => sum + s.age, 0);
+    const averageAge = totalAge / students.length;
+
+    const genderCounts = students.reduce((acc, s) => {
+        const gender = s.gender || 'Não informado';
+        acc[gender] = (acc[gender] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const genderDistribution: Record<string, number> = { Masculino: 0, Feminino: 0, Outro: 0, 'Não informado': 0 };
+    Object.keys(genderCounts).forEach(gender => {
+        genderDistribution[gender] = (genderCounts[gender] / students.length) * 100;
+    });
+
+    const generationCounts = students.reduce((acc, s) => {
+        const birthYear = currentYear - s.age;
+        const generation = getGeneration(birthYear);
+        acc[generation] = (acc[generation] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const dominantGeneration = Object.keys(generationCounts).reduce((a, b) => generationCounts[a] > generationCounts[b] ? a : b, 'N/A');
+
+    return {
+        averageAge,
+        genderDistribution,
+        dominantGeneration,
+    };
+}

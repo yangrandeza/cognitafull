@@ -39,10 +39,10 @@ export function StudentDashboard({ student, profile }: StudentDashboardProps) {
 
     useEffect(() => {
         if (profile) {
-            const generatedInsights = generateStudentInsights(profile);
+            const generatedInsights = generateStudentInsights(profile, student);
             setInsights(generatedInsights);
         }
-    }, [profile]);
+    }, [profile, student]);
 
     if (!insights) {
         return <div>Gerando insights...</div>

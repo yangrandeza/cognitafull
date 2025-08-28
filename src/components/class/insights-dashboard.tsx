@@ -8,8 +8,8 @@ import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile } from "@/lib/types";
-import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic } from "lucide-react";
-import { getDashboardData, processProfiles } from "@/lib/insights-generator";
+import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby } from "lucide-react";
+import { getDashboardData, processProfiles, getDemographicsData } from "@/lib/insights-generator";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { CognitiveCompass } from "./cognitive-compass";
@@ -22,6 +22,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
   const [loading, setLoading] = useState(true);
   const [classData, setClassData] = useState<ClassWithStudentData | null>(null);
   const [dashboardData, setDashboardData] = useState<ReturnType<typeof getDashboardData> | null>(null);
+  const [demographicsData, setDemographicsData] = useState<ReturnType<typeof getDemographicsData> | null>(null);
   const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
   const { toast } = useToast();
 
@@ -34,6 +35,8 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         if (fetchedClassData && fetchedClassData.profiles) {
             const data = getDashboardData(fetchedClassData.profiles, fetchedClassData.students);
             setDashboardData(data);
+            const demos = getDemographicsData(fetchedClassData.students);
+            setDemographicsData(demos);
             const profiles = processProfiles(fetchedClassData.profiles);
             setProcessedProfiles(profiles);
         }
@@ -90,6 +93,48 @@ export function InsightsDashboard({ classId }: { classId: string }) {
       </div>
 
       <TabsContent value="insights" className="space-y-6">
+
+        {demographicsData && (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Idade Média</CardTitle>
+                <Cake className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{demographicsData.averageAge.toFixed(1)} anos</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Geração Predominante</CardTitle>
+                <Baby className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{demographicsData.dominantGeneration}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Gênero (Feminino)</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{demographicsData.genderDistribution.Feminino.toFixed(0)}%</div>
+              </CardContent>
+            </Card>
+             <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Gênero (Masculino)</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{demographicsData.genderDistribution.Masculino.toFixed(0)}%</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">A Bússola Cognitiva da Turma</CardTitle>
