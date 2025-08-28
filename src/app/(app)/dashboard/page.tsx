@@ -10,12 +10,12 @@ export default function DashboardPage() {
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          My Classes
+          Minhas Turmas
         </h1>
         <div className="flex items-center space-x-2">
           <Button className="font-headline">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Create Class
+            Criar Turma
           </Button>
         </div>
       </div>
@@ -27,16 +27,16 @@ export default function DashboardPage() {
               <Users className="h-5 w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{classItem.studentCount} students</div>
+              <div className="text-2xl font-bold">{classItem.studentCount} alunos</div>
               <p className="text-xs text-muted-foreground">
-                {classItem.responsesCount} of {classItem.studentCount} completed the quiz
+                {classItem.responsesCount} de {classItem.studentCount} completaram o questionário
               </p>
               <Progress value={(classItem.responsesCount / classItem.studentCount) * 100} className="mt-4" />
             </CardContent>
             <CardFooter>
               <Button asChild className="w-full font-headline">
                 <Link href={`/class/${classItem.id}`}>
-                    View Insights <ArrowRight className="ml-2 h-4 w-4" />
+                    Ver Insights <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </CardFooter>

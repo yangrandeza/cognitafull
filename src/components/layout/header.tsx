@@ -7,8 +7,8 @@ import { Menu, BookHeart } from "lucide-react";
 
 export function Header() {
   const navLinks = [
-    { href: "#features", label: "Features" },
-    { href: "/login", label: "Login" },
+    { href: "#features", label: "Recursos" },
+    { href: "/login", label: "Entrar" },
   ];
 
   return (
@@ -32,7 +32,7 @@ export function Header() {
               </Link>
             ))}
              <Button asChild className="font-headline">
-              <Link href="/signup">Sign Up</Link>
+              <Link href="/signup">Cadastre-se</Link>
             </Button>
           </nav>
           <div className="md:hidden">
@@ -40,7 +40,7 @@ export function Header() {
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle Menu</span>
+                  <span className="sr-only">Abrir Menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">
@@ -62,7 +62,7 @@ export function Header() {
                     </Link>
                   ))}
                    <Button asChild className="font-headline">
-                    <Link href="/signup">Sign Up</Link>
+                    <Link href="/signup">Cadastre-se</Link>
                   </Button>
                 </nav>
               </SheetContent>

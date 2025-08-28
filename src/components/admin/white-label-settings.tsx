@@ -13,20 +13,20 @@ export function WhiteLabelSettings() {
       <CardHeader>
         <CardTitle className="font-headline">White-Labeling</CardTitle>
         <CardDescription>
-          Customize the platform with your institution's brand identity.
+          Personalize a plataforma com a identidade visual da sua instituição.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6 items-center">
             <div>
-                <Label htmlFor="logo" className="mb-2 block">Institution Logo</Label>
+                <Label htmlFor="logo" className="mb-2 block">Logo da Instituição</Label>
                 <div className="flex items-center gap-4">
                     <div className="w-24 h-24 rounded-md border flex items-center justify-center bg-muted">
                         <Image src="/logo-placeholder.svg" alt="logo placeholder" width={40} height={40} />
                     </div>
                     <Button variant="outline" asChild>
                         <label htmlFor="logo-upload" className="cursor-pointer">
-                            <Upload className="mr-2 h-4 w-4" /> Upload
+                            <Upload className="mr-2 h-4 w-4" /> Enviar
                             <input id="logo-upload" type="file" className="hidden" />
                         </label>
                     </Button>
@@ -34,14 +34,14 @@ export function WhiteLabelSettings() {
             </div>
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <Label htmlFor="primary-color">Primary Color</Label>
+                    <Label htmlFor="primary-color">Cor Primária</Label>
                     <div className="flex items-center gap-2">
                         <Input id="primary-color" defaultValue="#4A148C" />
                         <div className="w-8 h-8 rounded-md border" style={{ backgroundColor: "#4A148C" }}></div>
                     </div>
                 </div>
                 <div>
-                    <Label htmlFor="secondary-color">Secondary Color</Label>
+                    <Label htmlFor="secondary-color">Cor Secundária</Label>
                     <div className="flex items-center gap-2">
                         <Input id="secondary-color" defaultValue="#E6E6FA" />
                         <div className="w-8 h-8 rounded-md border" style={{ backgroundColor: "#E6E6FA" }}></div>
@@ -50,7 +50,7 @@ export function WhiteLabelSettings() {
             </div>
         </div>
         <div className="flex justify-end">
-            <Button>Save Changes</Button>
+            <Button>Salvar Alterações</Button>
         </div>
       </CardContent>
     </Card>

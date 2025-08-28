@@ -20,22 +20,22 @@ import {
 
 const chartConfig = {
   value: {
-    label: "Students",
+    label: "Alunos",
   },
   visual: {
     label: "Visual",
     color: "hsl(var(--chart-1))",
   },
   auditory: {
-    label: "Auditory",
+    label: "Auditivo",
     color: "hsl(var(--chart-2))",
   },
   reading: {
-    label: "Reading/Writing",
+    label: "Leitura/Escrita",
     color: "hsl(var(--chart-3))",
   },
   kinesthetic: {
-    label: "Kinesthetic",
+    label: "Cinestésico",
     color: "hsl(var(--chart-4))",
   },
 }
@@ -95,7 +95,7 @@ export function VarkChart({ data }: { data: any[] }) {
                       y={(viewBox.cy || 0) + 24}
                       className="fill-muted-foreground"
                     >
-                      Students
+                      Alunos
                     </tspan>
                   </text>
                 )

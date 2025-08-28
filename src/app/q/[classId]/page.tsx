@@ -14,62 +14,62 @@ const questions = [
   // Intro
   {
     type: 'intro',
-    title: 'Welcome to Cognita!',
-    description: "Let's discover your learning superpowers. For each question, choose the option that feels most like you. There are no right or wrong answers. Trust your first impression!",
+    title: 'Bem-vindo(a) ao Cognita!',
+    description: "Vamos descobrir seus superpoderes de aprendizagem. Para cada pergunta, escolha a opção que mais se parece com você. Não há respostas certas ou erradas. Confie na sua primeira impressão!",
   },
   // VARK
   {
     type: 'radio',
-    part: 'Part 1: How You Learn (VARK)',
-    question: 'When you need to learn something new and complex, what helps you most?',
+    part: 'Parte 1: Como Você Aprende (VARK)',
+    question: 'Quando você precisa aprender algo novo e complexo, o que mais te ajuda?',
     options: [
-      { value: 'V', label: 'Seeing graphs, infographics, and videos that demonstrate the concept.' },
-      { value: 'A', label: 'Hearing a good explanation, a podcast, or discussing the topic.' },
-      { value: 'R', label: 'Reading a well-written article, book, or manual on the subject.' },
-      { value: 'K', label: 'Getting hands-on, experimenting, or doing a practical exercise.' },
+      { value: 'V', label: 'Ver gráficos, infográficos e vídeos que demonstram o conceito.' },
+      { value: 'A', label: 'Ouvir uma boa explicação, um podcast, ou discutir o tópico.' },
+      { value: 'R', label: 'Ler um artigo, livro ou manual bem escrito sobre o assunto.' },
+      { value: 'K', label: 'Colocar a mão na massa, experimentar ou fazer um exercício prático.' },
     ],
   },
   {
     type: 'radio',
-    part: 'Part 1: How You Learn (VARK)',
-    question: 'Imagine you are trying to get to a new place. Which strategy would you choose?',
+    part: 'Parte 1: Como Você Aprende (VARK)',
+    question: 'Imagine que você está tentando chegar a um lugar novo. Qual estratégia você escolheria?',
     options: [
-      { value: 'V', label: 'Look at a visual map on your phone\'s GPS.' },
-      { value: 'A', label: 'Ask the GPS to give you voice instructions.' },
-      { value: 'R', label: 'Read a list of street names and directions to follow.' },
-      { value: 'K', label: 'Just start driving and guide yourself by landmarks along the way.' },
+      { value: 'V', label: 'Olhar um mapa visual no GPS do seu celular.' },
+      { value: 'A', label: 'Pedir ao GPS para dar instruções por voz.' },
+      { value: 'R', label: 'Ler uma lista de nomes de ruas e direções a seguir.' },
+      { value: 'K', label: 'Apenas começar a dirigir e se guiar por pontos de referência no caminho.' },
     ],
   },
   // DISC
    {
     type: 'disc',
-    part: 'Part 2: How You Act and Interact (DISC)',
-    instruction: 'In each group of four words, choose the one that is MOST like you and the one that is LEAST like you.',
-    words: ['Decided', 'Influential', 'Patient', 'Detailed'],
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    words: ['Decidido', 'Influente', 'Paciente', 'Detalhado'],
   },
   // Jungian
   {
     type: 'radio',
-    part: 'Part 3: How Your Mind Works (Jungian)',
-    question: 'After a day full of group activities, you feel:',
+    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    question: 'Depois de um dia cheio de atividades em grupo, você se sente:',
     options: [
-      { value: 'I', label: 'Exhausted, needing some alone time to recharge.' },
-      { value: 'E', label: 'Energized and excited, wanting to continue interacting.' },
+      { value: 'I', label: 'Esgotado(a), precisando de um tempo sozinho(a) para recarregar.' },
+      { value: 'E', label: 'Energizado(a) e animado(a), querendo continuar a interagir.' },
     ],
   },
   // Schwartz
   {
       type: 'scale',
-      part: 'Part 4: What Truly Moves You (Schwartz)',
-      instruction: 'For each sentence, indicate how much the person described is like you.',
-      statement: 'Having the freedom to choose what they do and think for themselves is very important to this person.',
-      value: 'Autodirection'
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      statement: 'Ter a liberdade de escolher o que faz e pensa por si mesmo é muito importante para esta pessoa.',
+      value: 'Autodireção'
   },
   // Finish
   {
     type: 'finish',
-    title: 'All Done!',
-    description: 'Thank you for completing the questionnaire. Your insights will help create a better learning experience.',
+    title: 'Tudo pronto!',
+    description: 'Obrigado por completar o questionário. Seus insights ajudarão a criar uma experiência de aprendizado melhor.',
   },
 ];
 
@@ -118,17 +118,17 @@ export default function QuestionnairePage() {
             <CardContent>
                 <div className="grid gap-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input id="name" placeholder="E.g., Mariana" />
+                        <Label htmlFor="name">Nome Completo</Label>
+                        <Input id="name" placeholder="Ex: Mariana" />
                     </div>
                      <div className="grid gap-2">
-                        <Label htmlFor="age">Age</Label>
-                        <Input id="age" type="number" placeholder="E.g., 16" />
+                        <Label htmlFor="age">Idade</Label>
+                        <Input id="age" type="number" placeholder="Ex: 16" />
                     </div>
                 </div>
             </CardContent>
             <CardFooter className="justify-end">
-                <Button onClick={handleNext}>Start <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                <Button onClick={handleNext}>Começar <ArrowRight className="ml-2 h-4 w-4" /></Button>
             </CardFooter>
             </>
         )}
@@ -154,9 +154,9 @@ export default function QuestionnairePage() {
               {currentQuestion.type === 'disc' && (
                   <div className="space-y-2">
                      <div className="grid grid-cols-6 gap-2 text-center items-center">
-                        <span className="col-span-2 font-medium text-sm text-muted-foreground">Most</span>
+                        <span className="col-span-2 font-medium text-sm text-muted-foreground">Mais</span>
                         <span className="col-span-2"></span>
-                        <span className="col-span-2 font-medium text-sm text-muted-foreground">Least</span>
+                        <span className="col-span-2 font-medium text-sm text-muted-foreground">Menos</span>
                      </div>
                       <div className="grid grid-cols-6 gap-2 border p-3 rounded-md items-center">
                           <RadioGroup className="col-span-2 flex justify-around">
@@ -203,10 +203,10 @@ export default function QuestionnairePage() {
                         {[1, 2, 3, 4].map(val => (
                             <div key={val} className="flex flex-col items-center space-y-2">
                                 <Label htmlFor={`scale-${val}`} className="text-xs text-muted-foreground text-center">
-                                    {val === 1 && "Not like me"}
-                                    {val === 2 && "A little like me"}
-                                    {val === 3 && "Like me"}
-                                    {val === 4 && "Very like me"}
+                                    {val === 1 && "Não se parece comigo"}
+                                    {val === 2 && "Um pouco como eu"}
+                                    {val === 3 && "Parecido comigo"}
+                                    {val === 4 && "Muito parecido comigo"}
                                 </Label>
                                 <RadioGroupItem value={String(val)} id={`scale-${val}`} />
                             </div>
@@ -217,10 +217,10 @@ export default function QuestionnairePage() {
             </CardContent>
             <CardFooter className="justify-between">
                 <Button variant="outline" onClick={handleBack} disabled={step === 0}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
                 <Button onClick={handleNext}>
-                    Next <ArrowRight className="ml-2 h-4 w-4" />
+                    Próximo <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
             </CardFooter>
             </>
@@ -236,7 +236,7 @@ export default function QuestionnairePage() {
                 <Check className="mx-auto h-16 w-16 text-green-500 bg-green-100 rounded-full p-2" />
             </CardContent>
             <CardFooter className="justify-end">
-                <Button onClick={() => window.location.href = '/'}>Finish</Button>
+                <Button onClick={() => window.location.href = '/'}>Finalizar</Button>
             </CardFooter>
             </>
         )}

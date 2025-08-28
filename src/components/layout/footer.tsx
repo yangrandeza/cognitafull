@@ -11,11 +11,11 @@ export function Footer() {
                         <span className="font-bold font-headline">Cognita 360</span>
                     </div>
                     <p className="text-sm text-foreground/60">
-                        &copy; {new Date().getFullYear()} Cognita 360. All rights reserved.
+                        &copy; {new Date().getFullYear()} Cognita 360. Todos os direitos reservados.
                     </p>
                     <div className="flex space-x-4 mt-4 md:mt-0">
-                        <Link href="#" className="text-foreground/60 hover:text-foreground">Privacy</Link>
-                        <Link href="#" className="text-foreground/60 hover:text-foreground">Terms</Link>
+                        <Link href="#" className="text-foreground/60 hover:text-foreground">Privacidade</Link>
+                        <Link href="#" className="text-foreground/60 hover:text-foreground">Termos</Link>
                     </div>
                 </div>
             </div>

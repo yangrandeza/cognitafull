@@ -26,23 +26,23 @@ export function TeachersTable() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="font-headline">Teachers</CardTitle>
+          <CardTitle className="font-headline">Professores</CardTitle>
           <CardDescription>
-            Add, view, and manage teacher accounts for your institution.
+            Adicione, visualize e gerencie as contas dos professores da sua instituição.
           </CardDescription>
         </div>
         <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Teacher
+          <PlusCircle className="mr-2 h-4 w-4" /> Adicionar Professor
         </Button>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead>Nome</TableHead>
+              <TableHead>E-mail</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -52,7 +52,7 @@ export function TeachersTable() {
                 <TableCell>{teacher.email}</TableCell>
                 <TableCell>
                   <Badge variant={teacher.status === 'active' ? 'default' : 'destructive'} className={teacher.status === 'active' ? 'bg-green-600' : ''}>
-                    {teacher.status}
+                    {teacher.status === 'active' ? 'Ativo' : 'Desativado'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
@@ -60,17 +60,17 @@ export function TeachersTable() {
                     <DropdownMenuTrigger asChild>
                       <Button aria-haspopup="true" size="icon" variant="ghost">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
+                        <span className="sr-only">Abrir menu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                      <DropdownMenuItem>Editar</DropdownMenuItem>
                       <DropdownMenuItem>
-                        {teacher.status === 'active' ? 'Disable' : 'Enable'}
+                        {teacher.status === 'active' ? 'Desativar' : 'Ativar'}
                       </DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
-                        Delete
+                        Excluir
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

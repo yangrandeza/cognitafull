@@ -13,7 +13,7 @@ import { getLessonPlanSuggestions } from "@/lib/actions";
 
 const formSchema = z.object({
   lessonPlan: z.string().min(50, {
-    message: "Lesson plan must be at least 50 characters.",
+    message: "O plano de aula deve ter pelo menos 50 caracteres.",
   }),
 });
 
@@ -40,7 +40,7 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
         setSuggestions(result.suggestions);
       }
     } catch (error) {
-      console.error("Error optimizing lesson plan:", error);
+      console.error("Erro ao otimizar o plano de aula:", error);
     } finally {
       setIsLoading(false);
     }
@@ -51,10 +51,10 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
       <Card>
         <CardHeader>
           <CardTitle className="font-headline flex items-center gap-2">
-            <Sparkles className="text-primary" /> AI Lesson Optimizer
+            <Sparkles className="text-primary" /> Otimizador de Aula com IA
           </CardTitle>
           <CardDescription>
-            Paste your lesson plan below and get practical, AI-driven suggestions tailored to your class profile.
+            Cole seu plano de aula abaixo e obtenha sugestões práticas e orientadas por IA, adaptadas ao perfil da sua turma.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,10 +65,10 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                 name="lessonPlan"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Your Lesson Plan</FormLabel>
+                    <FormLabel>Seu Plano de Aula</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="e.g., 'Topic: Photosynthesis. Activity: Lecture for 20 mins, then a group worksheet...'"
+                        placeholder="Ex: 'Tópico: Fotossíntese. Atividade: Aula expositiva por 20 min, depois uma atividade em grupo...'"
                         className="min-h-[200px]"
                         {...field}
                       />
@@ -81,10 +81,10 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
+                    Analisando...
                   </>
                 ) : (
-                  "Optimize My Lesson"
+                  "Otimizar Meu Plano"
                 )}
               </Button>
             </form>
@@ -93,9 +93,9 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
       </Card>
       <Card className="flex flex-col">
         <CardHeader>
-          <CardTitle className="font-headline">Suggestions</CardTitle>
+          <CardTitle className="font-headline">Sugestões</CardTitle>
           <CardDescription>
-            Here are some ways to enhance your plan:
+            Aqui estão algumas maneiras de aprimorar seu plano:
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-grow">
@@ -106,7 +106,7 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
           )}
           {!isLoading && suggestions.length === 0 && (
             <div className="flex items-center justify-center h-full text-center text-muted-foreground">
-              <p>Your AI-powered suggestions will appear here.</p>
+              <p>Suas sugestões personalizadas por IA aparecerão aqui.</p>
             </div>
           )}
           {suggestions.length > 0 && (

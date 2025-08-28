@@ -7,9 +7,9 @@ export function SuggestedTeams({ data }: { data: { category: string; students: s
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
             <Users />
-            Suggested Teams
+            Equipes Sugeridas
         </CardTitle>
-        <CardDescription>Group students by complementary profiles.</CardDescription>
+        <CardDescription>Agrupe alunos por perfis complementares.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {data.map((team) => (

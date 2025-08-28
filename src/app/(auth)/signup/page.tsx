@@ -17,41 +17,41 @@ export default function SignupPage() {
       <Card className="w-full max-w-sm mx-auto">
         <CardHeader className="text-center">
           <BookHeart className="mx-auto h-10 w-10 text-primary mb-2" />
-          <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
+          <CardTitle className="text-2xl font-headline">Criar uma Conta</CardTitle>
           <CardDescription>
-            Enter your information to get started
+            Insira suas informações para começar
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
-                <Label htmlFor="full-name">Full Name</Label>
-                <Input id="full-name" placeholder="John Doe" required />
+                <Label htmlFor="full-name">Nome Completo</Label>
+                <Input id="full-name" placeholder="João da Silva" required />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="m@exemplo.com"
                 required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input id="password" type="password" />
             </div>
             <Button type="submit" className="w-full font-headline">
-              Create account
+              Criar conta
             </Button>
             <Button variant="outline" className="w-full">
-              Sign up with Google
+              Cadastrar com Google
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
+            Já tem uma conta?{" "}
             <Link href="/login" className="underline">
-              Login
+              Entrar
             </Link>
           </div>
         </CardContent>

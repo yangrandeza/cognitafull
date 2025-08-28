@@ -5,7 +5,7 @@ export function SchwartzValues({ data }: { data: { value: string; count: number 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Dominant Values (Schwartz)</CardTitle>
+        <CardTitle className="font-headline">Valores Dominantes (Schwartz)</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">

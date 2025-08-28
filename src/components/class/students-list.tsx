@@ -19,24 +19,24 @@ export function StudentsList({ students }: { students: Student[] }) {
 
   const handleGeneratePdf = (studentName: string) => {
     toast({
-      title: "Generating Report...",
-      description: `A PDF report for ${studentName} is being generated.`,
+      title: "Gerando Relatório...",
+      description: `Um relatório em PDF para ${studentName} está sendo gerado.`,
     });
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Student Roster</CardTitle>
+        <CardTitle className="font-headline">Lista de Alunos</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Age</TableHead>
+              <TableHead>Nome</TableHead>
+              <TableHead>Idade</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -46,7 +46,7 @@ export function StudentsList({ students }: { students: Student[] }) {
                 <TableCell>{student.age}</TableCell>
                 <TableCell>
                   <Badge variant={student.quizStatus === 'completed' ? 'default' : 'outline'} className={student.quizStatus === 'completed' ? 'bg-green-600' : ''}>
-                    {student.quizStatus}
+                    {student.quizStatus === 'completed' ? 'Concluído' : 'Pendente'}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
@@ -56,7 +56,7 @@ export function StudentsList({ students }: { students: Student[] }) {
                     onClick={() => handleGeneratePdf(student.name)}
                     disabled={student.quizStatus !== 'completed'}
                   >
-                    Generate PDF
+                    Gerar PDF
                   </Button>
                 </TableCell>
               </TableRow>

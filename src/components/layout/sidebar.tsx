@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Painel" },
   { href: "/admin", icon: Users, label: "Admin" },
 ];
 
@@ -61,7 +61,7 @@ export function AppSidebar() {
             <Button variant="ghost" className="w-full justify-between">
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://picsum.photos/40" alt="User avatar" data-ai-hint="person" />
+                  <AvatarImage src="https://picsum.photos/40" alt="Avatar do usuário" data-ai-hint="pessoa" />
                   <AvatarFallback>CA</AvatarFallback>
                 </Avatar>
                 <div className="text-left">
@@ -84,13 +84,13 @@ export function AppSidebar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <Link href="/login">
                 <DropdownMenuItem>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>Sair</span>
                 </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>

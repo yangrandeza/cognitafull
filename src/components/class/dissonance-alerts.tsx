@@ -7,9 +7,9 @@ export function DissonanceAlerts({ data }: { data: { studentName: string; note: 
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
             <AlertCircle className="text-destructive" />
-            Dissonance Alerts
+            Alertas de Dissonância
         </CardTitle>
-        <CardDescription>Students with conflicting profile traits.</CardDescription>
+        <CardDescription>Alunos com traços de perfil conflitantes.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {data.length > 0 ? data.map((alert, index) => (
@@ -17,7 +17,7 @@ export function DissonanceAlerts({ data }: { data: { studentName: string; note: 
             <p className="font-semibold text-destructive">{alert.studentName}</p>
             <p className="text-sm text-destructive/80">{alert.note}</p>
           </div>
-        )) : <p className="text-sm text-muted-foreground">No dissonance alerts for this class.</p>}
+        )) : <p className="text-sm text-muted-foreground">Nenhum alerta de dissonância para esta turma.</p>}
       </CardContent>
     </Card>
   );

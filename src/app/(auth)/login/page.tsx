@@ -17,43 +17,43 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm mx-auto">
         <CardHeader className="text-center">
           <BookHeart className="mx-auto h-10 w-10 text-primary mb-2" />
-          <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardTitle className="text-2xl font-headline">Bem-vindo de Volta</CardTitle>
+          <CardDescription>Insira suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="m@exemplo.com"
                 required
               />
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Senha</Label>
                 <Link
                   href="/forgot-password"
                   className="ml-auto inline-block text-sm underline"
                 >
-                  Forgot your password?
+                  Esqueceu sua senha?
                 </Link>
               </div>
               <Input id="password" type="password" required />
             </div>
             <Button type="submit" className="w-full font-headline">
-              Login
+              Entrar
             </Button>
             <Button variant="outline" className="w-full">
-              Login with Google
+              Entrar com Google
             </Button>
           </div>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
+            Não tem uma conta?{" "}
             <Link href="/signup" className="underline">
-              Sign up
+              Cadastre-se
             </Link>
           </div>
         </CardContent>
