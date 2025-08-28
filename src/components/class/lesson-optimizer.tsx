@@ -109,7 +109,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPla
   async function onReformPlan() {
     setIsLoadingReformed(true);
     try {
-        const suggestionsText = suggestions.map(s => `Para ${s.feature}: ${s.suggestion}`).join('\n');
+        const suggestionsText = suggestions.map(s => `* **${s.feature}:** ${s.suggestion}`).join('\n');
         const result = await getReformedLessonPlan({
             lessonPlan: originalLessonPlan,
             suggestions: suggestionsText,
@@ -128,7 +128,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPla
   async function onSavePlan(values: z.infer<typeof saveFormSchema>) {
     setIsSaving(true);
     try {
-        const suggestionsText = suggestions.map(s => `Para ${s.feature}: ${s.suggestion}`).join('\n');
+        const suggestionsText = suggestions.map(s => `* **${s.feature}:** ${s.suggestion}`).join('\n');
         const result = await saveGeneratedLessonPlan({
             classId,
             teacherId,

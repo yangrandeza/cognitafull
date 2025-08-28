@@ -15,7 +15,6 @@ import {
 
 import { saveLessonPlan as savePlanInDb, getLessonPlansByClass as getPlansFromDb } from './firebase/firestore';
 import { NewLessonPlan, LessonPlan } from './types';
-import { revalidatePath } from 'next/cache';
 
 export async function getLessonPlanSuggestions(
   input: OptimizeLessonPlanInput
