@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -13,7 +14,7 @@ import { getLessonPlanSuggestions } from "@/lib/actions";
 
 const formSchema = z.object({
   lessonPlan: z.string().min(50, {
-    message: "O plano de aula deve ter pelo menos 50 caracteres.",
+    message: "A descrição da aula deve ter pelo menos 50 caracteres.",
   }),
 });
 
@@ -47,80 +48,74 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
   }
 
   return (
-    <div className="grid md:grid-cols-2 gap-8">
-      <Card>
+    <Card>
         <CardHeader>
           <CardTitle className="font-headline flex items-center gap-2">
-            <Sparkles className="text-primary" /> Otimizador de Aula com IA
+            <Sparkles className="text-primary" /> Oráculo Pedagógico
           </CardTitle>
           <CardDescription>
-            Cole seu plano de aula abaixo e obtenha sugestões práticas e orientadas por IA, adaptadas ao perfil da sua turma.
+            Descreva sua próxima aula e o Oráculo usará a Bússola Cognitiva da turma para sugerir como torná-la inesquecível.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="lessonPlan"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Seu Plano de Aula</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Ex: 'Tópico: Fotossíntese. Atividade: Aula expositiva por 20 min, depois uma atividade em grupo...'"
-                        className="min-h-[200px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analisando...
-                  </>
-                ) : (
-                  "Otimizar Meu Plano"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      <Card className="flex flex-col">
-        <CardHeader>
-          <CardTitle className="font-headline">Sugestões</CardTitle>
-          <CardDescription>
-            Aqui estão algumas maneiras de aprimorar seu plano:
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex-grow">
-          {isLoading && (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <CardContent className="grid md:grid-cols-2 gap-8">
+            <div>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                    control={form.control}
+                    name="lessonPlan"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Qual será o tema e a atividade principal da sua aula?</FormLabel>
+                        <FormControl>
+                        <Textarea
+                            placeholder="Ex: 'Aula sobre a Revolução Francesa. Pretendo fazer uma exposição e depois um debate...'"
+                            className="min-h-[200px]"
+                            {...field}
+                        />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <Button type="submit" disabled={isLoading}>
+                    {isLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Consultando...
+                    </>
+                    ) : (
+                    "Revelar Sugestões"
+                    )}
+                </Button>
+                </form>
+            </Form>
             </div>
-          )}
-          {!isLoading && suggestions.length === 0 && (
-            <div className="flex items-center justify-center h-full text-center text-muted-foreground">
-              <p>Suas sugestões personalizadas por IA aparecerão aqui.</p>
+            <div className="flex flex-col rounded-lg border bg-muted/30 p-4">
+                <div className="flex-grow">
+                {isLoading && (
+                    <div className="flex items-center justify-center h-full">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                )}
+                {!isLoading && suggestions.length === 0 && (
+                    <div className="flex items-center justify-center h-full text-center text-muted-foreground">
+                    <p>As sugestões do Oráculo aparecerão aqui.</p>
+                    </div>
+                )}
+                {suggestions.length > 0 && (
+                    <ul className="space-y-4">
+                    {suggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                        <Lightbulb className="h-5 w-5 mt-1 text-yellow-500 flex-shrink-0" />
+                        <span>{suggestion}</span>
+                        </li>
+                    ))}
+                    </ul>
+                )}
+                </div>
             </div>
-          )}
-          {suggestions.length > 0 && (
-            <ul className="space-y-4">
-              {suggestions.map((suggestion, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <Lightbulb className="h-5 w-5 mt-1 text-yellow-500 flex-shrink-0" />
-                  <span>{suggestion}</span>
-                </li>
-              ))}
-            </ul>
-          )}
         </CardContent>
-      </Card>
-    </div>
+    </Card>
   );
 }

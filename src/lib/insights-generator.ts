@@ -149,64 +149,167 @@ function analyzeDissonance(discProfile: DiscProfile, jungianProfile: string): {d
 }
 
 
-// --- Data Generation Functions for Charts ---
+// --- NEW INSIGHTS GENERATION FOR COGNITIVE COMPASS ---
 
-/**
- * Aggregates VARK profile data for chart visualization.
- */
-export function generateVarkData(profiles: UnifiedProfile[]) {
-  const varkCounts: Record<string, number> = { 'Visual': 0, 'Auditivo': 0, "Leitura/Escrita": 0, 'Cinestésico': 0, 'Multimodal': 0 };
-  
-  profiles.forEach(p => {
-    if (p?.varkProfile?.dominant) {
-      const dominantProfile = p.varkProfile.dominant;
-      if(varkCounts[dominantProfile] !== undefined) {
-         varkCounts[dominantProfile]++;
-      }
-    }
-  });
+function calculateCompassData(profiles: UnifiedProfile[]) {
+    if (profiles.length === 0) return null;
 
-  return [
-    { type: 'Visual', value: varkCounts.Visual, fill: 'var(--chart-1)' },
-    { type: 'Auditivo', value: varkCounts.Auditivo, fill: 'var(--chart-2)' },
-    { type: 'Leitura/Escrita', value: varkCounts["Leitura/Escrita"], fill: 'var(--chart-3)' },
-    { type: 'Cinestésico', value: varkCounts.Cinestésico, fill: 'var(--chart-4)' },
-  ].filter(item => item.value > 0);
-}
+    let rhythmStructure = 0; // North: +J, +C, +S | -P
+    let socialInteraction = 0; // East: +E, +I | -I(jung), -S
+    let energySource = 0;      // South: +Benevolence, +Universalism | -Power, -Achievement
+    let contentAbsorption = 0; // West: +V, +K, +S(jung) | -A, -R, -N
 
-/**
- * Formats DISC profile data for the scatter chart.
- */
-export function generateDiscData(profiles: UnifiedProfile[]) {
-    return profiles.map(p => ({
-      name: p.id, // Should map to student name later
-      d: p.discProfile.scores.d,
-      i: p.discProfile.scores.i,
-      s: p.discProfile.scores.s,
-      c: p.discProfile.scores.c,
-    }));
-}
-
-/**
- * Aggregates Schwartz values data.
- */
-export function generateSchwartzData(profiles: UnifiedProfile[]) {
-    const valueCounts = new Map<string, number>();
     profiles.forEach(p => {
-        p.schwartzValues.top_values.forEach(value => {
-            valueCounts.set(value, (valueCounts.get(value) || 0) + 1);
-        });
-    });
+        // Rhythm & Structure
+        if (p.jungianProfile.includes('J')) rhythmStructure++;
+        if (p.jungianProfile.includes('P')) rhythmStructure--;
+        if (p.discProfile.dominant === 'Consciência' || p.discProfile.dominant === 'Estabilidade') rhythmStructure++;
 
-    return Array.from(valueCounts.entries())
-        .map(([value, count]) => ({ value, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5); // Show top 5 dominant values for clarity
+        // Social Interaction
+        if (p.jungianProfile.includes('E')) socialInteraction++;
+        if (p.jungianProfile.includes('I')) socialInteraction--;
+        if (p.discProfile.dominant === 'Influência') socialInteraction++;
+        if (p.discProfile.dominant === 'Estabilidade') socialInteraction--;
+        
+        // Energy Source
+        if (p.schwartzValues.top_values.includes('Benevolência') || p.schwartzValues.top_values.includes('Universalismo')) energySource++;
+        if (p.schwartzValues.top_values.includes('Poder') || p.schwartzValues.top_values.includes('Realização')) energySource--;
+
+        // Content Absorption
+        if (p.varkProfile.dominant === 'Visual' || p.varkProfile.dominant === 'Cinestésico') contentAbsorption++;
+        if (p.varkProfile.dominant === 'Auditivo' || p.varkProfile.dominant === 'Leitura/Escrita') contentAbsorption--;
+        if (p.jungianProfile.includes('S')) contentAbsorption++;
+        if (p.jungianProfile.includes('N')) contentAbsorption--;
+    });
+    
+    // Normalize scores to a 0-100 scale
+    const normalize = (score: number) => Math.max(0, Math.min(100, 50 + (score / profiles.length) * 50));
+
+    return [
+        { axis: "Ritmo & Estrutura", value: normalize(rhythmStructure) },
+        { axis: "Interação Social", value: normalize(socialInteraction) },
+        { axis: "Fonte de Energia", value: normalize(energySource) },
+        { axis: "Absorção de Conteúdo", value: normalize(contentAbsorption) },
+    ];
 }
 
+
+function generateInsightCards(compassData: { axis: string; value: number }[] | null) {
+    if (!compassData) return { climate: "", engagement: "", explanation: "" };
+
+    const climate = {
+        score: (compassData[0].value + compassData[1].value) / 2, // Rhythm & Social
+        text: ""
+    };
+    const engagement = {
+        score: compassData[2].value, // Energy
+        text: ""
+    };
+    const explanation = {
+        score: compassData[3].value, // Absorption
+        text: ""
+    };
+
+    // O Clima da Sala
+    if (compassData[1].value > 60) { // Social Interaction
+        climate.text = `Esta é uma turma altamente colaborativa que se energiza em debates e projetos em grupo. Eles florescem quando podem interagir e construir juntos. `;
+    } else if (compassData[1].value < 40) {
+        climate.text = `Esta turma prefere a concentração individual. Eles produzem melhor quando têm seu próprio espaço e tempo para pensar antes de compartilhar. `;
+    } else {
+        climate.text = `Esta turma é equilibrada, adaptando-se bem tanto a trabalhos em grupo quanto a tarefas individuais. `;
+    }
+    if (compassData[0].value > 60) { // Rhythm
+        climate.text += `Eles valorizam a clareza e a previsibilidade. Forneça roteiros claros e regras bem definidas para que se sintam seguros e focados.`
+    } else {
+        climate.text += `Eles apreciam a flexibilidade. Esteja aberto a desvios no plano de aula e a novas ideias que surgirem no momento.`
+    }
+
+
+    // A Faísca do Engajamento
+    if (engagement.score > 60) { // Purpose & Harmony
+        engagement.text = `O combustível desta turma é o propósito e a conexão. Apresente problemas que tenham um impacto real e mostre como o conhecimento ajuda a comunidade. Crie um ambiente de apoio mútuo.`
+    } else { // Challenge & Achievement
+        engagement.text = `A principal motivação é o desafio e a conquista. Defina metas claras, crie competições saudáveis e celebre as vitórias para manter a turma engajada.`
+    }
+
+    // A Melhor Forma de Explicar
+    if (explanation.score > 60) { // Concrete & Practical
+        explanation.text = `Aposte em uma abordagem concreta e prática. Comece com demonstrações, vídeos ou exemplos do mundo real. Depois, coloque-os para construir, criar ou resolver algo com as próprias mãos.`
+    } else { // Abstract & Theoretical
+        explanation.text = `Esta turma absorve bem conceitos abstratos. Use analogias, debates teóricos e textos ricos em informação. Eles gostam de entender o 'porquê' por trás das coisas.`
+    }
+
+    return {
+        climate: climate.text,
+        engagement: engagement.text,
+        explanation: explanation.text,
+    }
+}
+
+
 /**
- * Filters for students with dissonance alerts.
+ * Generates a textual summary of the class profile for the AI assistant.
  */
+export function generateClassProfileSummary(profiles: UnifiedProfile[]): string {
+    if (profiles.length === 0) {
+        return "Não há dados de perfil suficientes para gerar um resumo da turma.";
+    }
+
+    const compassData = calculateCompassData(profiles);
+    if (!compassData) {
+         return "Não foi possível calcular o perfil da turma.";
+    }
+    const cardInsights = generateInsightCards(compassData);
+
+    const compassSummary = compassData.map(d => {
+        let tendency = "";
+        if (d.value > 65) tendency = "uma forte tendência para";
+        else if (d.value < 35) tendency = "uma baixa tendência para";
+        else tendency = "uma tendência equilibrada para";
+
+        let detail = "";
+        if (d.axis === "Ritmo & Estrutura") detail = d.value > 50 ? "Metódica (prefere estrutura)" : "Adaptável (prefere flexibilidade)";
+        if (d.axis === "Interação Social") detail = d.value > 50 ? "Colaborativa (prefere grupo)" : "Focada (prefere individual)";
+        if (d.axis === "Fonte de Energia") detail = d.value > 50 ? "Propósito & Harmonia" : "Desafio & Conquista";
+        if (d.axis === "Absorção de Conteúdo") detail = d.value > 50 ? "Concreta & Prática" : "Abstrata & Teórica";
+        
+        return `- ${d.axis} (${detail}): ${tendency} ${detail.split('(')[0].trim()}`;
+    }).join('\n');
+    
+    return `Resumo do Mosaico de Aprendizagem da Turma:
+A turma demonstra as seguintes características principais:
+${compassSummary}
+
+Com base nisso, aqui estão os insights pedagógicos:
+- O Clima da Sala: ${cardInsights.climate}
+- A Faísca do Engajamento: ${cardInsights.engagement}
+- A Melhor Forma de Explicar: ${cardInsights.explanation}
+`;
+}
+
+
+// --- Public API for the dashboard ---
+export function getDashboardData(profiles: UnifiedProfile[], students: Student[]) {
+    const processedProfiles = processProfiles(profiles);
+    const compassData = calculateCompassData(processedProfiles);
+    const insightCards = generateInsightCards(compassData);
+    const classProfileSummary = generateClassProfileSummary(processedProfiles);
+    
+    // Old data generation for compatibility, can be removed later
+    const dissonanceData = generateDissonanceData(processedProfiles, students);
+    const teamsData = generateTeamData(processedProfiles, students);
+
+    return {
+        compassData,
+        insightCards,
+        classProfileSummary,
+        dissonanceData, // Retaining for now if any component still uses it
+        teamsData,
+    };
+}
+
+
+// --- Legacy Data Generation Functions (can be phased out) ---
 export function generateDissonanceData(profiles: UnifiedProfile[], students: Student[]) {
     return profiles
         .filter(p => p.dissonanceAlert && p.dissonanceNotes)
@@ -219,9 +322,6 @@ export function generateDissonanceData(profiles: UnifiedProfile[], students: Stu
         });
 }
 
-/**
- * Generates suggested teams based on profiles.
- */
 export function generateTeamData(profiles: UnifiedProfile[], students: Student[]) {
     const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominância' || p.jungianProfile.includes('TJ'));
     const communicators = profiles.filter(p => p.discProfile.dominant === 'Influência' || p.jungianProfile.includes('EF'));
@@ -236,64 +336,4 @@ export function generateTeamData(profiles: UnifiedProfile[], students: Student[]
         { category: 'Planejadores e Analistas', description: 'Ótimos para organizar o trabalho e focar nos detalhes.', students: planners.map(getName).filter((v, i, a) => a.indexOf(v) === i) },
         { category: 'Harmonizadores e Apoiadores', description: 'Essenciais para manter o time unido e motivado.', students: harmonizers.map(getName).filter((v, i, a) => a.indexOf(v) === i) },
     ].filter(team => team.students.length > 0);
-}
-
-
-/**
- * Generates a textual summary of the class profile for the AI assistant.
- */
-export function generateClassProfileSummary(profiles: UnifiedProfile[]): string {
-    if (profiles.length === 0) {
-        return "Não há dados de perfil suficientes para gerar um resumo da turma. Peça aos seus alunos para preencherem o questionário.";
-    }
-
-    // VARK Distribution
-    const varkCounts: Record<string, number> = { 'Visual': 0, 'Auditivo': 0, "Leitura/Escrita": 0, 'Cinestésico': 0, 'Multimodal': 0 };
-    profiles.forEach(p => {
-      if(p?.varkProfile?.dominant) {
-        const dominantProfile = p.varkProfile.dominant;
-        if(varkCounts[dominantProfile] !== undefined) {
-            varkCounts[dominantProfile]++;
-        }
-      }
-    });
-    const totalVark = profiles.length;
-    const varkSummary = Object.entries(varkCounts)
-        .filter(([, count]) => count > 0)
-        .map(([type, count]) => `${type}: ${(count / totalVark * 100).toFixed(0)}%`)
-        .join(', ');
-
-    // DISC Dominance
-    const discCounts: Record<string, number> = { 'Dominância': 0, 'Influência': 0, 'Estabilidade': 0, 'Consciência': 0 };
-    profiles.forEach(p => {
-      if (p?.discProfile?.dominant) {
-        const dominantProfile = p.discProfile.dominant;
-        if (discCounts[dominantProfile] !== undefined) {
-            discCounts[dominantProfile]++;
-        }
-      }
-    });
-    const discSummary = Object.entries(discCounts)
-        .filter(([, count]) => count > 0)
-        .map(([type]) => type)
-        .join(', ');
-        
-    // Schwartz Values
-    const valueCounts = new Map<string, number>();
-    profiles.forEach(p => {
-        p?.schwartzValues?.top_values.forEach(value => {
-            valueCounts.set(value, (valueCounts.get(value) || 0) + 1);
-        });
-    });
-    const topValues = Array.from(valueCounts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([value]) => value)
-        .join(', ');
-
-    return `Perfil Agregado da Turma:
-- Estilos de Aprendizagem (VARK): ${varkSummary}.
-- Perfis Comportamentais Dominantes (DISC): Alta concentração em ${discSummary}.
-- Principais Valores Motivacionais (Schwartz): ${topValues}.
-`;
 }

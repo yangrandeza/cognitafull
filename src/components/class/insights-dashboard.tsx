@@ -3,45 +3,34 @@
 
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VarkChart } from "@/components/class/vark-chart";
-import { DiscChart } from "@/components/class/disc-chart";
-import { SchwartzValues } from "@/components/class/schwartz-values";
-import { DissonanceAlerts } from "@/components/class/dissonance-alerts";
-import { SuggestedTeams } from "@/components/class/suggested-teams";
 import { StudentsList } from "@/components/class/students-list";
 import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { ClassWithStudentData, UnifiedProfile, Student } from "@/lib/types";
-import { Loader2, Share2 } from "lucide-react";
-import {
-  processProfiles,
-  generateVarkData,
-  generateDiscData,
-  generateSchwartzData,
-  generateDissonanceData,
-  generateTeamData,
-  generateClassProfileSummary
-} from "@/lib/insights-generator";
+import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText } from "lucide-react";
+import { getDashboardData } from "@/lib/insights-generator";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { CognitiveCompass } from "./cognitive-compass"; // New component for the radar chart
+import { InsightCard } from "./insight-card"; // New component for the insight cards
 
 
 export function InsightsDashboard({ classId }: { classId: string }) {
-  const [data, setData] = useState<ClassWithStudentData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
+  const [classData, setClassData] = useState<ClassWithStudentData | null>(null);
+  const [dashboardData, setDashboardData] = useState<ReturnType<typeof getDashboardData> | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const classData = await getClassWithStudentsAndProfiles(classId);
-        setData(classData);
-        if (classData && classData.profiles) {
-            const profiles = processProfiles(classData.profiles);
-            setProcessedProfiles(profiles);
+        const fetchedClassData = await getClassWithStudentsAndProfiles(classId);
+        setClassData(fetchedClassData);
+        if (fetchedClassData && fetchedClassData.profiles) {
+            const data = getDashboardData(fetchedClassData.profiles, fetchedClassData.students);
+            setDashboardData(data);
         }
       } catch (error) {
         console.error("Failed to fetch class data:", error);
@@ -69,7 +58,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     );
   }
 
-  if (!data || data.students.length === 0) {
+  if (!classData || classData.students.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -77,7 +66,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         </CardHeader>
         <CardContent className="pt-6 text-center text-muted-foreground space-y-4">
           <p>
-            Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, os dados aparecerão aqui.
+            Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, o Mosaico de Aprendizagem aparecerá aqui.
           </p>
           <Button onClick={handleShareLink}>
             <Share2 className="mr-2 h-4 w-4" />
@@ -88,23 +77,20 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     );
   }
 
-  const { students } = data;
+  if (!dashboardData) {
+    return <p>Erro ao gerar os dados do painel.</p>
+  }
   
-  const varkData = generateVarkData(processedProfiles);
-  const discData = generateDiscData(processedProfiles);
-  const schwartzData = generateSchwartzData(processedProfiles);
-  const dissonanceData = generateDissonanceData(processedProfiles, students);
-  const teamsData = generateTeamData(processedProfiles, students);
-  const classProfileSummary = generateClassProfileSummary(processedProfiles);
-
+  const { students } = classData;
+  const { compassData, insightCards, classProfileSummary } = dashboardData;
 
   return (
     <Tabs defaultValue="insights" className="space-y-4">
       <div className="flex justify-between items-center">
         <TabsList>
-            <TabsTrigger value="insights">Visão Geral dos Insights</TabsTrigger>
-            <TabsTrigger value="students">Lista de Alunos ({students.length})</TabsTrigger>
-            <TabsTrigger value="optimizer">Otimizador de Aula com IA</TabsTrigger>
+            <TabsTrigger value="insights">Mosaico de Aprendizagem</TabsTrigger>
+            <TabsTrigger value="students">Alunos ({students.length})</TabsTrigger>
+            <TabsTrigger value="optimizer">Oráculo Pedagógico</TabsTrigger>
         </TabsList>
         <Button variant="outline" onClick={handleShareLink}>
             <Share2 className="mr-2 h-4 w-4" />
@@ -112,35 +98,82 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         </Button>
       </div>
 
-      <TabsContent value="insights" className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
+      <TabsContent value="insights" className="space-y-6">
+        <Card>
             <CardHeader>
-              <CardTitle className="font-headline">"Qual é a dinâmica do grupo?"</CardTitle>
-              <CardDescription>O Mapa de Perfis (DISC) mostra a distribuição comportamental da turma. Ex: Grupos focados em colaboração (Influência) vs. focados em resultados (Dominância).</CardDescription>
-            </CardHeader>
-            <CardContent className="pl-2">
-              <DiscChart data={discData} />
-            </CardContent>
-          </Card>
-          <Card className="col-span-3">
-            <CardHeader>
-              <CardTitle className="font-headline">"Como esta turma aprende melhor?"</CardTitle>
-               <CardDescription>O Gráfico de Modalidades (VARK) revela as preferências de aprendizagem. Ex: "40% da turma tem preferência Visual. Use mais diagramas e vídeos."</CardDescription>
+                <CardTitle className="font-headline text-2xl">A Bússola Cognitiva da Turma</CardTitle>
+                <CardDescription>
+                    Esta é a "personalidade" da sua turma. O formato do gráfico mostra rapidamente as tendências gerais do grupo, ajudando você a adaptar suas aulas de forma intuitiva.
+                </CardDescription>
             </CardHeader>
             <CardContent>
-              <VarkChart data={varkData} />
+                {compassData && <CognitiveCompass data={compassData} />}
             </CardContent>
-          </Card>
+        </Card>
+        
+        <div className="grid gap-6 md:grid-cols-3">
+            <InsightCard 
+                icon={<Wind className="h-8 w-8 text-blue-500" />}
+                title="O Clima da Sala 🌡️"
+                subtitle="Como eles se sentem mais confortáveis para aprender?"
+                text={insightCards.climate}
+            />
+            <InsightCard 
+                icon={<Sparkles className="h-8 w-8 text-amber-500" />}
+                title="A Faísca do Engajamento ✨"
+                subtitle="O que os faz inclinar para a frente na cadeira?"
+                text={insightCards.engagement}
+            />
+            <InsightCard 
+                icon={<Brain className="h-8 w-8 text-violet-500" />}
+                title="A Melhor Forma de Explicar 🧠"
+                subtitle="Qual abordagem de ensino ressoará mais forte?"
+                text={insightCards.explanation}
+            />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <SchwartzValues data={schwartzData} />
-          <DissonanceAlerts data={dissonanceData} />
-          <SuggestedTeams data={teamsData} />
+        
+        {/* Keeping these for now, can be integrated into a new "Advanced" tab or removed */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 hidden">
+             <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Users />
+                        Sugestão de Equipes
+                    </CardTitle>
+                    <CardDescription>Agrupe alunos por perfis complementares para otimizar o trabalho em equipe.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {dashboardData.teamsData.map((team, index) => (
+                    <div key={index}>
+                        <p className="font-semibold">{team.category}</p>
+                        <p className="text-xs text-muted-foreground mb-1">{team.description}</p>
+                        <p className="text-sm text-foreground/80">{team.students.join(', ')}</p>
+                    </div>
+                    ))}
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline flex items-center gap-2">
+                        <Users />
+                        Alertas de Dissonância
+                    </CardTitle>
+                     <CardDescription>Alunos com perfis conflitantes, que podem gastar mais energia para se adaptar.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    {dashboardData.dissonanceData.map((alert, index) => (
+                    <div key={index} className="p-3 bg-destructive/10 rounded-lg">
+                        <p className="font-semibold text-destructive">{alert.studentName}</p>
+                        <p className="text-sm text-destructive/80">{alert.note}</p>
+                    </div>
+                    ))}
+                </CardContent>
+            </Card>
         </div>
+
       </TabsContent>
       <TabsContent value="students">
-        <StudentsList students={students} profiles={processedProfiles} />
+        <StudentsList students={students} profiles={classData.profiles} />
       </TabsContent>
       <TabsContent value="optimizer">
         <LessonOptimizer classProfileSummary={classProfileSummary} />
