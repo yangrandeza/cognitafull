@@ -8,7 +8,7 @@ import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile } from "@/lib/types";
-import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby } from "lucide-react";
+import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby, BookMarked } from "lucide-react";
 import { getDashboardData, processProfiles, getDemographicsData } from "@/lib/insights-generator";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,7 @@ import { CognitiveCompass } from "./cognitive-compass";
 import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
+import { SavedLessonPlans } from "./saved-lesson-plans";
 
 
 export function InsightsDashboard({ classId }: { classId: string }) {
@@ -87,6 +88,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <TabsList>
             <TabsTrigger value="insights">Mosaico de Aprendizagem</TabsTrigger>
             <TabsTrigger value="students">Alunos ({students.length})</TabsTrigger>
+            <TabsTrigger value="plans">Planos de Aula</TabsTrigger>
             <TabsTrigger value="optimizer">Oráculo Pedagógico</TabsTrigger>
         </TabsList>
         <ShareClassDialog classId={classId} />
@@ -232,6 +234,9 @@ export function InsightsDashboard({ classId }: { classId: string }) {
       </TabsContent>
       <TabsContent value="students">
         <StudentsList students={students} profiles={processedProfiles} />
+      </TabsContent>
+       <TabsContent value="plans">
+        <SavedLessonPlans classId={classId} />
       </TabsContent>
       <TabsContent value="optimizer">
         <LessonOptimizer classProfileSummary={classProfileSummary} classId={classId} teacherId={teacherId} />

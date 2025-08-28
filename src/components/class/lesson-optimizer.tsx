@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect, forwardRef } from "react";
+import { useState, useRef, forwardRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,11 +11,9 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Lightbulb, Loader2, Sparkles, Wand2, FileDown, BookMarked, Save } from "lucide-react";
-import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan, getSavedLessonPlans } from "@/lib/actions";
+import { Lightbulb, Loader2, Sparkles, Wand2, FileDown, Save } from "lucide-react";
+import { getLessonPlanSuggestions, getReformedLessonPlan, saveGeneratedLessonPlan } from "@/lib/actions";
 import type { OptimizeLessonPlanOutput } from "@/ai/flows/lesson-plan-optimizer";
-import type { LessonPlan } from "@/lib/types";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,6 +26,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { revalidatePath } from "next/cache";
 
 
 const formSchema = z.object({
@@ -66,8 +65,6 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
   const [isSaving, setIsSaving] = useState(false);
   const [suggestions, setSuggestions] = useState<OptimizeLessonPlanOutput['suggestions']>([]);
   const [reformulatedPlan, setReformulatedPlan] = useState("");
-  const [savedPlans, setSavedPlans] = useState<LessonPlan[]>([]);
-  const [isLoadingSaved, setIsLoadingSaved] = useState(true);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
 
   const printRef = useRef<HTMLDivElement>(null);
@@ -78,16 +75,6 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
     documentTitle: "plano-de-aula-otimizado",
   });
   
-  const fetchSavedPlans = async () => {
-    setIsLoadingSaved(true);
-    const plans = await getSavedLessonPlans(classId);
-    setSavedPlans(plans);
-    setIsLoadingSaved(false);
-  };
-
-  useEffect(() => {
-    fetchSavedPlans();
-  }, [classId]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -159,10 +146,9 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
         if (result.success && result.newPlan) {
             toast({
                 title: "Sucesso!",
-                description: "Seu plano de aula foi salvo.",
+                description: "Seu plano de aula foi salvo. Você pode vê-lo na aba 'Planos de Aula'.",
             });
-            // Add the new plan to the top of the list for immediate feedback
-            setSavedPlans(prevPlans => [result.newPlan!, ...prevPlans]);
+            
             // Reset state
             setReformulatedPlan("");
             setSuggestions([]);
@@ -186,39 +172,6 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
 
   return (
     <div className="space-y-6">
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                    <BookMarked className="text-primary" /> Planos de Aula Salvos
-                </CardTitle>
-                <CardDescription>
-                    Acesse aqui os planos de aula que você já otimizou e salvou para esta turma.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isLoadingSaved ? (
-                     <div className="flex items-center justify-center p-4">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                ) : savedPlans.length > 0 ? (
-                    <Accordion type="single" collapsible className="w-full">
-                        {savedPlans.map(plan => (
-                            <AccordionItem value={plan.id} key={plan.id}>
-                                <AccordionTrigger className="font-headline">{plan.title}</AccordionTrigger>
-                                <AccordionContent>
-                                    <div className="prose prose-sm dark:prose-invert max-w-none p-4 border rounded-lg bg-muted/20">
-                                        <ReactMarkdown>{plan.reformulatedPlan}</ReactMarkdown>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                ) : (
-                    <p className="text-sm text-center text-muted-foreground p-4">Nenhum plano salvo ainda.</p>
-                )}
-            </CardContent>
-        </Card>
-
         <Card>
             <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
