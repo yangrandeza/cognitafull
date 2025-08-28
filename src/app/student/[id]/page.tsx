@@ -5,6 +5,7 @@ import { AlertTriangle, User } from "lucide-react";
 
 
 export default async function StudentPage({ params }: { params: { id: string } }) {
+    // Directly use params.id as it's available in Server Components
     const data = await getStudentAndProfileById(params.id);
 
     if (!data) {

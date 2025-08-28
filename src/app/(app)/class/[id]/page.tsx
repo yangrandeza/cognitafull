@@ -4,6 +4,7 @@ import { AlertTriangle, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function ClassDetailsPage({ params }: { params: { id: string } }) {
+  // Directly use params.id as it's available in Server Components
   const classData = await getClassById(params.id);
 
   if (!classData) {

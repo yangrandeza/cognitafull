@@ -35,7 +35,6 @@ export function CognitiveCompass({ data }: CognitiveCompassProps) {
       config={chartConfig}
       className="mx-auto aspect-square h-[350px]"
     >
-      <ResponsiveContainer>
         <RadarChart 
             data={data} 
             margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
@@ -59,7 +58,6 @@ export function CognitiveCompass({ data }: CognitiveCompassProps) {
             fillOpacity={0.6}
           />
         </RadarChart>
-      </ResponsiveContainer>
     </ChartContainer>
   )
 }

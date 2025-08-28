@@ -61,6 +61,7 @@ export default function Home() {
                   height={400}
                   className="rounded-lg shadow-2xl"
                   data-ai-hint="estudantes sala de aula"
+                  priority
                 />
               </div>
             </div>
