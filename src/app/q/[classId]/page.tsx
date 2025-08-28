@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState } from 'react';
@@ -48,6 +49,30 @@ const questions = [
       { value: 'K', label: 'Apenas começar a dirigir e se guiar por pontos de referência no caminho.' },
     ],
   },
+   {
+    type: 'radio',
+    part: 'Parte 1: Como Você Aprende (VARK)',
+    question: 'Para se lembrar de algo importante para uma prova, qual método funciona melhor para você?',
+    id: 'vark_3',
+    options: [
+      { value: 'V', label: 'Criar mapas mentais coloridos ou usar marca-textos para grifar o material.' },
+      { value: 'A', label: 'Explicar a matéria em voz alta para si mesmo ou para um colega.' },
+      { value: 'R', label: 'Fazer resumos escritos e reler suas anotações várias vezes.' },
+      { value: 'K', label: 'Associar o conteúdo a um movimento, a uma história ou a um exemplo real.' },
+    ],
+  },
+   {
+    type: 'radio',
+    part: 'Parte 1: Como Você Aprende (VARK)',
+    question: 'Em uma apresentação ou palestra, o que mais prende a sua atenção?',
+    id: 'vark_4',
+    options: [
+      { value: 'V', label: 'O design dos slides, as imagens e os gráficos apresentados.' },
+      { value: 'A', label: 'A clareza da fala, o tom de voz e as histórias contadas pelo palestrante.' },
+      { value: 'R', label: 'A quantidade de dados e informações textuais detalhadas nos slides.' },
+      { value: 'K', label: 'As atividades interativas, demonstrações ao vivo ou estudos de caso práticos.' },
+    ],
+  },
   // DISC
    {
     type: 'disc',
@@ -55,6 +80,55 @@ const questions = [
     instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
     id: 'disc_1',
     words: ['Decidido', 'Influente', 'Paciente', 'Detalhado'],
+  },
+   {
+    type: 'disc',
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_2',
+    words: ['Competitivo', 'Otimista', 'Estável', 'Cauteloso'],
+  },
+   {
+    type: 'disc',
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_3',
+    words: ['Direto', 'Sociável', 'Previsível', 'Perfeccionista'],
+  },
+   {
+    type: 'disc',
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_4',
+    words: ['Ousado', 'Entusiasmado', 'Calmo', 'Sistemático'],
+  },
+   {
+    type: 'disc',
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_5',
+    words: ['Focado em resultados', 'Inspirador', 'Apoiador', 'Lógico'],
+  },
+   {
+    type: 'disc',
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_6',
+    words: ['Exigente', 'Comunicativo', 'Consistente', 'Preciso'],
+  },
+   {
+    type: 'disc',
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_7',
+    words: ['Pioneiro', 'Convincente', 'Leal', 'Cuidadoso'],
+  },
+   {
+    type: 'disc',
+    part: 'Parte 2: Como Você Age e Interage (DISC)',
+    instruction: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+    id: 'disc_8',
+    words: ['Independente', 'Divertido', 'Harmonioso', 'Organizado'],
   },
   // Jungian
   {
@@ -67,14 +141,116 @@ const questions = [
       { value: 'E', label: 'Energizado(a) e animado(a), querendo continuar a interagir.' },
     ],
   },
+  {
+    type: 'radio',
+    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    question: 'Ao lidar com uma nova tarefa, você tende a:',
+    id: 'jung_2',
+    options: [
+      { value: 'S', label: 'Focar nos detalhes práticos e seguir um passo a passo claro.' },
+      { value: 'N', label: 'Pensar nas possibilidades, nas conexões e na visão geral do projeto.' },
+    ],
+  },
+  {
+    type: 'radio',
+    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    question: 'Na hora de tomar uma decisão, o que pesa mais para você?',
+    id: 'jung_3',
+    options: [
+      { value: 'T', label: 'A lógica, a análise imparcial dos fatos e a objetividade.' },
+      { value: 'F', label: 'O impacto da decisão nas pessoas envolvidas e em seus valores pessoais.' },
+    ],
+  },
+  {
+    type: 'radio',
+    part: 'Parte 3: Como Sua Mente Funciona (Jungiano)',
+    question: 'Seu estilo de trabalho preferido é:',
+    id: 'jung_4',
+    options: [
+      { value: 'J', label: 'Ter um plano bem definido, com prazos e metas claras, e segui-lo.' },
+      { value: 'P', label: 'Manter as opções em aberto e se adaptar conforme as coisas acontecem.' },
+    ],
+  },
   // Schwartz
   {
       type: 'scale',
       part: 'Parte 4: O que Realmente te Move (Schwartz)',
       instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
-      statement: 'Ter a liberdade de escolher o que faz e pensa por si mesmo é muito importante para esta pessoa.',
       id: 'schwartz_1',
+      statement: 'Ter a liberdade de escolher o que faz e pensa por si mesmo é muito importante para esta pessoa.',
       value: 'Autodireção'
+  },
+   {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_2',
+      statement: 'Ela busca uma vida cheia de emoção, novidades e desafios.',
+      value: 'Estimulação'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_3',
+      statement: 'Para ela, sentir prazer e aproveitar os bons momentos da vida é uma prioridade.',
+      value: 'Hedonismo'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_4',
+      statement: 'Ser bem-sucedido(a) e mostrar aos outros que é capaz é algo que a motiva muito.',
+      value: 'Realização'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_5',
+      statement: 'Ela gosta de liderar, ser responsável e ter influência sobre as coisas.',
+      value: 'Poder'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_6',
+      statement: 'Viver em um ambiente seguro, estável e organizado é fundamental para seu bem-estar.',
+      value: 'Segurança'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_7',
+      statement: 'Ela se esforça para seguir as regras e nunca decepcionar as pessoas ao seu redor.',
+      value: 'Conformidade'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_8',
+      statement: 'Para ela, é importante respeitar os costumes e as tradições de sua família e cultura.',
+      value: 'Tradição'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_9',
+      statement: 'Ajudar as pessoas que ama e ser um amigo(a) leal é uma de suas maiores qualidades.',
+      value: 'Benevolência'
+  },
+  {
+      type: 'scale',
+      part: 'Parte 4: O que Realmente te Move (Schwartz)',
+      instruction: 'Para cada frase, indique o quanto a pessoa descrita se parece com você.',
+      id: 'schwartz_10',
+      statement: 'Ela se preocupa muito com a igualdade, a justiça social e a proteção do meio ambiente.',
+      value: 'Universalismo'
   },
   // Finish
   {
@@ -97,6 +273,8 @@ export default function QuestionnairePage() {
   const classId = params.classId as string;
 
   const currentQuestion = questions[step];
+  const isLastQuestion = step === totalQuestions;
+
 
   const handleStudentInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -243,7 +421,7 @@ export default function QuestionnairePage() {
                                     value={answers[`${currentQuestion.id}_most`] || ''}
                                     onValueChange={(value) => handleDiscAnswerChange(currentQuestion.id, 'most', value)}
                                 >
-                                    <RadioGroupItem value={word} id={`most_${index}`} />
+                                    <RadioGroupItem value={word} id={`most_${currentQuestion.id}_${index}`} />
                                 </RadioGroup>
                             </div>
                             <Label className="text-center font-medium">{word}</Label>
@@ -252,7 +430,7 @@ export default function QuestionnairePage() {
                                     value={answers[`${currentQuestion.id}_least`] || ''}
                                     onValueChange={(value) => handleDiscAnswerChange(currentQuestion.id, 'least', value)}
                                 >
-                                <RadioGroupItem value={word} id={`least_${index}`} />
+                                <RadioGroupItem value={word} id={`least_${currentQuestion.id}_${index}`} />
                                 </RadioGroup>
                             </div>
                         </div>
@@ -269,8 +447,8 @@ export default function QuestionnairePage() {
                     >
                         {[{val: 1, label: "Nada parecido comigo"}, {val: 2, label: "Um pouco como eu"}, {val: 3, label: "Parecido comigo"}, {val: 4, label: "Muito parecido comigo"}].map(({val, label}) => (
                             <div key={val} className="flex items-center space-x-2 sm:flex-col sm:space-x-0 sm:space-y-2 py-2 sm:py-0">
-                                <RadioGroupItem value={String(val)} id={`scale-${val}`} />
-                                <Label htmlFor={`scale-${val}`} className="text-xs text-muted-foreground text-center cursor-pointer">
+                                <RadioGroupItem value={String(val)} id={`scale-${currentQuestion.id}-${val}`} />
+                                <Label htmlFor={`scale-${currentQuestion.id}-${val}`} className="text-xs text-muted-foreground text-center cursor-pointer">
                                     {label}
                                 </Label>
                             </div>
@@ -283,15 +461,15 @@ export default function QuestionnairePage() {
                 <Button variant="outline" onClick={handleBack} disabled={step === 1}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
-                {step < totalQuestions ? (
-                     <Button onClick={handleNext}>
-                        Próximo <ArrowRight className="ml-2 h-4 w-4" />
-                     </Button>
-                ) : (
+                {isLastQuestion ? (
                     <Button onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Finalizar e Enviar
                     </Button>
+                ) : (
+                     <Button onClick={handleNext}>
+                        Próximo <ArrowRight className="ml-2 h-4 w-4" />
+                     </Button>
                 )}
             </CardFooter>
             </>

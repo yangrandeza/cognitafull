@@ -46,8 +46,8 @@ export type NewStudent = {
     classId: string;
     quizStatus: 'completed';
     createdAt: FieldValue;
+    unifiedProfileId?: string;
 };
-
 
 export type VarkProfile = {
   dominant: 'Visual' | 'Auditory' | 'Reading' | 'Kinesthetic' | 'Multimodal';
@@ -59,11 +59,18 @@ export type DiscProfile = {
   scores: { d: number; i: number; s: number; c: number };
 };
 
-export type UnifiedProfile = {
+// This represents the raw data fetched from Firestore before client-side processing
+export type RawUnifiedProfile = {
   id: string;
   studentId: string;
   classId: string;
-  rawAnswers: QuizAnswers; // Temporary field until processing function is built
+  rawAnswers: QuizAnswers;
+  createdAt: FieldValue;
+};
+
+
+// This represents the fully processed profile after client-side calculations
+export type UnifiedProfile = Omit<RawUnifiedProfile, 'rawAnswers'> & {
   varkProfile: VarkProfile;
   discProfile: DiscProfile;
   jungianProfile: string; // e.g., "ENFP"
@@ -73,8 +80,8 @@ export type UnifiedProfile = {
   };
   dissonanceAlert: boolean;
   dissonanceNotes?: string;
-  createdAt: FieldValue;
 };
+
 
 export type NewUnifiedProfile = {
     studentId: string;
@@ -92,5 +99,5 @@ export type Teacher = {
 
 export type ClassWithStudentData = Class & {
   students: Student[];
-  profiles: UnifiedProfile[];
+  profiles: RawUnifiedProfile[]; // Fetch raw profiles
 };

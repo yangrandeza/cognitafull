@@ -1,13 +1,136 @@
-import type { UnifiedProfile, Student, VarkProfile } from "./types";
+import type { UnifiedProfile, Student, QuizAnswers, VarkProfile, DiscProfile, RawUnifiedProfile } from "./types";
+
+/**
+ * Main processing function to convert raw profiles into fully typed profiles.
+ * This simulates the work of a backend cloud function.
+ */
+export function processProfiles(rawProfiles: RawUnifiedProfile[]): UnifiedProfile[] {
+  return rawProfiles.map(rawProfile => {
+    const { rawAnswers, ...rest } = rawProfile;
+    // This check is to avoid reprocessing profiles that might already be processed
+    if ('varkProfile' in rest && (rest as any).varkProfile) {
+        return rest as UnifiedProfile;
+    }
+    
+    return {
+      ...rest,
+      varkProfile: calculateVark(rawAnswers),
+      discProfile: calculateDisc(rawAnswers),
+      jungianProfile: calculateJungian(rawAnswers),
+      schwartzValues: calculateSchwartz(rawAnswers),
+      dissonanceAlert: false, // Placeholder
+      dissonanceNotes: "", // Placeholder
+    };
+  });
+}
+
+// --- Individual Profile Calculation Functions ---
+
+function calculateVark(answers: QuizAnswers): VarkProfile {
+    const scores = { v: 0, a: 0, r: 0, k: 0 };
+    const varkQuestions = ['vark_1', 'vark_2', 'vark_3', 'vark_4'];
+    varkQuestions.forEach(id => {
+        const answer = answers[id];
+        if (answer === 'V') scores.v++;
+        if (answer === 'A') scores.a++;
+        if (answer === 'R') scores.r++;
+        if (answer === 'K') scores.k++;
+    });
+
+    const dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+    
+    let dominantLabel: VarkProfile['dominant'] = 'Multimodal';
+    if (dominant === 'v') dominantLabel = 'Visual';
+    if (dominant === 'a') dominantLabel = 'Auditory';
+    if (dominant === 'r') dominantLabel = 'Reading';
+    if (dominant === 'k') dominantLabel = 'Kinesthetic';
+    
+    return { dominant: dominantLabel, scores };
+}
+
+function calculateDisc(answers: QuizAnswers): DiscProfile {
+    // Simplified DISC calculation based on word choices
+    const scores = { d: 0, i: 0, s: 0, c: 0 };
+    const wordMap = {
+        'Decidido': 'd', 'Competitivo': 'd', 'Direto': 'd', 'Ousado': 'd', 'Focado em resultados': 'd', 'Exigente': 'd', 'Pioneiro': 'd', 'Independente': 'd',
+        'Influente': 'i', 'Otimista': 'i', 'Sociável': 'i', 'Entusiasmado': 'i', 'Inspirador': 'i', 'Comunicativo': 'i', 'Convincente': 'i', 'Divertido': 'i',
+        'Paciente': 's', 'Estável': 's', 'Previsível': 's', 'Calmo': 's', 'Apoiador': 's', 'Consistente': 's', 'Leal': 's', 'Harmonioso': 's',
+        'Detalhado': 'c', 'Cauteloso': 'c', 'Perfeccionista': 'c', 'Sistemático': 'c', 'Lógico': 'c', 'Preciso': 'c', 'Cuidadoso': 'c', 'Organizado': 'c',
+    };
+
+    for (let q = 1; q <= 8; q++) {
+        const mostKey = `disc_${q}_most`;
+        const leastKey = `disc_${q}_least`;
+        const mostWord = answers[mostKey];
+        const leastWord = answers[leastKey];
+
+        if (mostWord && wordMap[mostWord]) {
+            scores[wordMap[mostWord]]++;
+        }
+        if (leastWord && wordMap[leastWord]) {
+            scores[wordMap[leastWord]]--;
+        }
+    }
+
+    const dominantKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+    
+    let dominantLabel: DiscProfile['dominant'] = 'Influence'; // Default
+    if (dominantKey === 'd') dominantLabel = 'Dominance';
+    if (dominantKey === 'i') dominantLabel = 'Influence';
+    if (dominantKey === 's') dominantLabel = 'Steadiness';
+    if (dominantKey === 'c') dominantLabel = 'Conscientiousness';
+
+    return { dominant: dominantLabel, scores };
+}
+
+function calculateJungian(answers: QuizAnswers): string {
+    let profile = '';
+    profile += answers['jung_1'] === 'I' ? 'I' : 'E';
+    profile += answers['jung_2'] === 'S' ? 'S' : 'N';
+    profile += answers['jung_3'] === 'T' ? 'T' : 'F';
+    profile += answers['jung_4'] === 'J' ? 'J' : 'P';
+    return profile;
+}
+
+function calculateSchwartz(answers: QuizAnswers): { top_values: string[], scores: Record<string, number> } {
+    const scores: Record<string, number> = {};
+    const valueMap = {
+        'schwartz_1': 'Autodireção',
+        'schwartz_2': 'Estimulação',
+        'schwartz_3': 'Hedonismo',
+        'schwartz_4': 'Realização',
+        'schwartz_5': 'Poder',
+        'schwartz_6': 'Segurança',
+        'schwartz_7': 'Conformidade',
+        'schwartz_8': 'Tradição',
+        'schwartz_9': 'Benevolência',
+        'schwartz_10': 'Universalismo',
+    };
+
+    Object.keys(valueMap).forEach(key => {
+        if(answers[key]) {
+            scores[valueMap[key]] = parseInt(answers[key], 10);
+        }
+    });
+
+    const top_values = Object.entries(scores)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([key]) => key);
+
+    return { top_values, scores };
+}
+
+// --- Data Generation Functions for Charts ---
 
 /**
  * Aggregates VARK profile data for chart visualization.
  */
 export function generateVarkData(profiles: UnifiedProfile[]) {
-  const varkCounts = { Visual: 0, Auditory: 0, Reading: 0, Kinesthetic: 0, Multimodal: 0 };
+  const varkCounts: Record<VarkProfile['dominant'], number> = { Visual: 0, Auditory: 0, Reading: 0, Kinesthetic: 0, Multimodal: 0 };
   
   profiles.forEach(p => {
-    if (p.varkProfile.dominant) {
+    if (p?.varkProfile?.dominant) {
       varkCounts[p.varkProfile.dominant]++;
     }
   });
@@ -66,7 +189,6 @@ export function generateDissonanceData(profiles: UnifiedProfile[], students: Stu
 
 /**
  * Generates suggested teams based on profiles.
- * This is a simplistic implementation and can be greatly improved.
  */
 export function generateTeamData(profiles: UnifiedProfile[], students: Student[]) {
     const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominance');
@@ -77,10 +199,10 @@ export function generateTeamData(profiles: UnifiedProfile[], students: Student[]
     const getName = (profile: UnifiedProfile) => students.find(s => s.id === profile.studentId)?.name || 'Desconhecido';
 
     return [
-        { category: 'Líderes e Inovadores', students: leaders.map(getName) },
-        { category: 'Comunicadores e Influenciadores', students: communicators.map(getName) },
-        { category: 'Planejadores e Analistas', students: planners.map(getName) },
-        { category: 'Harmonizadores e Executores', students: harmonizers.map(getName) },
+        { category: 'Líderes e Inovadores (Dominância)', students: leaders.map(getName) },
+        { category: 'Comunicadores e Influenciadores (Influência)', students: communicators.map(getName) },
+        { category: 'Planejadores e Analistas (Conformidade)', students: planners.map(getName) },
+        { category: 'Harmonizadores e Executores (Estabilidade)', students: harmonizers.map(getName) },
     ].filter(team => team.students.length > 0);
 }
 
@@ -90,12 +212,12 @@ export function generateTeamData(profiles: UnifiedProfile[], students: Student[]
  */
 export function generateClassProfileSummary(profiles: UnifiedProfile[]): string {
     if (profiles.length === 0) {
-        return "Não há dados de perfil suficientes para gerar um resumo da turma.";
+        return "Não há dados de perfil suficientes para gerar um resumo da turma. Peça aos seus alunos para preencherem o questionário.";
     }
 
     // VARK Distribution
-    const varkCounts = { Visual: 0, Auditory: 0, Reading: 0, Kinesthetic: 0, Multimodal: 0 };
-    profiles.forEach(p => varkCounts[p.varkProfile.dominant]++);
+    const varkCounts: Record<VarkProfile['dominant'], number> = { Visual: 0, Auditory: 0, Reading: 0, Kinesthetic: 0, Multimodal: 0 };
+    profiles.forEach(p => p?.varkProfile && varkCounts[p.varkProfile.dominant]++);
     const totalVark = profiles.length;
     const varkSummary = Object.entries(varkCounts)
         .filter(([, count]) => count > 0)
@@ -103,8 +225,8 @@ export function generateClassProfileSummary(profiles: UnifiedProfile[]): string 
         .join(', ');
 
     // DISC Dominance
-    const discCounts = { Dominance: 0, Influence: 0, Steadiness: 0, Conscientiousness: 0 };
-    profiles.forEach(p => discCounts[p.discProfile.dominant]++);
+    const discCounts: Record<DiscProfile['dominant'], number> = { Dominance: 0, Influence: 0, Steadiness: 0, Conscientiousness: 0 };
+    profiles.forEach(p => p?.discProfile && discCounts[p.discProfile.dominant]++);
     const discSummary = Object.entries(discCounts)
         .filter(([, count]) => count > 0)
         .map(([type]) => type)
@@ -113,7 +235,7 @@ export function generateClassProfileSummary(profiles: UnifiedProfile[]): string 
     // Schwartz Values
     const valueCounts = new Map<string, number>();
     profiles.forEach(p => {
-        p.schwartzValues.top_values.forEach(value => {
+        p?.schwartzValues?.top_values.forEach(value => {
             valueCounts.set(value, (valueCounts.get(value) || 0) + 1);
         });
     });

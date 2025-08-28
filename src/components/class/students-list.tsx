@@ -11,18 +11,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Student } from "@/lib/types";
+import type { Student, UnifiedProfile } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
-export function StudentsList({ students }: { students: Student[] }) {
+export function StudentsList({ students, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
   const { toast } = useToast();
 
   const handleGeneratePdf = (studentName: string) => {
     toast({
-      title: "Gerando Relatório...",
-      description: `Um relatório em PDF para ${studentName} está sendo gerado.`,
+      title: "Função em Desenvolvimento",
+      description: `A geração de relatório em PDF para ${studentName} estará disponível em breve.`,
     });
   };
+
+  const getStudentProfile = (studentId: string) => {
+    return profiles.find(p => p.studentId === studentId);
+  }
 
   return (
     <Card>
@@ -35,32 +39,45 @@ export function StudentsList({ students }: { students: Student[] }) {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Idade</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead>Perfil Dominante (DISC)</TableHead>
+              <TableHead>Estilo de Aprendizagem (VARK)</TableHead>
+              <TableHead className="text-right">Relatório Individual</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.map((student) => (
-              <TableRow key={student.id}>
-                <TableCell className="font-medium">{student.name}</TableCell>
-                <TableCell>{student.age}</TableCell>
-                <TableCell>
-                  <Badge variant={student.quizStatus === 'completed' ? 'default' : 'outline'} className={student.quizStatus === 'completed' ? 'bg-green-600' : ''}>
-                    {student.quizStatus === 'completed' ? 'Concluído' : 'Pendente'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleGeneratePdf(student.name)}
-                    disabled={student.quizStatus !== 'completed'}
-                  >
-                    Gerar PDF
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {students.map((student) => {
+              const profile = getStudentProfile(student.id);
+              return (
+                 <TableRow key={student.id}>
+                    <TableCell className="font-medium">{student.name}</TableCell>
+                    <TableCell>{student.age}</TableCell>
+                    <TableCell>
+                      {profile ? (
+                        <Badge variant="secondary">{profile.discProfile.dominant}</Badge>
+                      ) : (
+                        <Badge variant="outline">Pendente</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                       {profile ? (
+                        <Badge variant="secondary">{profile.varkProfile.dominant}</Badge>
+                      ) : (
+                        <Badge variant="outline">Pendente</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleGeneratePdf(student.name)}
+                        disabled={!profile}
+                      >
+                        Gerar PDF
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </CardContent>
