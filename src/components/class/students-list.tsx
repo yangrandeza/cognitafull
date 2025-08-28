@@ -55,14 +55,14 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                     <TableCell className="font-medium">{student.name}</TableCell>
                     <TableCell>{student.age}</TableCell>
                     <TableCell>
-                      {profile ? (
+                      {profile?.discProfile ? (
                         <Badge variant="secondary">{profile.discProfile.dominant}</Badge>
                       ) : (
                         <Badge variant="outline">Pendente</Badge>
                       )}
                     </TableCell>
                     <TableCell>
-                       {profile ? (
+                       {profile?.varkProfile ? (
                         <Badge variant="secondary">{profile.varkProfile.dominant}</Badge>
                       ) : (
                         <Badge variant="outline">Pendente</Badge>

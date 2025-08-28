@@ -9,17 +9,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { ClassWithStudentData, UnifiedProfile, Student } from "@/lib/types";
 import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle } from "lucide-react";
-import { getDashboardData } from "@/lib/insights-generator";
+import { getDashboardData, processProfiles } from "@/lib/insights-generator";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { CognitiveCompass } from "./cognitive-compass"; // New component for the radar chart
-import { InsightCard } from "./insight-card"; // New component for the insight cards
+import { CognitiveCompass } from "./cognitive-compass";
+import { InsightCard } from "./insight-card";
 
 
 export function InsightsDashboard({ classId }: { classId: string }) {
   const [loading, setLoading] = useState(true);
   const [classData, setClassData] = useState<ClassWithStudentData | null>(null);
   const [dashboardData, setDashboardData] = useState<ReturnType<typeof getDashboardData> | null>(null);
+  const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,6 +32,8 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         if (fetchedClassData && fetchedClassData.profiles) {
             const data = getDashboardData(fetchedClassData.profiles, fetchedClassData.students);
             setDashboardData(data);
+            const profiles = processProfiles(fetchedClassData.profiles);
+            setProcessedProfiles(profiles);
         }
       } catch (error) {
         console.error("Failed to fetch class data:", error);
@@ -174,7 +177,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
 
       </TabsContent>
       <TabsContent value="students">
-        <StudentsList students={students} profiles={classData.profiles} />
+        <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
       <TabsContent value="optimizer">
         <LessonOptimizer classProfileSummary={classProfileSummary} />
