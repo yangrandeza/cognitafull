@@ -127,8 +127,8 @@ export type LearningStrategy = {
     classId: string;
     teacherId: string;
     title: string;
-    originalLessonPlan: string; // The user's input
-    suggestions: string; // The AI's suggestions
+    lessonPlan: string; 
+    strategies: StrategyCard[];
     createdAt: string;
 }
 
@@ -136,8 +136,8 @@ export type NewLearningStrategy = {
     classId: string;
     teacherId: string;
     title: string;
-    originalLessonPlan: string;
-    suggestions: string;
+    lessonPlan: string;
+    strategies: StrategyCard[];
     createdAt: Date;
 }
 

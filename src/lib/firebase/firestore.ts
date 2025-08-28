@@ -308,7 +308,7 @@ export const getStrategiesByClass = async (classId: string): Promise<LearningStr
         // orderBy('createdAt', 'desc') // Requires a composite index, removed for simplicity
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
+    const strategies = querySnapshot.docs.map(doc => {
         const data = doc.data();
         return {
             id: doc.id,
@@ -316,4 +316,6 @@ export const getStrategiesByClass = async (classId: string): Promise<LearningStr
             createdAt: (data.createdAt as Timestamp)?.toDate().toISOString(),
         } as LearningStrategy
     });
+    // Sort manually after fetching to avoid needing a composite index
+    return strategies.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }

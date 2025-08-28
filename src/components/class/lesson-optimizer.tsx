@@ -94,14 +94,12 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onStr
   async function onSaveStrategies(values: z.infer<typeof saveFormSchema>) {
     setIsSaving(true);
     try {
-        const suggestionsText = strategies.map(s => `### ${s.methodology}: ${s.headline}\n\n**Como Fazer:** ${s.details}\n\n**Por que Funciona:** ${s.connection}\n\n**Para Saber Mais:** [Clique aqui](${s.reference})`).join('\n\n---\n\n');
-        
         await saveLearningStrategy({
             classId,
             teacherId,
             title: values.title,
-            originalLessonPlan: form.getValues("lessonPlan"),
-            suggestions: suggestionsText,
+            lessonPlan: form.getValues("lessonPlan"),
+            strategies: strategies, // Save the array of objects directly
         });
 
         // Reset state and notify parent
