@@ -1,3 +1,4 @@
+
 import {
   auth,
   db
@@ -10,20 +11,27 @@ import {
   signOut,
   User,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { UserProfile } from '../types';
 
 const createUserProfileInFirestore = async (user: User, additionalData: Partial<UserProfile> = {}) => {
     const userRef = doc(db, 'users', user.uid);
-    const data: UserProfile = {
-        id: user.uid,
-        email: user.email || '',
-        name: user.displayName || additionalData.name || 'Usuário Anônimo',
-        role: 'teacher', // Default role
-        ...additionalData,
-    };
-    await setDoc(userRef, data);
-    return data;
+    
+    // Check if user profile already exists
+    const docSnap = await getDoc(userRef);
+
+    if (!docSnap.exists()) {
+        const data: UserProfile = {
+            id: user.uid,
+            email: user.email || '',
+            name: user.displayName || additionalData.name || 'Usuário Anônimo',
+            role: 'teacher', // Default role
+            ...additionalData,
+        };
+        await setDoc(userRef, data);
+        return data;
+    }
+    return docSnap.data() as UserProfile
 }
 
 // Sign up with email and password

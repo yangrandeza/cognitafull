@@ -1,6 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,16 +21,36 @@ import {
   Settings,
   LogOut,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useUserProfile } from "@/hooks/use-user-profile";
+import { userSignOut } from "@/lib/firebase/auth";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Painel" },
   { href: "/admin", icon: Users, label: "Admin" },
 ];
 
+function getInitials(name: string = ""): string {
+    return name
+        .split(' ')
+        .map(n => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, userProfile, loading } = useUserProfile();
+
+  const handleSignOut = async () => {
+    await userSignOut();
+    router.push("/login");
+  };
+  
+  const isAdmin = userProfile?.role === 'admin';
 
   return (
     <aside className="w-64 flex-shrink-0 border-r bg-card flex flex-col">
@@ -40,59 +62,74 @@ export function AppSidebar() {
       </div>
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2">
-          {navItems.map((item) => (
-            <li key={item.label}>
-              <Link href={item.href}>
-                <Button
-                  variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                >
-                  <item.icon className="mr-2 h-4 w-4" />
-                  {item.label}
-                </Button>
-              </Link>
-            </li>
-          ))}
+          {navItems.map((item) => {
+            if (item.href === '/admin' && !isAdmin) {
+                return null;
+            }
+            return (
+                <li key={item.label}>
+                <Link href={item.href}>
+                    <Button
+                    variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
+                    className="w-full justify-start"
+                    >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.label}
+                    </Button>
+                </Link>
+                </li>
+            )
+          })}
         </ul>
       </nav>
       <div className="mt-auto border-t p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-between">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://picsum.photos/40" alt="Avatar do usuário" data-ai-hint="pessoa" />
-                  <AvatarFallback>CA</AvatarFallback>
-                </Avatar>
-                <div className="text-left">
-                    <p className="text-sm font-medium">Carlos</p>
-                    <p className="text-xs text-muted-foreground">Professor</p>
-                </div>
-              </div>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            <Button variant="ghost" className="w-full justify-between" disabled={loading}>
+              {loading ? (
+                <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+              ) : user && userProfile ? (
+                 <>
+                    <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.photoURL || undefined} alt="Avatar do usuário" data-ai-hint="pessoa" />
+                        <AvatarFallback>{getInitials(userProfile.name)}</AvatarFallback>
+                        </Avatar>
+                        <div className="text-left">
+                            <p className="text-sm font-medium">{userProfile.name}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{userProfile.role === 'teacher' ? 'Professor(a)' : 'Admin'}</p>
+                        </div>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                 </>
+              ) : (
+                <p>Nenhum usuário logado</p>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Carlos</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  carlos@escolaexemplo.com
-                </p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {userProfile && (
+                 <>
+                    <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{userProfile.name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                        {userProfile.email}
+                        </p>
+                    </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                 </>
+            )}
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               <span>Configurações</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <Link href="/login">
-                <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sair</span>
-                </DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sair</span>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
