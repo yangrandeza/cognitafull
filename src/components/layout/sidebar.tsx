@@ -51,6 +51,14 @@ export function AppSidebar() {
     router.push("/login");
   };
   
+  const handleSettingsClick = () => {
+    if (userProfile?.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/dashboard');
+    }
+  }
+
   const userRole = userProfile?.role;
 
   return (
@@ -123,7 +131,7 @@ export function AppSidebar() {
                     <DropdownMenuSeparator />
                  </>
             )}
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSettingsClick}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Configurações</span>
             </DropdownMenuItem>
