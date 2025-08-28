@@ -108,7 +108,7 @@ function generateManualInsight(profile: UnifiedProfile): string {
         participation = `Chame-me para debates abertos e brainstorming em grupo. Adoro compartilhar minhas ideias!`;
     }
     
-    return `**Feedback:** ${feedback} \n**Tarefas:** ${tasks} \n**Participação:** ${participation}`;
+    return `**Feedback:** ${feedback}\n**Tarefas:** ${tasks}\n**Participação:** ${participation}`;
 }
 
 function generateTips(profile: UnifiedProfile): string[] {
@@ -134,6 +134,10 @@ function generateTips(profile: UnifiedProfile): string[] {
 
     if (jungianProfile.includes('P')) {
         tips.push("Sua flexibilidade é uma força, mas lembre-se de usar agendas ou aplicativos de tarefas para não perder os prazos importantes.");
+    }
+
+    if (tips.length === 0) {
+        tips.push("Seu perfil é bastante equilibrado! Continue explorando diferentes formas de aprender para ver o que funciona melhor para cada assunto.");
     }
 
     return tips;

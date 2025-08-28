@@ -48,6 +48,17 @@ export function StudentDashboard({ student, profile }: StudentDashboardProps) {
         return <div>Gerando insights...</div>
     }
 
+    // Helper para renderizar o manual com quebras de linha
+    const renderManual = (manualText: string) => {
+        return manualText.split('\n').map((line, index) => {
+            if (line.startsWith('**')) {
+                 const parts = line.split('**');
+                 return <p key={index} className="mt-2"><strong className="text-foreground">{parts[1]}:</strong> {parts[2]}</p>
+            }
+            return <span key={index}>{line}</span>
+        })
+    }
+
     return (
         <div className="space-y-6">
              <Card>
@@ -74,7 +85,7 @@ export function StudentDashboard({ student, profile }: StudentDashboardProps) {
                     title="O Que Me Move ❤️"
                     text={insights.motivation}
                 />
-                <InsightQuadrant 
+                <InsightQuadrant
                     icon={<BookOpen className="h-6 w-6" />}
                     title="Meu 'Manual de Instruções' 📖"
                     text={insights.manual}
