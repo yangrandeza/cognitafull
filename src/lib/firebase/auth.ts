@@ -15,60 +15,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, addDoc, collection, updateDoc } from 'firebase/firestore';
 import type { UserProfile, Organization } from '../types';
-
-const createOrganizationAndAdmin = async (user: User, fullName: string) => {
-    // 1. Create the organization
-    const orgData: Omit<Organization, 'id'> = {
-        name: `${fullName}'s Organization`,
-        createdAt: serverTimestamp(),
-    };
-    const orgRef = await addDoc(collection(db, 'organizations'), orgData);
-
-    // 2. Create the admin user profile
-    const userProfileData: UserProfile = {
-        id: user.uid,
-        email: user.email || '',
-        name: fullName,
-        role: 'admin',
-        organizationId: orgRef.id, 
-    };
-    await setDoc(doc(db, 'users', user.uid), userProfileData);
-
-    // 3. Update Firebase Auth profile
-    await updateProfile(user, { displayName: fullName });
-    
-    return userProfileData;
-}
-
-
-const createUserProfileInFirestore = async (user: User, additionalData: Partial<UserProfile> = {}) => {
-    const userRef = doc(db, 'users', user.uid);
-    const docSnap = await getDoc(userRef);
-
-    if (!docSnap.exists()) {
-        // This is the first sign-in for this user, likely an admin creating their account
-        if(additionalData.role === 'admin') {
-            return await createOrganizationAndAdmin(user, additionalData.name || 'Admin');
-        }
-
-        // For subsequent users (teachers added by admin, or Google sign-ins without a profile)
-        // a more complex logic for assigning organization would be needed.
-        // For the MVP, we assume the first user is an admin.
-        const data: UserProfile = {
-            id: user.uid,
-            email: user.email || '',
-            name: user.displayName || additionalData.name || 'Usuário Anônimo',
-            role: 'teacher', // Default role for non-admins
-            ...additionalData,
-        };
-        await setDoc(userRef, data);
-        if (user.displayName !== data.name) {
-            await updateProfile(user, { displayName: data.name });
-        }
-        return data;
-    }
-    return docSnap.data() as UserProfile;
-}
+import { createUserProfileInFirestore } from './firestore';
 
 // Sign up with email and password (intended for the first Admin user)
 export const signUpWithEmail = async (email, password, fullName) => {
@@ -80,7 +27,7 @@ export const signUpWithEmail = async (email, password, fullName) => {
     );
     const user = userCredential.user;
     // The first user to sign up is always an admin and creates the organization.
-    await createUserProfileInFirestore(user, { name: fullName, role: 'admin' });
+    await createUserProfileInFirestore(user, { name: fullName });
     return { user, error: null };
   } catch (error) {
     return { user: null, error: error.message };
@@ -110,11 +57,7 @@ export const signInWithGoogle = async () => {
     // This will create a profile if one doesn't exist. 
     // In a real app, you'd need logic to assign them to an org.
     // For the MVP, we'll assume they are the first user (admin) if no profile exists.
-    const userRef = doc(db, 'users', user.uid);
-    const docSnap = await getDoc(userRef);
-    if (!docSnap.exists()) {
-        await createUserProfileInFirestore(user, { name: user.displayName || 'Admin', role: 'admin' });
-    }
+    await createUserProfileInFirestore(user, { name: user.displayName || 'Admin' });
     return { user, error: null };
   } catch (error) {
     return { user: null, error: error.message };

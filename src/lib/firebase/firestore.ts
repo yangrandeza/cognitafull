@@ -16,8 +16,9 @@ import {
   runTransaction,
   Timestamp,
   orderBy,
+  setDoc,
 } from 'firebase/firestore';
-import { updateProfile } from "firebase/auth";
+import { updateProfile, User } from "firebase/auth";
 import type {
   UserProfile,
   Class,
@@ -35,15 +36,54 @@ import type {
 } from '../types';
 import { processProfiles } from '../insights-generator';
 
-// User Profile Functions
-export const createUserProfile = async (
-  userId: string,
-  data: Omit<UserProfile, 'id'>
-) => {
-  const userRef = doc(db, 'users', userId);
-  await writeBatch(db).set(userRef, data).commit();
-};
+const createOrganizationAndAdmin = async (transaction: any, user: User, fullName: string) => {
+    // 1. Create the organization
+    const orgData: Omit<Organization, 'id'> = {
+        name: `${fullName}'s Organization`,
+        createdAt: serverTimestamp(),
+    };
+    const orgRef = doc(collection(db, 'organizations'));
+    transaction.set(orgRef, orgData);
 
+    // 2. Create the admin user profile
+    const userProfileData: UserProfile = {
+        id: user.uid,
+        email: user.email || '',
+        name: fullName,
+        role: 'admin',
+        organizationId: orgRef.id, 
+    };
+    const userRef = doc(db, 'users', user.uid);
+    transaction.set(userRef, userProfileData);
+    
+    // Auth profile is updated outside transaction
+    
+    return userProfileData;
+}
+
+
+export const createUserProfileInFirestore = async (user: User, additionalData: Partial<UserProfile> = {}) => {
+    const userRef = doc(db, 'users', user.uid);
+    
+    return await runTransaction(db, async (transaction) => {
+        const docSnap = await transaction.get(userRef);
+
+        if (!docSnap.exists()) {
+            // First time user is always an admin and creates an organization
+            const fullName = additionalData.name || user.displayName || 'Admin';
+            const profile = await createOrganizationAndAdmin(transaction, user, fullName);
+            
+            // This needs to be run outside the transaction, but we can't await it here.
+            // It's a "best effort" update for the display name.
+            updateProfile(user, { displayName: fullName });
+
+            return profile;
+        }
+        return docSnap.data() as UserProfile;
+    });
+}
+
+// User Profile Functions
 export const getUserProfile = async (userId: string) => {
   const userRef = doc(db, 'users', userId);
   const userSnap = await getDoc(userRef);
