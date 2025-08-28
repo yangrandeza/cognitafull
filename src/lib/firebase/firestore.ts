@@ -12,6 +12,7 @@ import {
   writeBatch,
   documentId,
   serverTimestamp,
+  runTransaction,
 } from 'firebase/firestore';
 import type {
   UserProfile,
@@ -20,6 +21,9 @@ import type {
   UnifiedProfile,
   ClassWithStudentData,
   NewClass,
+  NewStudent,
+  NewUnifiedProfile,
+  QuizAnswers,
 } from '../types';
 
 // User Profile Functions
@@ -70,6 +74,45 @@ export const getClassById = async (classId: string): Promise<Class | null> => {
 
 
 // Student and Profile Functions
+export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string}, answers: QuizAnswers) => {
+     await runTransaction(db, async (transaction) => {
+        // 1. Create the new student document
+        const newStudentData: NewStudent = {
+            name: studentInfo.name,
+            age: parseInt(studentInfo.age, 10),
+            classId,
+            quizStatus: 'completed',
+            createdAt: serverTimestamp(),
+        };
+        const studentRef = doc(collection(db, 'students'));
+        transaction.set(studentRef, newStudentData);
+
+        // 2. Create the unified profile with raw answers
+        const newProfileData: NewUnifiedProfile = {
+            studentId: studentRef.id,
+            classId: classId,
+            rawAnswers: answers,
+            createdAt: serverTimestamp(),
+        };
+        const profileRef = doc(collection(db, 'unifiedProfiles'));
+        transaction.set(profileRef, newProfileData);
+        
+        // 3. Update the student with the profile ID
+        transaction.update(studentRef, { unifiedProfileId: profileRef.id });
+
+        // 4. Atomically update the class counters
+        const classRef = doc(db, 'classes', classId);
+        const classDoc = await transaction.get(classRef);
+        if (!classDoc.exists()) {
+            throw new Error("Class does not exist!");
+        }
+        const newStudentCount = (classDoc.data().studentCount || 0) + 1;
+        // The responsesCount will be incremented by the cloud function after processing
+        transaction.update(classRef, { studentCount: newStudentCount });
+    });
+};
+
+
 export const getStudentsByClass = async (classId: string): Promise<Student[]> => {
   const q = query(collection(db, 'students'), where('classId', '==', classId));
   const querySnapshot = await getDocs(q);

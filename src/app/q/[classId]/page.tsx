@@ -12,6 +12,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { BookHeart, ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { submitQuizAnswers } from '@/lib/firebase/firestore';
+import type { QuizAnswers } from '@/lib/types';
+
 
 const questions = [
   // Intro
@@ -85,7 +88,7 @@ const totalQuestions = questions.filter(q => q.type !== 'intro' && q.type !== 'f
 
 export default function QuestionnairePage() {
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<QuizAnswers>({});
   const [studentInfo, setStudentInfo] = useState({ name: '', age: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -102,6 +105,21 @@ export default function QuestionnairePage() {
 
   const handleAnswerChange = (questionId: string, value: any) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+  
+  const handleDiscAnswerChange = (groupId: string, type: 'most' | 'least', value: string) => {
+      setAnswers(prev => {
+          const newAnswers = {...prev};
+          // Ensure the same word cannot be both MOST and LEAST
+          if (type === 'most' && newAnswers[`${groupId}_least`] === value) {
+              delete newAnswers[`${groupId}_least`];
+          }
+          if (type === 'least' && newAnswers[`${groupId}_most`] === value) {
+              delete newAnswers[`${groupId}_most`];
+          }
+          newAnswers[`${groupId}_${type}`] = value;
+          return newAnswers;
+      });
   };
 
   const handleNext = () => {
@@ -129,24 +147,27 @@ export default function QuestionnairePage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Here we would call the function to save to Firestore
-    console.log("Submitting:", { studentInfo, answers, classId });
-    // TODO: Implement Firestore submission logic
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    toast({
-        title: "Respostas enviadas!",
-        description: "Agradecemos sua participação.",
-    });
-
-    // We change the step to the finish card AFTER submission is successful
-    setStep(questions.length - 1); 
-    setIsSubmitting(false);
+    try {
+        await submitQuizAnswers(classId, studentInfo, answers);
+        toast({
+            title: "Respostas enviadas!",
+            description: "Agradecemos sua participação.",
+        });
+        // We change the step to the finish card AFTER submission is successful
+        setStep(questions.length - 1); 
+    } catch (error) {
+        console.error("Submission error:", error);
+        toast({
+            variant: "destructive",
+            title: "Erro ao enviar",
+            description: "Não foi possível salvar suas respostas. Por favor, tente novamente.",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
   
-  const progress = step > 0 ? ((step) / totalQuestions) * 100 : 0;
+  const progress = step > 0 ? ((step -1) / totalQuestions) * 100 : 0;
 
 
   return (
@@ -172,11 +193,11 @@ export default function QuestionnairePage() {
                 <div className="grid gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="name">Nome Completo</Label>
-                        <Input id="name" placeholder="Seu nome completo" value={studentInfo.name} onChange={handleStudentInfoChange} />
+                        <Input id="name" placeholder="Seu nome completo" value={studentInfo.name} onChange={handleStudentInfoChange} required/>
                     </div>
                      <div className="grid gap-2">
                         <Label htmlFor="age">Idade</Label>
-                        <Input id="age" type="number" placeholder="Sua idade" value={studentInfo.age} onChange={handleStudentInfoChange}/>
+                        <Input id="age" type="number" placeholder="Sua idade" value={studentInfo.age} onChange={handleStudentInfoChange} required/>
                     </div>
                 </div>
             </CardContent>
@@ -202,38 +223,38 @@ export default function QuestionnairePage() {
                 >
                   {currentQuestion.options.map(opt => (
                     <div key={opt.value} className="flex items-center space-x-2 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                      <RadioGroupItem value={opt.value} id={opt.value} />
-                      <Label htmlFor={opt.value} className="flex-1 cursor-pointer">{opt.label}</Label>
+                      <RadioGroupItem value={opt.value} id={`${currentQuestion.id}_${opt.value}`} />
+                      <Label htmlFor={`${currentQuestion.id}_${opt.value}`} className="flex-1 cursor-pointer">{opt.label}</Label>
                     </div>
                   ))}
                 </RadioGroup>
               )}
               {currentQuestion.type === 'disc' && (
-                   <div className="space-y-2">
-                     <div className="grid grid-cols-6 gap-2 text-center items-center">
-                        <span className="col-span-2 font-medium text-sm text-muted-foreground">MAIS parecido</span>
-                        <span className="col-span-2"></span>
-                        <span className="col-span-2 font-medium text-sm text-muted-foreground">MENOS parecido</span>
+                   <div className="space-y-4">
+                     <div className="grid grid-cols-3 gap-2 text-center items-center px-4">
+                        <span className="font-medium text-sm text-muted-foreground text-left">MAIS parecido</span>
+                        <span></span>
+                        <span className="font-medium text-sm text-muted-foreground text-right">MENOS parecido</span>
                      </div>
                       {currentQuestion.words.map((word, index) => (
-                         <div key={index} className="grid grid-cols-6 gap-2 border p-3 rounded-md items-center">
-                            <RadioGroup 
-                                className="col-span-2 flex justify-around"
-                                name={`${currentQuestion.id}_${index}_most`}
-                                value={answers[`${currentQuestion.id}_${index}_most`] || ''}
-                                onValueChange={() => handleAnswerChange(`${currentQuestion.id}_${index}_most`, word)}
-                            >
-                              <RadioGroupItem value={word} id={`most_${index}`} />
-                            </RadioGroup>
-                            <Label className="col-span-2 text-center">{word}</Label>
-                            <RadioGroup 
-                                className="col-span-2 flex justify-around"
-                                name={`${currentQuestion.id}_${index}_least`}
-                                value={answers[`${currentQuestion.id}_${index}_least`] || ''}
-                                onValueChange={() => handleAnswerChange(`${currentQuestion.id}_${index}_least`, word)}
-                            >
-                               <RadioGroupItem value={word} id={`least_${index}`} />
-                            </RadioGroup>
+                         <div key={index} className="grid grid-cols-3 gap-2 border p-3 rounded-md items-center">
+                            <div className="flex justify-start">
+                                <RadioGroup 
+                                    value={answers[`${currentQuestion.id}_most`] || ''}
+                                    onValueChange={(value) => handleDiscAnswerChange(currentQuestion.id, 'most', value)}
+                                >
+                                    <RadioGroupItem value={word} id={`most_${index}`} />
+                                </RadioGroup>
+                            </div>
+                            <Label className="text-center font-medium">{word}</Label>
+                            <div className="flex justify-end">
+                                <RadioGroup 
+                                    value={answers[`${currentQuestion.id}_least`] || ''}
+                                    onValueChange={(value) => handleDiscAnswerChange(currentQuestion.id, 'least', value)}
+                                >
+                                <RadioGroupItem value={word} id={`least_${index}`} />
+                                </RadioGroup>
+                            </div>
                         </div>
                       ))}
                   </div>
@@ -242,19 +263,16 @@ export default function QuestionnairePage() {
                 <div>
                     <p className="italic mb-4">"{currentQuestion.statement}"</p>
                     <RadioGroup 
-                        className="flex justify-around bg-muted p-2 rounded-lg"
+                        className="flex flex-col sm:flex-row justify-around bg-muted p-3 rounded-lg"
                         value={answers[currentQuestion.id] || ''}
                         onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
                     >
-                        {[1, 2, 3, 4].map(val => (
-                            <div key={val} className="flex flex-col items-center space-y-2">
-                                <Label htmlFor={`scale-${val}`} className="text-xs text-muted-foreground text-center">
-                                    {val === 1 && "Não se parece comigo"}
-                                    {val === 2 && "Um pouco como eu"}
-                                    {val === 3 && "Parecido comigo"}
-                                    {val === 4 && "Muito parecido comigo"}
-                                </Label>
+                        {[{val: 1, label: "Nada parecido comigo"}, {val: 2, label: "Um pouco como eu"}, {val: 3, label: "Parecido comigo"}, {val: 4, label: "Muito parecido comigo"}].map(({val, label}) => (
+                            <div key={val} className="flex items-center space-x-2 sm:flex-col sm:space-x-0 sm:space-y-2 py-2 sm:py-0">
                                 <RadioGroupItem value={String(val)} id={`scale-${val}`} />
+                                <Label htmlFor={`scale-${val}`} className="text-xs text-muted-foreground text-center cursor-pointer">
+                                    {label}
+                                </Label>
                             </div>
                         ))}
                     </RadioGroup>
@@ -289,7 +307,7 @@ export default function QuestionnairePage() {
                 <Check className="mx-auto h-16 w-16 text-green-500 bg-green-100 rounded-full p-2" />
             </CardContent>
             <CardFooter className="justify-end">
-                <Button onClick={() => window.location.href = '/'}>Voltar para o início</Button>
+                <Button asChild><Link href="/">Voltar para o início</Link></Button>
             </CardFooter>
             </>
         )}
@@ -297,4 +315,3 @@ export default function QuestionnairePage() {
     </div>
   );
 }
-

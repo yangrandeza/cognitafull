@@ -29,7 +29,7 @@ export type Class = {
 };
 
 export type Student = {
-  id: string;
+  id:string;
   name: string;
   age: number;
   classId: string;
@@ -37,6 +37,17 @@ export type Student = {
   quizStatus: 'pending' | 'completed';
   unifiedProfileId?: string;
 };
+
+export type QuizAnswers = Record<string, any>;
+
+export type NewStudent = {
+    name: string;
+    age: number;
+    classId: string;
+    quizStatus: 'completed';
+    createdAt: FieldValue;
+};
+
 
 export type VarkProfile = {
   dominant: 'Visual' | 'Auditory' | 'Reading' | 'Kinesthetic' | 'Multimodal';
@@ -52,6 +63,7 @@ export type UnifiedProfile = {
   id: string;
   studentId: string;
   classId: string;
+  rawAnswers: QuizAnswers; // Temporary field until processing function is built
   varkProfile: VarkProfile;
   discProfile: DiscProfile;
   jungianProfile: string; // e.g., "ENFP"
@@ -61,6 +73,14 @@ export type UnifiedProfile = {
   };
   dissonanceAlert: boolean;
   dissonanceNotes?: string;
+  createdAt: FieldValue;
+};
+
+export type NewUnifiedProfile = {
+    studentId: string;
+    classId: string;
+    rawAnswers: QuizAnswers;
+    createdAt: FieldValue;
 };
 
 export type Teacher = {
