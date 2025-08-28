@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -30,7 +31,7 @@ import { deleteStudent } from "@/lib/firebase/firestore";
 
 export function StudentsList({ students: initialStudents, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [studentList, setStudentList] = useState(initialStudents);
+  const [studentList, setStudentList] = useState<Student[]>(initialStudents);
 
   useEffect(() => {
     setStudentList(initialStudents);
