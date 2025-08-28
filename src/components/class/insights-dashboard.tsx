@@ -78,7 +78,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     return <p>Erro ao gerar os dados do painel.</p>
   }
   
-  const { students } = classData;
+  const { students, teacherId } = classData;
   const { compassData, insightCards, classProfileSummary, teamsData, dissonanceData, communicationData, workPaceData } = dashboardData;
 
   return (
@@ -153,7 +153,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             />
             <InsightCard 
                 icon={<Brain className="h-8 w-8 text-violet-500" />}
-                title="A Melhor Forma de Explicar 🧠"
+                title="A Melhor Forma de Explicação 🧠"
                 subtitle="Qual abordagem de ensino ressoará mais forte?"
                 text={insightCards.explanation}
             />
@@ -234,7 +234,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
       <TabsContent value="optimizer">
-        <LessonOptimizer classProfileSummary={classProfileSummary} classId={classId} />
+        <LessonOptimizer classProfileSummary={classProfileSummary} classId={classId} teacherId={teacherId} />
       </TabsContent>
     </Tabs>
   );

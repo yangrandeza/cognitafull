@@ -1,3 +1,4 @@
+
 'use server';
 
 import {
@@ -13,7 +14,6 @@ import {
 } from '@/ai/flows/lesson-plan-reformer';
 
 import { saveLessonPlan as savePlanInDb, getLessonPlansByClass as getPlansFromDb } from './firebase/firestore';
-import { auth } from './firebase/firebase';
 import { NewLessonPlan, LessonPlan } from './types';
 import { revalidatePath } from 'next/cache';
 
@@ -54,16 +54,14 @@ export async function getReformedLessonPlan(
 }
 
 
-export async function saveGeneratedLessonPlan(planData: Omit<NewLessonPlan, 'teacherId' | 'createdAt'>): Promise<{success: boolean, error?: string}> {
-    const user = auth.currentUser;
-    if (!user) {
+export async function saveGeneratedLessonPlan(planData: Omit<NewLessonPlan, 'createdAt'>): Promise<{success: boolean, error?: string}> {
+    if (!planData.teacherId) {
         return { success: false, error: 'Usuário não autenticado.' };
     }
 
     try {
         const fullPlanData: NewLessonPlan = {
             ...planData,
-            teacherId: user.uid,
             createdAt: new Date(),
         };
         await savePlanInDb(fullPlanData as any); // Cast because serverTimestamp is handled by Firestore

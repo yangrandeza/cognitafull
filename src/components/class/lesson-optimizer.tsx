@@ -45,6 +45,7 @@ const saveFormSchema = z.object({
 interface LessonOptimizerProps {
     classProfileSummary: string;
     classId: string;
+    teacherId: string;
 }
 
 
@@ -59,7 +60,7 @@ const PrintableContent = forwardRef<HTMLDivElement, { content: string }>(({ cont
 PrintableContent.displayName = 'PrintableContent';
 
 
-export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimizerProps) {
+export function LessonOptimizer({ classProfileSummary, classId, teacherId }: LessonOptimizerProps) {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [isLoadingReformed, setIsLoadingReformed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -148,6 +149,7 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
         const suggestionsText = suggestions.map(s => `Para ${s.feature}: ${s.suggestion}`).join('\n');
         const result = await saveGeneratedLessonPlan({
             classId,
+            teacherId,
             title: values.title,
             originalPlan: originalLessonPlan,
             suggestions: suggestionsText,
@@ -168,7 +170,7 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
             // Refresh the list of saved plans
             fetchSavedPlans();
         } else {
-            throw new Error(result.error);
+             throw new Error(result.error || "Ocorreu um erro desconhecido");
         }
     } catch (error) {
         console.error("Erro ao salvar o plano:", error);
@@ -361,4 +363,3 @@ export function LessonOptimizer({ classProfileSummary, classId }: LessonOptimize
     </div>
   );
 }
-
