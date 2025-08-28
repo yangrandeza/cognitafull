@@ -14,17 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Student, UnifiedProfile } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { FileText } from "lucide-react";
+import { User } from "lucide-react";
+import Link from "next/link";
 
 export function StudentsList({ students, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
   const { toast } = useToast();
-
-  const handleGeneratePdf = (studentName: string) => {
-    toast({
-      title: "Função em Desenvolvimento",
-      description: `A geração de relatório em PDF para ${studentName} estará disponível em breve.`,
-    });
-  };
 
   const getStudentProfile = (studentId: string) => {
     return profiles.find(p => p.studentId === studentId);
@@ -34,7 +28,7 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
     <Card>
       <CardHeader>
         <CardTitle className="font-headline">Lista de Alunos e Perfis Individuais</CardTitle>
-        <CardDescription>Visualize o perfil dominante de cada aluno e gere relatórios individuais detalhados.</CardDescription>
+        <CardDescription>Visualize o perfil dominante de cada aluno e acesse o painel individual detalhado.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -44,7 +38,7 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
               <TableHead>Idade</TableHead>
               <TableHead>Perfil Dominante (DISC)</TableHead>
               <TableHead>Estilo de Aprendizagem (VARK)</TableHead>
-              <TableHead className="text-right">Relatório Individual</TableHead>
+              <TableHead className="text-right">Painel Individual</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,14 +63,11 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleGeneratePdf(student.name)}
-                        disabled={!profile}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Gerar PDF
+                       <Button asChild variant="outline" size="sm" disabled={!profile}>
+                          <Link href={`/student/${student.id}`}>
+                            <User className="mr-2 h-4 w-4" />
+                            Painel do Aluno
+                          </Link>
                       </Button>
                     </TableCell>
                   </TableRow>

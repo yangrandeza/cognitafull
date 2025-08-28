@@ -114,5 +114,3 @@ export type ClassWithStudentData = Class & {
   students: Student[];
   profiles: RawUnifiedProfile[]; // Fetch raw profiles
 };
-
-    

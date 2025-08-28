@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { BookHeart, ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { BookHeart, ArrowLeft, ArrowRight, Check, Loader2, PartyPopper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { submitQuizAnswers } from '@/lib/firebase/firestore';
 import type { QuizAnswers } from '@/lib/types';
@@ -254,8 +254,8 @@ const questions = [
   // Finish
   {
     type: 'finish',
-    title: 'Tudo pronto!',
-    description: 'Obrigado por completar o questionário. Seus insights ajudarão a criar uma experiência de aprendizado melhor.',
+    title: 'Prontinho! Você descobriu seus superpoderes.',
+    description: 'Seus insights foram enviados para seu professor. Agora você pode explorar seu próprio painel de aprendizagem!',
   },
 ];
 
@@ -266,6 +266,7 @@ export default function QuestionnairePage() {
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [studentInfo, setStudentInfo] = useState({ name: '', age: '', email: '', gender: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newStudentId, setNewStudentId] = useState<string | null>(null);
   
   const params = useParams();
   const { toast } = useToast();
@@ -365,7 +366,8 @@ export default function QuestionnairePage() {
 
     setIsSubmitting(true);
     try {
-        await submitQuizAnswers(classId, studentInfo, answers);
+        const studentId = await submitQuizAnswers(classId, studentInfo, answers);
+        setNewStudentId(studentId);
         toast({
             title: "Respostas enviadas!",
             description: "Agradecemos sua participação.",
@@ -540,12 +542,14 @@ export default function QuestionnairePage() {
                 <CardTitle className="font-headline text-2xl">{currentQuestion.title}</CardTitle>
                 <CardDescription>{currentQuestion.description}</CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
-                <Check className="mx-auto h-16 w-16 text-green-500 bg-green-100 rounded-full p-2" />
+            <CardContent className="text-center space-y-4">
+                <PartyPopper className="mx-auto h-16 w-16 text-primary bg-primary/10 rounded-full p-3" />
+                {newStudentId && (
+                    <Button asChild className="font-headline">
+                        <Link href={`/student/${newStudentId}`}>Acessar meu painel</Link>
+                    </Button>
+                )}
             </CardContent>
-            <CardFooter className="justify-end">
-                <Button asChild><Link href="/">Voltar para o início</Link></Button>
-            </CardFooter>
             </>
         )}
       </Card>

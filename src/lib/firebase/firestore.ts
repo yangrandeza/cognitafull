@@ -28,6 +28,7 @@ import type {
   RawUnifiedProfile,
   Organization,
 } from '../types';
+import { processProfiles } from '../insights-generator';
 
 // User Profile Functions
 export const createUserProfile = async (
@@ -110,7 +111,8 @@ export const getClassById = async (classId: string): Promise<Class | null> => {
 
 
 // Student and Profile Functions
-export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string, email?: string, gender?: string}, answers: QuizAnswers) => {
+export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string, email?: string, gender?: string}, answers: QuizAnswers): Promise<string> => {
+     let studentId = "";
      await runTransaction(db, async (transaction) => {
         const classRef = doc(db, 'classes', classId);
         const classDoc = await transaction.get(classRef);
@@ -130,6 +132,7 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
         };
         const studentRef = doc(collection(db, 'students'));
         transaction.set(studentRef, newStudentData);
+        studentId = studentRef.id; // Capture the new student's ID
 
         // 2. Create the unified profile with raw answers
         const newProfileData: NewUnifiedProfile = {
@@ -149,6 +152,7 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
         const newResponsesCount = (classDoc.data().responsesCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount, responsesCount: newResponsesCount });
     });
+    return studentId; // Return the student ID
 };
 
 
@@ -165,6 +169,27 @@ export const getProfilesByClass = async (classId: string): Promise<RawUnifiedPro
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RawUnifiedProfile));
 };
+
+export const getStudentAndProfileById = async (studentId: string): Promise<{student: Student, profile: UnifiedProfile} | null> => {
+    const studentRef = doc(db, 'students', studentId);
+    const studentSnap = await getDoc(studentRef);
+
+    if (!studentSnap.exists()) return null;
+    const student = { id: studentSnap.id, ...studentSnap.data() } as Student;
+
+    if (!student.unifiedProfileId) return null;
+
+    const profileRef = doc(db, 'unifiedProfiles', student.unifiedProfileId);
+    const profileSnap = await getDoc(profileRef);
+
+    if (!profileSnap.exists()) return null;
+
+    const rawProfile = { id: profileSnap.id, ...profileSnap.data() } as RawUnifiedProfile;
+    // We process the single raw profile into a full unified profile
+    const [processedProfile] = processProfiles([rawProfile]);
+
+    return { student, profile: processedProfile };
+}
 
 
 export const getClassWithStudentsAndProfiles = async (
