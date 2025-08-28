@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, BookHeart } from "lucide-react";
+import { Menu, BrainCircuit } from "lucide-react";
 
 export function Header() {
   const navLinks = [
@@ -16,7 +17,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <BookHeart className="h-6 w-6 text-primary" />
+            <BrainCircuit className="h-6 w-6 text-primary" />
             <span className="font-bold font-headline">Cognita 360</span>
           </Link>
         </div>
@@ -49,7 +50,7 @@ export function Header() {
                     href="/"
                     className="flex items-center space-x-2"
                   >
-                    <BookHeart className="h-6 w-6 text-primary" />
+                    <BrainCircuit className="h-6 w-6 text-primary" />
                     <span className="font-bold font-headline">Cognita 360</span>
                   </Link>
                   {navLinks.map((link) => (

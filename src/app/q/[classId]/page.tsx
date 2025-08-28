@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { BookHeart, ArrowLeft, ArrowRight, Check, Loader2, PartyPopper } from 'lucide-react';
+import { BrainCircuit, ArrowLeft, ArrowRight, Check, Loader2, PartyPopper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { submitQuizAnswers } from '@/lib/firebase/firestore';
 import type { QuizAnswers } from '@/lib/types';
@@ -22,8 +22,8 @@ const questions = [
   // Intro
   {
     type: 'intro',
-    title: 'Bem-vindo(a) ao Cognita!',
-    description: "Vamos descobrir seus superpoderes de aprendizagem. Para cada pergunta, escolha a opção que mais se parece com você. Não há respostas certas ou erradas. Confie na sua primeira impressão!",
+    title: 'Bem-vindo(a) ao cognita!',
+    description: "Vamos descobrir seus superpoderes de aprendizagem. para cada pergunta, escolha a opção que mais se parece com você. não há respostas certas ou erradas. confie na sua primeira impressão!",
   },
   // VARK
   {
@@ -41,7 +41,7 @@ const questions = [
   {
     type: 'radio',
     part: 'Parte 1: Como você aprende (VARK)',
-    question: 'Imagine que você está tentando chegar a um lugar novo. Qual estratégia você escolheria?',
+    question: 'Imagine que você está tentando chegar a um lugar novo. qual estratégia você escolheria?',
     id: 'vark_2',
     options: [
       { value: 'V', label: 'Olhar um mapa visual no GPS do seu celular.' },
@@ -256,8 +256,8 @@ const questions = [
   // Finish
   {
     type: 'finish',
-    title: 'Prontinho! Você descobriu seus superpoderes.',
-    description: 'Seus insights foram enviados para seu professor. Agora você pode explorar seu próprio painel de aprendizagem!',
+    title: 'Prontinho! você descobriu seus superpoderes.',
+    description: 'Seus insights foram enviados para seu professor. agora você pode explorar seu próprio painel de aprendizagem!',
   },
 ];
 
@@ -395,7 +395,7 @@ export default function QuestionnairePage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <header className="w-full max-w-2xl mb-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <BookHeart className="h-6 w-6 text-primary" />
+          <BrainCircuit className="h-6 w-6 text-primary" />
           <span className="font-headline text-lg">Cognita 360</span>
         </Link>
       </header>

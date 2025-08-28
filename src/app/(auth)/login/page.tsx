@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookHeart } from "lucide-react";
+import { BrainCircuit } from "lucide-react";
 import { signInWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -78,7 +79,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-sm mx-auto">
         <CardHeader className="text-center">
-          <BookHeart className="mx-auto h-10 w-10 text-primary mb-2" />
+          <BrainCircuit className="mx-auto h-10 w-10 text-primary mb-2" />
           <CardTitle className="text-2xl font-headline">Bem-vindo de volta</CardTitle>
           <CardDescription>Insira suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>
