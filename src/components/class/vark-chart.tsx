@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { TrendingUp } from "lucide-react"
-import { Label, Pie, PieChart, Sector } from "recharts"
+import { Label, Pie, PieChart, Sector, Legend } from "recharts"
 
 import {
   Card,
@@ -16,25 +16,27 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent
 } from "@/components/ui/chart"
 
 const chartConfig = {
   value: {
     label: "Alunos",
   },
-  visual: {
+  Visual: {
     label: "Visual",
     color: "hsl(var(--chart-1))",
   },
-  auditory: {
+  Auditivo: {
     label: "Auditivo",
     color: "hsl(var(--chart-2))",
   },
-  reading: {
+  'Leitura/Escrita': {
     label: "Leitura/Escrita",
     color: "hsl(var(--chart-3))",
   },
-  kinesthetic: {
+  Cinestésico: {
     label: "Cinestésico",
     color: "hsl(var(--chart-4))",
   },
@@ -61,17 +63,6 @@ export function VarkChart({ data }: { data: any[] }) {
           nameKey="type"
           innerRadius={60}
           strokeWidth={5}
-          activeIndex={0}
-          activeShape={({ outerRadius = 0, ...props }) => (
-            <g>
-              <Sector {...props} outerRadius={outerRadius + 5} />
-              <Sector
-                {...props}
-                outerRadius={outerRadius + 15}
-                innerRadius={outerRadius + 10}
-              />
-            </g>
-          )}
         >
           <Label
             content={({ viewBox }) => {
@@ -103,6 +94,10 @@ export function VarkChart({ data }: { data: any[] }) {
             }}
           />
         </Pie>
+        <ChartLegend
+            content={<ChartLegendContent nameKey="type" />}
+            className="-mt-4 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+        />
       </PieChart>
     </ChartContainer>
   )

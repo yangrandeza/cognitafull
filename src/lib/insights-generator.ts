@@ -50,9 +50,9 @@ function calculateVark(answers: QuizAnswers): VarkProfile {
     
     let dominantLabel: VarkProfile['dominant'] = 'Multimodal';
     if (dominant === 'v') dominantLabel = 'Visual';
-    if (dominant === 'a') dominantLabel = 'Auditory';
-    if (dominant === 'r') dominantLabel = 'Reading';
-    if (dominant === 'k') dominantLabel = 'Kinesthetic';
+    if (dominant === 'a') dominantLabel = 'Auditivo';
+    if (dominant === 'r') dominantLabel = 'Leitura/Escrita';
+    if (dominant === 'k') dominantLabel = 'Cinestésico';
     
     return { dominant: dominantLabel, scores };
 }
@@ -83,11 +83,11 @@ function calculateDisc(answers: QuizAnswers): DiscProfile {
 
     const dominantKey = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
     
-    let dominantLabel: DiscProfile['dominant'] = 'Influence'; // Default
-    if (dominantKey === 'd') dominantLabel = 'Dominance';
-    if (dominantKey === 'i') dominantLabel = 'Influence';
-    if (dominantKey === 's') dominantLabel = 'Steadiness';
-    if (dominantKey === 'c') dominantLabel = 'Conscientiousness';
+    let dominantLabel: DiscProfile['dominant'] = 'Influência'; // Default
+    if (dominantKey === 'd') dominantLabel = 'Dominância';
+    if (dominantKey === 'i') dominantLabel = 'Influência';
+    if (dominantKey === 's') dominantLabel = 'Estabilidade';
+    if (dominantKey === 'c') dominantLabel = 'Consciência';
 
     return { dominant: dominantLabel, scores };
 }
@@ -132,9 +132,8 @@ function calculateSchwartz(answers: QuizAnswers): { top_values: string[], scores
 
 function analyzeDissonance(discProfile: DiscProfile, jungianProfile: string): {dissonanceAlert: boolean, dissonanceNotes: string} {
     const isIntrovert = jungianProfile.startsWith('I');
-    const isExtrovert = jungianProfile.startsWith('E');
-    const isHighInfluence = discProfile.dominant === 'Influence';
-    const isHighDominance = discProfile.dominant === 'Dominance';
+    const isHighInfluence = discProfile.dominant === 'Influência';
+    const isHighDominance = discProfile.dominant === 'Dominância';
 
     if (isIntrovert && (isHighInfluence || isHighDominance)) {
         return {
@@ -156,19 +155,22 @@ function analyzeDissonance(discProfile: DiscProfile, jungianProfile: string): {d
  * Aggregates VARK profile data for chart visualization.
  */
 export function generateVarkData(profiles: UnifiedProfile[]) {
-  const varkCounts: Record<VarkProfile['dominant'], number> = { Visual: 0, Auditory: 0, Reading: 0, Kinesthetic: 0, Multimodal: 0 };
+  const varkCounts: Record<string, number> = { 'Visual': 0, 'Auditivo': 0, "Leitura/Escrita": 0, 'Cinestésico': 0, 'Multimodal': 0 };
   
   profiles.forEach(p => {
     if (p?.varkProfile?.dominant) {
-      varkCounts[p.varkProfile.dominant]++;
+      const dominantProfile = p.varkProfile.dominant;
+      if(varkCounts[dominantProfile] !== undefined) {
+         varkCounts[dominantProfile]++;
+      }
     }
   });
 
   return [
     { type: 'Visual', value: varkCounts.Visual, fill: 'var(--chart-1)' },
-    { type: 'Auditivo', value: varkCounts.Auditory, fill: 'var(--chart-2)' },
-    { type: 'Leitura/Escrita', value: varkCounts.Reading, fill: 'var(--chart-3)' },
-    { type: 'Cinestésico', value: varkCounts.Kinesthetic, fill: 'var(--chart-4)' },
+    { type: 'Auditivo', value: varkCounts.Auditivo, fill: 'var(--chart-2)' },
+    { type: 'Leitura/Escrita', value: varkCounts["Leitura/Escrita"], fill: 'var(--chart-3)' },
+    { type: 'Cinestésico', value: varkCounts.Cinestésico, fill: 'var(--chart-4)' },
   ].filter(item => item.value > 0);
 }
 
@@ -221,10 +223,10 @@ export function generateDissonanceData(profiles: UnifiedProfile[], students: Stu
  * Generates suggested teams based on profiles.
  */
 export function generateTeamData(profiles: UnifiedProfile[], students: Student[]) {
-    const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominance' || p.jungianProfile.includes('TJ'));
-    const communicators = profiles.filter(p => p.discProfile.dominant === 'Influence' || p.jungianProfile.includes('EF'));
-    const planners = profiles.filter(p => p.discProfile.dominant === 'Conscientiousness' || p.jungianProfile.includes('SJ'));
-    const harmonizers = profiles.filter(p => p.discProfile.dominant === 'Steadiness' || p.jungianProfile.includes('FP'));
+    const leaders = profiles.filter(p => p.discProfile.dominant === 'Dominância' || p.jungianProfile.includes('TJ'));
+    const communicators = profiles.filter(p => p.discProfile.dominant === 'Influência' || p.jungianProfile.includes('EF'));
+    const planners = profiles.filter(p => p.discProfile.dominant === 'Consciência' || p.jungianProfile.includes('SJ'));
+    const harmonizers = profiles.filter(p => p.discProfile.dominant === 'Estabilidade' || p.jungianProfile.includes('FP'));
 
     const getName = (profile: UnifiedProfile) => students.find(s => s.id === profile.studentId)?.name || 'Desconhecido';
 
@@ -246,8 +248,15 @@ export function generateClassProfileSummary(profiles: UnifiedProfile[]): string 
     }
 
     // VARK Distribution
-    const varkCounts: Record<VarkProfile['dominant'], number> = { Visual: 0, Auditory: 0, Reading: 0, Kinesthetic: 0, Multimodal: 0 };
-    profiles.forEach(p => p?.varkProfile && varkCounts[p.varkProfile.dominant]++);
+    const varkCounts: Record<string, number> = { 'Visual': 0, 'Auditivo': 0, "Leitura/Escrita": 0, 'Cinestésico': 0, 'Multimodal': 0 };
+    profiles.forEach(p => {
+      if(p?.varkProfile?.dominant) {
+        const dominantProfile = p.varkProfile.dominant;
+        if(varkCounts[dominantProfile] !== undefined) {
+            varkCounts[dominantProfile]++;
+        }
+      }
+    });
     const totalVark = profiles.length;
     const varkSummary = Object.entries(varkCounts)
         .filter(([, count]) => count > 0)
@@ -255,8 +264,15 @@ export function generateClassProfileSummary(profiles: UnifiedProfile[]): string 
         .join(', ');
 
     // DISC Dominance
-    const discCounts: Record<DiscProfile['dominant'], number> = { Dominance: 0, Influence: 0, Steadiness: 0, Conscientiousness: 0 };
-    profiles.forEach(p => p?.discProfile && discCounts[p.discProfile.dominant]++);
+    const discCounts: Record<string, number> = { 'Dominância': 0, 'Influência': 0, 'Estabilidade': 0, 'Consciência': 0 };
+    profiles.forEach(p => {
+      if (p?.discProfile?.dominant) {
+        const dominantProfile = p.discProfile.dominant;
+        if (discCounts[dominantProfile] !== undefined) {
+            discCounts[dominantProfile]++;
+        }
+      }
+    });
     const discSummary = Object.entries(discCounts)
         .filter(([, count]) => count > 0)
         .map(([type]) => type)

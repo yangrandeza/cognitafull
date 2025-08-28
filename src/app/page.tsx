@@ -34,7 +34,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow">
-        <section className="bg-light-lavender py-20 md:py-32">
+        <section className="py-20 md:py-32">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
@@ -93,7 +93,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-light-lavender py-20 md:py-24">
+        <section className="py-20 md:py-24">
           <div className="container mx-auto px-4 text-center">
             <h2 className="font-headline text-3xl md:text-4xl font-bold mb-6">Pronto para Revolucionar sua Sala de Aula?</h2>
             <p className="text-lg text-foreground/80 mb-8 max-w-2xl mx-auto">

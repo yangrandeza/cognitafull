@@ -61,12 +61,12 @@ export type NewStudent = {
 };
 
 export type VarkProfile = {
-  dominant: 'Visual' | 'Auditory' | 'Reading' | 'Kinesthetic' | 'Multimodal';
+  dominant: 'Visual' | 'Auditivo' | 'Leitura/Escrita' | 'Cinestésico' | 'Multimodal';
   scores: { v: number; a: number; r: number; k: number };
 };
 
 export type DiscProfile = {
-  dominant: 'Dominance' | 'Influence' | 'Steadiness' | 'Conscientiousness';
+  dominant: 'Dominância' | 'Influência' | 'Estabilidade' | 'Consciência';
   scores: { d: number; i: number; s: number; c: number };
 };
 

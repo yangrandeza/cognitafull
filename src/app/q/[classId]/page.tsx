@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState } from 'react';
@@ -354,7 +352,7 @@ export default function QuestionnairePage() {
 
 
   return (
-    <div className="min-h-screen bg-light-lavender flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <header className="w-full max-w-2xl mb-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <BookHeart className="h-6 w-6 text-primary" />
@@ -421,7 +419,7 @@ export default function QuestionnairePage() {
                   onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
                 >
                   {currentQuestion.options.map(opt => (
-                    <div key={opt.value} className="flex items-center space-x-2 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
+                    <div key={opt.value} className="flex items-center space-x-2 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
                       <RadioGroupItem value={opt.value} id={`${currentQuestion.id}_${opt.value}`} />
                       <Label htmlFor={`${currentQuestion.id}_${opt.value}`} className="flex-1 cursor-pointer">{opt.label}</Label>
                     </div>
@@ -436,7 +434,7 @@ export default function QuestionnairePage() {
                         <span className="font-medium text-sm text-muted-foreground text-right">MENOS parecido</span>
                      </div>
                       {currentQuestion.words.map((word, index) => (
-                         <div key={index} className="grid grid-cols-3 gap-2 border p-3 rounded-md items-center">
+                         <div key={index} className="grid grid-cols-3 gap-2 border p-3 rounded-md items-center has-[:checked]:bg-primary/5">
                             <div className="flex justify-start">
                                 <RadioGroup 
                                     value={answers[`${currentQuestion.id}_most`] || ''}
@@ -462,7 +460,7 @@ export default function QuestionnairePage() {
                 <div>
                     <p className="italic mb-4">"{currentQuestion.statement}"</p>
                     <RadioGroup 
-                        className="flex flex-col sm:flex-row justify-around bg-muted p-3 rounded-lg"
+                        className="flex flex-col sm:flex-row justify-around bg-muted/50 p-3 rounded-lg"
                         value={answers[currentQuestion.id] || ''}
                         onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
                     >
