@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -350,7 +351,7 @@ export default function QuestionnairePage() {
 
   const handleBack = () => {
     if (step > 0) {
-      setStep(step - 1);
+      setStep(step + 1);
     }
   };
 
@@ -556,5 +557,7 @@ export default function QuestionnairePage() {
     </div>
   );
 }
+
+    
 
     
