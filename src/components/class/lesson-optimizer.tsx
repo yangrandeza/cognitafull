@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Lightbulb, Loader2, Sparkles } from "lucide-react";
 import { getLessonPlanSuggestions } from "@/lib/actions";
+import type { OptimizeLessonPlanOutput } from "@/ai/flows/lesson-plan-optimizer";
 
 const formSchema = z.object({
   lessonPlan: z.string().min(50, {
@@ -20,7 +21,7 @@ const formSchema = z.object({
 
 export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: string }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<OptimizeLessonPlanOutput['suggestions']>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -104,14 +105,17 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                     </div>
                 )}
                 {suggestions.length > 0 && (
-                    <ul className="space-y-4">
-                    {suggestions.map((suggestion, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                        <Lightbulb className="h-5 w-5 mt-1 text-yellow-500 flex-shrink-0" />
-                        <span>{suggestion}</span>
-                        </li>
+                    <div className="space-y-6">
+                    {suggestions.map((item, index) => (
+                        <div key={index} className="flex items-start gap-4">
+                            <Lightbulb className="h-6 w-6 mt-1 text-yellow-500 flex-shrink-0" />
+                            <div>
+                                <p className="font-semibold text-primary">{item.feature}:</p>
+                                <p className="text-muted-foreground">{item.suggestion}</p>
+                            </div>
+                        </div>
                     ))}
-                    </ul>
+                    </div>
                 )}
                 </div>
             </div>

@@ -23,7 +23,12 @@ export type OptimizeLessonPlanInput = z.infer<typeof OptimizeLessonPlanInputSche
 
 const OptimizeLessonPlanOutputSchema = z.object({
   suggestions: z
-    .array(z.string())
+    .array(
+        z.object({
+            feature: z.string().describe("The class feature the suggestion is based on. E.g., 'Para o lado Prático deles'"),
+            suggestion: z.string().describe("The practical suggestion for the teacher.")
+        })
+    )
     .describe('A list of 3-5 practical suggestions to improve the lesson plan.'),
 });
 export type OptimizeLessonPlanOutput = z.infer<typeof OptimizeLessonPlanOutputSchema>;
@@ -40,12 +45,24 @@ const prompt = ai.definePrompt({
 
 Você receberá um resumo do perfil da turma (o "Mosaico de Aprendizagem") e a descrição de uma aula que o professor planejou.
 
-Sua tarefa é fornecer 3 a 5 sugestões práticas e criativas que conectem diretamente o plano de aula com as características da turma. Para cada sugestão, explique QUAL característica da turma você está usando como base.
+Sua tarefa é fornecer 3 a 5 sugestões práticas e criativas que conectem diretamente o plano de aula com as características da turma. Para cada sugestão, explique QUAL característica da turma você está usando como base no campo 'feature'.
 
 Exemplo de como responder:
-- "Para o lado 'Colaborativo' deles: Em vez de uma palestra, transforme a aula em um 'Conselho Revolucionário'. Divida a turma em grupos e dê a cada um um papel para debater."
-- "Para a necessidade de 'Estrutura' deles: Forneça um 'mapa mental' com a linha do tempo e os principais eventos antes de começar. Isso dará a segurança que eles precisam."
-- "Para engajar o lado 'Prático' deles: Peça que cada grupo crie um post de rede social (como se fosse da época) defendendo suas ideias. Isso torna o conteúdo concreto."
+[
+  {
+    "feature": "Para o lado 'Colaborativo' deles",
+    "suggestion": "Em vez de uma palestra, transforme a aula em um 'Conselho Revolucionário'. Divida a turma em grupos e dê a cada um um papel para debater."
+  },
+  {
+    "feature": "Para a necessidade de 'Estrutura' deles",
+    "suggestion": "Forneça um 'mapa mental' com a linha do tempo e os principais eventos antes de começar. Isso dará a segurança que eles precisam."
+  },
+  {
+    "feature": "Para engajar o lado 'Prático' deles",
+    "suggestion": "Peça que cada grupo crie um post de rede social (como se fosse da época) defendendo suas ideias. Isso torna o conteúdo concreto."
+  }
+]
+
 
 ---
 
