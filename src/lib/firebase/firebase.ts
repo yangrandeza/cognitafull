@@ -5,14 +5,15 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
+// This is now read from environment variables to ensure correctness
 const firebaseConfig = {
-  apiKey: "AIzaSyDPh5QPX-yRvPgHysCds9g102yRGBdfQQU",
-  authDomain: "cognita-21ecd.firebaseapp.com",
-  projectId: "cognita-21ecd",
-  storageBucket: "cognita-21ecd.firebasestorage.app",
-  messagingSenderId: "792250638993",
-  appId: "1:792250638993:web:f48376218bdc3560a15530",
-  measurementId: "G-FLZH66ZL6H"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
