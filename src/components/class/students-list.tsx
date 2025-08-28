@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -24,23 +23,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Student, UnifiedProfile } from "@/lib/types";
-import { useToast } from "@/hooks/use-toast";
 import { User, MoreHorizontal, FilePenLine, Trash2 } from "lucide-react";
 import { EditStudentDialog } from "./edit-student-dialog";
 import { DeleteStudentDialog } from "./delete-student-dialog";
 import { deleteStudent } from "@/lib/firebase/firestore";
 
 export function StudentsList({ students, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [studentList, setStudentList] = useState(students);
+
+  // Ensure the list updates if the parent component's data changes
+  useEffect(() => {
+    setStudentList(students);
+  }, [students]);
 
   const getStudentProfile = (studentId: string) => {
     return profiles.find(p => p.studentId === studentId);
   }
   
-  const handleStudentUpdated = (updatedStudent: Student) => {
-    setStudentList(currentList => currentList.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+  const handleStudentUpdated = (updatedStudent: Pick<Student, 'id' | 'name' | 'age'>) => {
+    setStudentList(currentList => 
+      currentList.map(s => 
+        s.id === updatedStudent.id ? { ...s, ...updatedStudent } : s
+      )
+    );
   };
   
   const handleStudentDeleted = (studentId: string) => {
@@ -149,7 +155,7 @@ export function StudentsList({ students, profiles }: { students: Student[], prof
                           
                           <EditStudentDialog 
                              student={student} 
-                             onStudentUpdated={() => setStudentList(prev => prev.map(s => s.id === student.id ? {...s, name: student.name, age: student.age} : s))}
+                             onStudentUpdated={handleStudentUpdated}
                           >
                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                <FilePenLine className="mr-2 h-4 w-4" />

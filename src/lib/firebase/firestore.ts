@@ -236,8 +236,8 @@ export const getStudentAndProfileById = async (studentId: string): Promise<{stud
     const studentSnap = await getDoc(studentRef);
 
     if (!studentSnap.exists()) return null;
-    const studentData = studentSnap.data();
     
+    const studentData = studentSnap.data();
     // Convert Firestore Timestamp to a serializable format (ISO string)
     const student: Student = { 
         id: studentSnap.id,

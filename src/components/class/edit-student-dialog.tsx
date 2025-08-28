@@ -15,7 +15,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -40,7 +39,7 @@ const formSchema = z.object({
 
 interface EditStudentDialogProps {
   student: Student;
-  onStudentUpdated: () => void;
+  onStudentUpdated: (student: Pick<Student, 'id' | 'name' | 'age'>) => void;
   children: React.ReactNode; // The trigger element
 }
 
@@ -63,7 +62,7 @@ export function EditStudentDialog({ student, onStudentUpdated, children }: EditS
         title: "Sucesso!",
         description: `Os dados de ${values.name} foram atualizados.`,
       });
-      onStudentUpdated();
+      onStudentUpdated({ id: student.id, ...values });
       setOpen(false);
     } catch (error) {
       toast({
@@ -128,4 +127,3 @@ export function EditStudentDialog({ student, onStudentUpdated, children }: EditS
     </Dialog>
   );
 }
-
