@@ -18,15 +18,31 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { Teacher } from "@/lib/types";
+import { MoreHorizontal, PlusCircle, Loader2 } from "lucide-react";
+import { Teacher, UserProfile } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+import { useUserProfile } from "@/hooks/use-user-profile";
+import { getTeachersByOrganization } from "@/lib/firebase/firestore";
 
-// TODO: Replace with real data from Firestore
-const mockTeachers: Teacher[] = [];
 
 export function TeachersTable() {
   const { toast } = useToast();
+  const { userProfile } = useUserProfile();
+  const [teachers, setTeachers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      if (userProfile?.organizationId) {
+        setLoading(true);
+        const fetchedTeachers = await getTeachersByOrganization(userProfile.organizationId);
+        setTeachers(fetchedTeachers);
+        setLoading(false);
+      }
+    }
+    fetchTeachers();
+  }, [userProfile]);
 
   const handleAddTeacher = () => {
      toast({
@@ -49,7 +65,11 @@ export function TeachersTable() {
         </Button>
       </CardHeader>
       <CardContent>
-        {mockTeachers.length > 0 ? (
+        {loading ? (
+            <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        ) : teachers.length > 0 ? (
             <Table>
             <TableHeader>
                 <TableRow>
@@ -60,14 +80,15 @@ export function TeachersTable() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {mockTeachers.map((teacher) => (
+                {teachers.map((teacher) => (
                 <TableRow key={teacher.id}>
                     <TableCell className="font-medium">{teacher.name}</TableCell>
                     <TableCell>{teacher.email}</TableCell>
                     <TableCell>
-                    <Badge variant={teacher.status === 'active' ? 'default' : 'destructive'} className={teacher.status === 'active' ? 'bg-green-600' : ''}>
-                        {teacher.status === 'active' ? 'Ativo' : 'Desativado'}
-                    </Badge>
+                      {/* Note: Status is not on UserProfile, assuming 'active' for now */}
+                      <Badge variant={'default'} className={'bg-green-600'}>
+                          Ativo
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                     <DropdownMenu>
@@ -80,9 +101,7 @@ export function TeachersTable() {
                         <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Ações</DropdownMenuLabel>
                         <DropdownMenuItem>Editar</DropdownMenuItem>
-                        <DropdownMenuItem>
-                            {teacher.status === 'active' ? 'Desativar' : 'Ativar'}
-                        </DropdownMenuItem>
+                        <DropdownMenuItem>Desativar</DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
                             Excluir
                         </DropdownMenuItem>

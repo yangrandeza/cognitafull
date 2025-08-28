@@ -27,11 +27,12 @@ import { useUserProfile } from "@/hooks/use-user-profile";
 import { userSignOut } from "@/lib/firebase/auth";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Painel" },
-  { href: "/admin", icon: Users, label: "Admin" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Painel", role: "teacher" },
+  { href: "/admin", icon: Users, label: "Admin", role: "admin" },
 ];
 
 function getInitials(name: string = ""): string {
+    if (!name) return "";
     return name
         .split(' ')
         .map(n => n[0])
@@ -50,7 +51,7 @@ export function AppSidebar() {
     router.push("/login");
   };
   
-  const isAdmin = userProfile?.role === 'admin';
+  const userRole = userProfile?.role;
 
   return (
     <aside className="w-64 flex-shrink-0 border-r bg-card flex flex-col">
@@ -63,22 +64,23 @@ export function AppSidebar() {
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2">
           {navItems.map((item) => {
-            if (item.href === '/admin' && !isAdmin) {
-                return null;
+            // Render item if it's not for a specific role or if the user has that role
+            if (!item.role || item.role === userRole) {
+              return (
+                  <li key={item.label}>
+                  <Link href={item.href}>
+                      <Button
+                      variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      >
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {item.label}
+                      </Button>
+                  </Link>
+                  </li>
+              )
             }
-            return (
-                <li key={item.label}>
-                <Link href={item.href}>
-                    <Button
-                    variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                    >
-                    <item.icon className="mr-2 h-4 w-4" />
-                    {item.label}
-                    </Button>
-                </Link>
-                </li>
-            )
+            return null;
           })}
         </ul>
       </nav>

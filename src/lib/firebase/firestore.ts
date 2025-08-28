@@ -24,6 +24,8 @@ import type {
   NewStudent,
   NewUnifiedProfile,
   QuizAnswers,
+  RawUnifiedProfile,
+  Organization,
 } from '../types';
 
 // User Profile Functions
@@ -44,11 +46,28 @@ export const getUserProfile = async (userId: string) => {
   return null;
 };
 
+export const getTeachersByOrganization = async (organizationId: string) => {
+    const q = query(
+        collection(db, 'users'), 
+        where('organizationId', '==', organizationId),
+        where('role', '==', 'teacher')
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+}
+
+
 // Class Functions
 export const createClass = async (className: string, teacherId: string) => {
+    const teacherProfile = await getUserProfile(teacherId);
+    if (!teacherProfile || !teacherProfile.organizationId) {
+        throw new Error("Professor não encontrado ou não associado a uma organização.");
+    }
+
     const newClass: NewClass = {
         name: className,
         teacherId,
+        organizationId: teacherProfile.organizationId,
         studentCount: 0,
         responsesCount: 0,
         createdAt: serverTimestamp(),
@@ -76,6 +95,12 @@ export const getClassById = async (classId: string): Promise<Class | null> => {
 // Student and Profile Functions
 export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string}, answers: QuizAnswers) => {
      await runTransaction(db, async (transaction) => {
+        const classRef = doc(db, 'classes', classId);
+        const classDoc = await transaction.get(classRef);
+        if (!classDoc.exists()) {
+            throw new Error("Turma não existe!");
+        }
+
         // 1. Create the new student document
         const newStudentData: NewStudent = {
             name: studentInfo.name,
@@ -101,14 +126,9 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
         transaction.update(studentRef, { unifiedProfileId: profileRef.id });
 
         // 4. Atomically update the class counters
-        const classRef = doc(db, 'classes', classId);
-        const classDoc = await transaction.get(classRef);
-        if (!classDoc.exists()) {
-            throw new Error("Class does not exist!");
-        }
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
-        // The responsesCount will be incremented by the cloud function after processing
-        transaction.update(classRef, { studentCount: newStudentCount });
+        const newResponsesCount = (classDoc.data().responsesCount || 0) + 1;
+        transaction.update(classRef, { studentCount: newStudentCount, responsesCount: newResponsesCount });
     });
 };
 
@@ -121,10 +141,10 @@ export const getStudentsByClass = async (classId: string): Promise<Student[]> =>
   );
 };
 
-export const getProfilesByClass = async (classId: string): Promise<UnifiedProfile[]> => {
+export const getProfilesByClass = async (classId: string): Promise<RawUnifiedProfile[]> => {
     const q = query(collection(db, 'unifiedProfiles'), where('classId', '==', classId));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UnifiedProfile));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RawUnifiedProfile));
 };
 
 

@@ -7,12 +7,22 @@ export type UserProfile = {
   email: string;
   name: string;
   role: UserRole;
-  organizationId?: string;
+  organizationId: string;
 };
+
+export type Organization = {
+  id: string;
+  name: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  logoUrl?: string;
+  createdAt: FieldValue;
+}
 
 export type NewClass = {
   name: string;
   teacherId: string;
+  organizationId: string;
   studentCount: number;
   responsesCount: number;
   createdAt: FieldValue;

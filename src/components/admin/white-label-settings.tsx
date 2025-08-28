@@ -4,10 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 
 export function WhiteLabelSettings() {
+  const { toast } = useToast();
+
+  const handleSaveChanges = () => {
+    toast({
+      title: "Função em Desenvolvimento",
+      description: "A personalização da marca estará disponível em breve.",
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -50,7 +60,7 @@ export function WhiteLabelSettings() {
             </div>
         </div>
         <div className="flex justify-end">
-            <Button>Salvar Alterações</Button>
+            <Button onClick={handleSaveChanges}>Salvar Alterações</Button>
         </div>
       </CardContent>
     </Card>
