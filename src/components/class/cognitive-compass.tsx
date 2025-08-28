@@ -59,7 +59,7 @@ export function CognitiveCompass({ data }: CognitiveCompassProps) {
             fillOpacity={0.6}
           />
         </RadarChart>
-      </responsivecontainer>
+      </ResponsiveContainer>
     </ChartContainer>
   )
 }
