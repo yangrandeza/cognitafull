@@ -18,12 +18,14 @@ import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
 import { SavedLessonPlans } from "./saved-lesson-plans";
+import { getSavedLessonPlans } from "@/lib/actions";
 
 
-export function InsightsDashboard({ classId, initialLessonPlans }: { classId: string, initialLessonPlans: LessonPlan[] }) {
+export function InsightsDashboard({ classId }: { classId: string }) {
   const [loading, setLoading] = useState(true);
   const [classData, setClassData] = useState<Class | null>(null);
   const [studentData, setStudentData] = useState<{students: Student[], profiles: RawUnifiedProfile[]} | null>(null);
+  const [savedLessonPlans, setSavedLessonPlans] = useState<LessonPlan[]>([]);
   const [dashboardData, setDashboardData] = useState<ReturnType<typeof getDashboardData> | null>(null);
   const [demographicsData, setDemographicsData] = useState<ReturnType<typeof getDemographicsData> | null>(null);
   const [processedProfiles, setProcessedProfiles] = useState<UnifiedProfile[]>([]);
@@ -34,13 +36,15 @@ export function InsightsDashboard({ classId, initialLessonPlans }: { classId: st
   const fetchClassData = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch class details and student/profile data in parallel
-      const [fetchedClassData, fetchedStudentData] = await Promise.all([
+      // Fetch class details, student/profile data, and lesson plans in parallel
+      const [fetchedClassData, fetchedStudentData, fetchedLessonPlans] = await Promise.all([
         getClassById(classId),
-        getClassWithStudentsAndProfiles(classId)
+        getClassWithStudentsAndProfiles(classId),
+        getSavedLessonPlans(classId)
       ]);
       
       setClassData(fetchedClassData);
+      setSavedLessonPlans(fetchedLessonPlans);
 
       if (fetchedStudentData) {
         setStudentData({students: fetchedStudentData.students, profiles: fetchedStudentData.profiles });
@@ -69,8 +73,8 @@ export function InsightsDashboard({ classId, initialLessonPlans }: { classId: st
   }, [fetchClassData]);
   
   const handlePlanSaved = () => {
-    // Re-fetch server-side props and re-render the page with new data.
-    router.refresh();
+    // Re-fetch lesson plans and re-render
+    getSavedLessonPlans(classId).then(setSavedLessonPlans);
     toast({
         title: "Plano Salvo!",
         description: "Seu plano de aula foi salvo. Verifique a aba 'Planos de Aula'.",
@@ -263,7 +267,7 @@ export function InsightsDashboard({ classId, initialLessonPlans }: { classId: st
         <StudentsList students={students} profiles={processedProfiles} />
       </TabsContent>
        <TabsContent value="plans">
-        <SavedLessonPlans savedPlans={initialLessonPlans} />
+        <SavedLessonPlans savedPlans={savedLessonPlans} />
       </TabsContent>
       <TabsContent value="optimizer">
         <LessonOptimizer 

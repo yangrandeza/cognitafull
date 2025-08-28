@@ -7,11 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default async function ClassDetailsPage({ params }: { params: { id: string } }) {
   const classId = params.id;
   
-  // Fetch all data on the server in parallel
-  const [classData, savedLessonPlans] = await Promise.all([
-    getClassById(classId),
-    getSavedLessonPlans(classId)
-  ]);
+  // Fetch only the essential data on the server first
+  const classData = await getClassById(classId);
+
+  // Lesson plans will be fetched on the client side inside the dashboard
 
   if (!classData) {
     return (
@@ -41,7 +40,7 @@ export default async function ClassDetailsPage({ params }: { params: { id: strin
             </h1>
         </div>
       </div>
-      <InsightsDashboard classId={classId} initialLessonPlans={savedLessonPlans} />
+      <InsightsDashboard classId={classId} />
     </div>
   );
 }
