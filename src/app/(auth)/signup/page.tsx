@@ -48,8 +48,8 @@ export default function SignupPage() {
   });
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
-    const { email, password } = data;
-    const { error } = await signUpWithEmail(email, password);
+    const { email, password, fullName } = data;
+    const { error } = await signUpWithEmail(email, password, fullName);
 
     if (error) {
       toast({

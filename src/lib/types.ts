@@ -1,42 +1,55 @@
+export type UserRole = 'teacher' | 'admin';
+
+export type UserProfile = {
+  id: string; // Corresponds to Firebase Auth UID
+  email: string;
+  name: string;
+  role: UserRole;
+  organizationId?: string;
+};
+
 export type Class = {
   id: string;
   name: string;
+  teacherId: string;
+  organizationId?: string;
   studentCount: number;
   responsesCount: number;
-  quizLink: string;
 };
 
 export type Student = {
   id: string;
   name: string;
   age: number;
+  classId: string;
   gender?: string;
   quizStatus: 'pending' | 'completed';
   unifiedProfileId?: string;
 };
 
 export type VarkProfile = {
-  dominant: string;
+  dominant: 'Visual' | 'Auditory' | 'Reading' | 'Kinesthetic' | 'Multimodal';
   scores: { v: number; a: number; r: number; k: number };
 };
 
 export type DiscProfile = {
-  dominant: string;
+  dominant: 'Dominance' | 'Influence' | 'Steadiness' | 'Conscientiousness';
   scores: { d: number; i: number; s: number; c: number };
 };
 
 export type UnifiedProfile = {
   id: string;
   studentId: string;
+  classId: string;
   varkProfile: VarkProfile;
   discProfile: DiscProfile;
-  jungianProfile: string;
+  jungianProfile: string; // e.g., "ENFP"
   schwartzValues: {
     top_values: string[];
     scores: Record<string, number>;
   };
   dissonanceAlert: boolean;
-  dissonanceNotes: string;
+  dissonanceNotes?: string;
 };
 
 export type Teacher = {
@@ -44,4 +57,9 @@ export type Teacher = {
   name: string;
   email: string;
   status: 'active' | 'disabled';
+};
+
+export type ClassWithStudentData = Class & {
+  students: Student[];
+  profiles: UnifiedProfile[];
 };

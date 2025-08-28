@@ -14,6 +14,7 @@ export async function getLessonPlanSuggestions(
     return output;
   } catch (error) {
     console.error("Error in getLessonPlanSuggestions:", error);
-    throw new Error("Failed to get suggestions from AI.");
+    // Retornar um objeto de erro estruturado pode ser melhor para o frontend
+    return { suggestions: ["Ocorreu um erro ao contatar a IA. Por favor, tente novamente mais tarde."] };
   }
 }

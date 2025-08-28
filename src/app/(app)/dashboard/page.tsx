@@ -1,11 +1,58 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { PlusCircle, Users, ArrowRight } from "lucide-react";
-import { mockClasses } from "@/lib/mock-data";
+import { PlusCircle, Users, ArrowRight, Loader2 } from "lucide-react";
+import { getClassesByTeacher } from "@/lib/firebase/firestore";
+import { auth } from "@/lib/firebase/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import type { Class } from "@/lib/types";
 
 export default function DashboardPage() {
+  const [user, loadingAuth] = useAuthState(auth);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [loadingClasses, setLoadingClasses] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      const fetchClasses = async () => {
+        setLoadingClasses(true);
+        const userClasses = await getClassesByTeacher(user.uid);
+        setClasses(userClasses);
+        setLoadingClasses(false);
+      };
+      fetchClasses();
+    } else if (!loadingAuth) {
+      // Handle case where there is no user
+      setLoadingClasses(false);
+    }
+  }, [user, loadingAuth]);
+
+  if (loadingAuth || loadingClasses) {
+    return (
+        <div className="flex-1 space-y-4 p-8 pt-6 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
+  
+  if (!user) {
+     return (
+        <div className="flex-1 space-y-4 p-8 pt-6">
+             <h1 className="text-3xl font-bold tracking-tight font-headline">
+                Acesso Negado
+            </h1>
+            <p>Você precisa estar logado para ver suas turmas.</p>
+             <Button asChild>
+                <Link href="/login">Ir para o Login</Link>
+            </Button>
+        </div>
+     )
+  }
+
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -19,8 +66,17 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+       {classes.length === 0 && (
+          <Card>
+              <CardContent className="pt-6">
+                  <p className="text-center text-muted-foreground">Nenhuma turma encontrada. Que tal criar uma?</p>
+              </CardContent>
+          </Card>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {mockClasses.map((classItem) => (
+        {classes.map((classItem) => (
           <Card key={classItem.id}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xl font-headline">{classItem.name}</CardTitle>
