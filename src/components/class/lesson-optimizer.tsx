@@ -156,19 +156,19 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId }: Les
             reformulatedPlan: reformulatedPlan,
         });
 
-        if (result.success) {
+        if (result.success && result.newPlan) {
             toast({
                 title: "Sucesso!",
                 description: "Seu plano de aula foi salvo.",
             });
+            // Add the new plan to the top of the list for immediate feedback
+            setSavedPlans(prevPlans => [result.newPlan!, ...prevPlans]);
             // Reset state
             setReformulatedPlan("");
             setSuggestions([]);
             form.reset();
             saveForm.reset();
             setIsSaveDialogOpen(false);
-            // Refresh the list of saved plans
-            fetchSavedPlans();
         } else {
              throw new Error(result.error || "Ocorreu um erro desconhecido");
         }

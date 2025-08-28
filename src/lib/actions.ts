@@ -54,7 +54,7 @@ export async function getReformedLessonPlan(
 }
 
 
-export async function saveGeneratedLessonPlan(planData: Omit<NewLessonPlan, 'createdAt'>): Promise<{success: boolean, error?: string}> {
+export async function saveGeneratedLessonPlan(planData: Omit<NewLessonPlan, 'createdAt'>): Promise<{success: boolean, error?: string, newPlan?: LessonPlan}> {
     if (!planData.teacherId) {
         return { success: false, error: 'Usuário não autenticado.' };
     }
@@ -64,9 +64,9 @@ export async function saveGeneratedLessonPlan(planData: Omit<NewLessonPlan, 'cre
             ...planData,
             createdAt: new Date(),
         };
-        await savePlanInDb(fullPlanData as any); // Cast because serverTimestamp is handled by Firestore
+        const newPlan = await savePlanInDb(fullPlanData); // Now returns the full plan
         revalidatePath(`/class/${planData.classId}`);
-        return { success: true };
+        return { success: true, newPlan };
     } catch(error) {
         console.error("Error saving lesson plan:", error);
         return { success: false, error: "Falha ao salvar o plano de aula."};

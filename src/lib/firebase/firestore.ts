@@ -122,7 +122,7 @@ export const updateStudent = async (studentId: string, data: Partial<Pick<Studen
 }
 
 export const deleteStudent = async (studentId: string): Promise<void> => {
-    await runTransaction(db, async (transaction) => {
+     await runTransaction(db, async (transaction) => {
         const studentRef = doc(db, 'students', studentId);
         const studentDoc = await transaction.get(studentRef);
 
@@ -135,10 +135,8 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
         const profileId = studentData.unifiedProfileId;
         
         let classRef;
-        let classDoc;
         if (classId) {
             classRef = doc(db, 'classes', classId);
-            classDoc = await transaction.get(classRef);
         }
 
         transaction.delete(studentRef);
@@ -148,19 +146,22 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
             transaction.delete(profileRef);
         }
 
-        if (classRef && classDoc?.exists()) {
-            const currentStudentCount = classDoc.data().studentCount || 0;
-            const currentResponsesCount = classDoc.data().responsesCount || 0;
-            
-            const newStudentCount = Math.max(0, currentStudentCount - 1);
-            const newResponsesCount = studentData.quizStatus === 'completed' 
-                ? Math.max(0, currentResponsesCount - 1)
-                : currentResponsesCount;
-            
-            transaction.update(classRef, { 
-                studentCount: newStudentCount,
-                responsesCount: newResponsesCount,
-            });
+        if (classRef) {
+            const classDoc = await transaction.get(classRef);
+            if (classDoc.exists()) {
+                const currentStudentCount = classDoc.data().studentCount || 0;
+                const currentResponsesCount = classDoc.data().responsesCount || 0;
+                
+                const newStudentCount = Math.max(0, currentStudentCount - 1);
+                const newResponsesCount = studentData.quizStatus === 'completed' 
+                    ? Math.max(0, currentResponsesCount - 1)
+                    : currentResponsesCount;
+                
+                transaction.update(classRef, { 
+                    studentCount: newStudentCount,
+                    responsesCount: newResponsesCount,
+                });
+            }
         }
     });
 };
@@ -290,9 +291,20 @@ export const getClassWithStudentsAndProfiles = async (
 
 // Lesson Plan Functions
 
-export const saveLessonPlan = async (plan: NewLessonPlan): Promise<string> => {
-    const docRef = await addDoc(collection(db, "lessonPlans"), plan);
-    return docRef.id;
+export const saveLessonPlan = async (plan: Omit<NewLessonPlan, 'createdAt'>): Promise<LessonPlan> => {
+    const dataWithTimestamp = {
+        ...plan,
+        createdAt: serverTimestamp()
+    };
+    const docRef = await addDoc(collection(db, "lessonPlans"), dataWithTimestamp);
+
+    // To return the full object, we create a client-side version of it.
+    // The server timestamp will be null on the client initially, but we can use the current date as a good-enough placeholder.
+    return {
+        id: docRef.id,
+        ...plan,
+        createdAt: new Date().toISOString(), // Use current date as placeholder
+    };
 }
 
 export const getLessonPlansByClass = async (classId: string): Promise<LessonPlan[]> => {
