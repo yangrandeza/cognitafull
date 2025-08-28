@@ -40,11 +40,11 @@ const formSchema = z.object({
 interface EditStudentDialogProps {
   student: Student;
   onStudentUpdated: (student: Pick<Student, 'id' | 'name' | 'age'>) => void;
-  children: React.ReactNode; // The trigger element
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
 }
 
-export function EditStudentDialog({ student, onStudentUpdated, children }: EditStudentDialogProps) {
-  const [open, setOpen] = useState(false);
+export function EditStudentDialog({ student, onStudentUpdated, isOpen, setIsOpen }: EditStudentDialogProps) {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -63,7 +63,7 @@ export function EditStudentDialog({ student, onStudentUpdated, children }: EditS
         description: `Os dados de ${values.name} foram atualizados.`,
       });
       onStudentUpdated({ id: student.id, ...values });
-      setOpen(false);
+      setIsOpen(false);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -75,8 +75,7 @@ export function EditStudentDialog({ student, onStudentUpdated, children }: EditS
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-        {children}
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="font-headline">Editar Aluno</DialogTitle>
@@ -113,7 +112,7 @@ export function EditStudentDialog({ student, onStudentUpdated, children }: EditS
               )}
             />
             <DialogFooter>
-               <Button variant="outline" onClick={() => setOpen(false)} type="button">
+               <Button variant="outline" onClick={() => setIsOpen(false)} type="button">
                 Cancelar
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>

@@ -11,6 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -19,15 +20,16 @@ import { Loader2 } from "lucide-react";
 interface DeleteStudentDialogProps {
   studentName: string;
   onConfirm: () => Promise<void>;
-  children: React.ReactNode; // The trigger button
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
 }
 
 export function DeleteStudentDialog({
   studentName,
   onConfirm,
-  children,
+  isOpen,
+  setIsOpen,
 }: DeleteStudentDialogProps) {
-  const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
@@ -39,7 +41,6 @@ export function DeleteStudentDialog({
         title: "Aluno excluído!",
         description: `${studentName} foi removido da turma.`,
       });
-      setOpen(false);
     } catch (error) {
       console.error("Erro ao excluir aluno:", error);
       toast({
@@ -49,12 +50,12 @@ export function DeleteStudentDialog({
       });
     } finally {
       setIsDeleting(false);
+      setIsOpen(false);
     }
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      {children}
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>

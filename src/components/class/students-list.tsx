@@ -48,6 +48,11 @@ export function StudentsList({ students: initialStudents, profiles }: { students
       disc: 'all',
       jung: 'all',
   });
+  
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
 
   useEffect(() => {
     setStudentList(initialStudents);
@@ -89,9 +94,22 @@ export function StudentsList({ students: initialStudents, profiles }: { students
   const handleDeleteConfirm = async (studentId: string) => {
     await deleteStudent(studentId);
     handleStudentDeleted(studentId);
+    setIsDeleteOpen(false);
   };
+  
+  const openEditDialog = (student: Student) => {
+      setSelectedStudent(student);
+      setIsEditOpen(true);
+  }
+  
+  const openDeleteDialog = (student: Student) => {
+      setSelectedStudent(student);
+      setIsDeleteOpen(true);
+  }
+
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle className="font-headline">Lista de Alunos e Perfis Individuais</CardTitle>
@@ -206,28 +224,18 @@ export function StudentsList({ students: initialStudents, profiles }: { students
                             </Link>
                           </DropdownMenuItem>
                           
-                          <EditStudentDialog 
-                             student={student} 
-                             onStudentUpdated={handleStudentUpdated}
-                          >
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                               <FilePenLine className="mr-2 h-4 w-4" />
-                               Editar
-                            </DropdownMenuItem>
-                          </EditStudentDialog>
+                          <DropdownMenuItem onSelect={() => openEditDialog(student)}>
+                              <FilePenLine className="mr-2 h-4 w-4" />
+                              Editar
+                          </DropdownMenuItem>
 
-                          <DeleteStudentDialog
-                             studentName={student.name}
-                             onConfirm={() => handleDeleteConfirm(student.id)}
+                          <DropdownMenuItem 
+                              onSelect={() => openDeleteDialog(student)}
+                              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                           >
-                            <DropdownMenuItem 
-                                onSelect={(e) => e.preventDefault()}
-                                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Excluir
-                            </DropdownMenuItem>
-                          </DeleteStudentDialog>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                          </DropdownMenuItem>
                           
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -244,5 +252,27 @@ export function StudentsList({ students: initialStudents, profiles }: { students
         )}
       </CardContent>
     </Card>
+
+    {selectedStudent && (
+        <>
+            <EditStudentDialog 
+                key={`edit-${selectedStudent.id}`}
+                student={selectedStudent} 
+                onStudentUpdated={handleStudentUpdated}
+                isOpen={isEditOpen}
+                setIsOpen={setIsEditOpen}
+            />
+            <DeleteStudentDialog
+                key={`delete-${selectedStudent.id}`}
+                studentName={selectedStudent.name}
+                onConfirm={() => handleDeleteConfirm(selectedStudent.id)}
+                isOpen={isDeleteOpen}
+                setIsOpen={setIsDeleteOpen}
+            />
+        </>
+    )}
+
+    </>
   );
 }
+
