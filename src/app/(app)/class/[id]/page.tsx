@@ -4,8 +4,8 @@ import { AlertTriangle, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function ClassDetailsPage({ params }: { params: { id: string } }) {
-  // Directly use params.id as it's available in Server Components
-  const classData = await getClassById(params.id);
+  const classId = params.id;
+  const classData = await getClassById(classId);
 
   if (!classData) {
     return (
@@ -35,7 +35,7 @@ export default async function ClassDetailsPage({ params }: { params: { id: strin
             </h1>
         </div>
       </div>
-      <InsightsDashboard classId={params.id} />
+      <InsightsDashboard classId={classId} />
     </div>
   );
 }

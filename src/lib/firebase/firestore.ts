@@ -131,34 +131,35 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
         const classId = studentData.classId;
         const profileId = studentData.unifiedProfileId;
 
-        // 1. Delete student document
+        // Perform all reads first
+        let classRef;
+        let classDoc;
+        if (classId) {
+            classRef = doc(db, 'classes', classId);
+            classDoc = await transaction.get(classRef);
+        }
+
+        // Now, perform all writes
         transaction.delete(studentRef);
 
-        // 2. Delete unified profile if it exists
         if (profileId) {
             const profileRef = doc(db, 'unifiedProfiles', profileId);
             transaction.delete(profileRef);
         }
 
-        // 3. Atomically decrement class counters
-        if (classId) {
-            const classRef = doc(db, 'classes', classId);
-            const classDoc = await transaction.get(classRef);
-            if (classDoc.exists()) {
-                const currentStudentCount = classDoc.data().studentCount || 0;
-                const currentResponsesCount = classDoc.data().responsesCount || 0;
-                
-                const newStudentCount = Math.max(0, currentStudentCount - 1);
-                // Decrement responses count only if the student had a completed quiz
-                const newResponsesCount = studentData.quizStatus === 'completed' 
-                    ? Math.max(0, currentResponsesCount - 1)
-                    : currentResponsesCount;
-                
-                transaction.update(classRef, { 
-                    studentCount: newStudentCount,
-                    responsesCount: newResponsesCount,
-                });
-            }
+        if (classRef && classDoc?.exists()) {
+            const currentStudentCount = classDoc.data().studentCount || 0;
+            const currentResponsesCount = classDoc.data().responsesCount || 0;
+            
+            const newStudentCount = Math.max(0, currentStudentCount - 1);
+            const newResponsesCount = studentData.quizStatus === 'completed' 
+                ? Math.max(0, currentResponsesCount - 1)
+                : currentResponsesCount;
+            
+            transaction.update(classRef, { 
+                studentCount: newStudentCount,
+                responsesCount: newResponsesCount,
+            });
         }
     });
 };
