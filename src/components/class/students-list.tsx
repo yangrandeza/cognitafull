@@ -47,6 +47,7 @@ export function StudentsList({ students: initialStudents, profiles }: { students
       vark: 'all',
       disc: 'all',
       jung: 'all',
+      age: ''
   });
   
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -74,7 +75,7 @@ export function StudentsList({ students: initialStudents, profiles }: { students
      setStudentList(currentList => currentList.filter(s => s.id !== studentId));
   }
   
-  const handleFilterChange = (filterType: 'vark' | 'disc' | 'jung', value: string) => {
+  const handleFilterChange = (filterType: 'vark' | 'disc' | 'jung' | 'age', value: string) => {
       setFilters(prev => ({...prev, [filterType]: value}));
   }
 
@@ -83,11 +84,12 @@ export function StudentsList({ students: initialStudents, profiles }: { students
         const profile = getStudentProfile(student.id);
 
         const nameMatch = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const ageMatch = !filters.age || student.age === parseInt(filters.age, 10);
         const varkMatch = !profile || filters.vark === 'all' || profile.varkProfile.dominant === filters.vark;
         const discMatch = !profile || filters.disc === 'all' || profile.discProfile.dominant === filters.disc;
         const jungMatch = !profile || filters.jung === 'all' || profile.jungianProfile.type === filters.jung;
 
-        return nameMatch && varkMatch && discMatch && jungMatch;
+        return nameMatch && ageMatch && varkMatch && discMatch && jungMatch;
     });
   }, [searchTerm, studentList, filters, profiles]);
   
@@ -123,7 +125,13 @@ export function StudentsList({ students: initialStudents, profiles }: { students
             onChange={(e) => setSearchTerm(e.target.value)}
             className="md:max-w-xs"
           />
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Input
+                type="number"
+                placeholder="Filtrar por idade..."
+                value={filters.age}
+                onChange={(e) => handleFilterChange('age', e.target.value)}
+              />
               <Select value={filters.vark} onValueChange={(value) => handleFilterChange('vark', value)}>
                 <SelectTrigger>
                     <SelectValue placeholder="Filtrar por VARK" />
@@ -275,4 +283,3 @@ export function StudentsList({ students: initialStudents, profiles }: { students
     </>
   );
 }
-
