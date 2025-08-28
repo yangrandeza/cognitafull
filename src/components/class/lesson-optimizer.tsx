@@ -165,10 +165,14 @@ export function LessonOptimizer({ classProfileSummary }: { classProfileSummary: 
                       <div className="space-y-4 pt-6 border-t">
                           <div className="flex justify-between items-center">
                             <h3 className="text-lg font-headline">Plano de Aula Melhorado</h3>
-                             <Button variant="outline" onClick={handlePrint}>
-                                <FileDown className="mr-2 h-4 w-4" />
-                                Exportar para PDF
-                            </Button>
+                            <div onClick={handlePrint} className="cursor-pointer">
+                              <Button variant="outline" asChild>
+                                  <span>
+                                      <FileDown className="mr-2 h-4 w-4" />
+                                      Exportar para PDF
+                                  </span>
+                              </Button>
+                            </div>
                           </div>
                           <div ref={printRef} className="prose prose-sm dark:prose-invert max-w-none p-6 border rounded-lg bg-muted/20">
                             <ReactMarkdown>{reformulatedPlan}</ReactMarkdown>
