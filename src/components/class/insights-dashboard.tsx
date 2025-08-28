@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentsList } from "@/components/class/students-list";
 import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { getClassWithStudentsAndProfiles, getLessonPlansByClass } from "@/lib/firebase/firestore";
+import { getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile, LessonPlan } from "@/lib/types";
 import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby, BookMarked } from "lucide-react";
 import { getDashboardData, processProfiles, getDemographicsData } from "@/lib/insights-generator";
@@ -30,37 +30,46 @@ export function InsightsDashboard({ classId }: { classId: string }) {
   const [loadingPlans, setLoadingPlans] = useState(true);
   const { toast } = useToast();
 
-  const fetchSavedPlans = useCallback(async () => {
-        setLoadingPlans(true);
-        const plans = await getSavedLessonPlans(classId);
-        setSavedPlans(plans);
-        setLoadingPlans(false);
-  }, [classId]);
+  const fetchClassData = useCallback(async () => {
+    setLoading(true);
+    setLoadingPlans(true);
+    try {
+      const [fetchedClassData, fetchedPlans] = await Promise.all([
+        getClassWithStudentsAndProfiles(classId),
+        getSavedLessonPlans(classId)
+      ]);
+      
+      setClassData(fetchedClassData);
+      setSavedPlans(fetchedPlans);
+
+      if (fetchedClassData && fetchedClassData.profiles) {
+          const data = getDashboardData(fetchedClassData.profiles, fetchedClassData.students);
+          setDashboardData(data);
+          const demos = getDemographicsData(fetchedClassData.students);
+          setDemographicsData(demos);
+          const profiles = processProfiles(fetchedClassData.profiles);
+          setProcessedProfiles(profiles);
+      }
+    } catch (error) {
+      console.error("Failed to fetch class data:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao carregar dados',
+        description: 'Não foi possível carregar os dados da turma.'
+      })
+    } finally {
+      setLoading(false);
+      setLoadingPlans(false);
+    }
+  }, [classId, toast]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const fetchedClassData = await getClassWithStudentsAndProfiles(classId);
-        setClassData(fetchedClassData);
-        if (fetchedClassData && fetchedClassData.profiles) {
-            const data = getDashboardData(fetchedClassData.profiles, fetchedClassData.students);
-            setDashboardData(data);
-            const demos = getDemographicsData(fetchedClassData.students);
-            setDemographicsData(demos);
-            const profiles = processProfiles(fetchedClassData.profiles);
-            setProcessedProfiles(profiles);
-        }
-      } catch (error) {
-        console.error("Failed to fetch class data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-    fetchSavedPlans();
-  }, [classId, fetchSavedPlans]);
+    fetchClassData();
+  }, [fetchClassData]);
   
+  const handlePlanSaved = (newPlan: LessonPlan) => {
+    setSavedPlans(prevPlans => [newPlan, ...prevPlans]);
+  }
 
   if (loading) {
     return (
@@ -257,7 +266,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             classProfileSummary={classProfileSummary} 
             classId={classId} 
             teacherId={teacherId}
-            onPlanSaved={fetchSavedPlans}
+            onPlanSaved={handlePlanSaved}
         />
       </TabsContent>
     </Tabs>

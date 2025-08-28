@@ -45,7 +45,7 @@ interface LessonOptimizerProps {
     classProfileSummary: string;
     classId: string;
     teacherId: string;
-    onPlanSaved: () => void;
+    onPlanSaved: (newPlan: LessonPlan) => void;
 }
 
 
@@ -150,7 +150,7 @@ export function LessonOptimizer({ classProfileSummary, classId, teacherId, onPla
                 description: "Seu plano de aula foi salvo. Você pode vê-lo na aba 'Planos de Aula'.",
             });
             
-            onPlanSaved();
+            onPlanSaved(result.newPlan);
 
             // Reset state
             setReformulatedPlan("");
