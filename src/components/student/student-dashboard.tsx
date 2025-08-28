@@ -10,10 +10,10 @@ import { useEffect, useState } from "react";
 interface InsightQuadrantProps {
     icon: React.ReactNode;
     title: string;
-    text: string;
+    children: React.ReactNode;
 }
 
-function InsightQuadrant({ icon, title, text }: InsightQuadrantProps) {
+function InsightQuadrant({ icon, title, children }: InsightQuadrantProps) {
     return (
         <Card className="flex flex-col">
             <CardHeader className="flex-row items-center gap-4 pb-4">
@@ -23,7 +23,7 @@ function InsightQuadrant({ icon, title, text }: InsightQuadrantProps) {
                 <CardTitle className="font-headline text-xl">{title}</CardTitle>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground">{text}</p>
+                <div className="text-muted-foreground">{children}</div>
             </CardContent>
         </Card>
     );
@@ -48,12 +48,12 @@ export function StudentDashboard({ student, profile }: StudentDashboardProps) {
         return <div>Gerando insights...</div>
     }
 
-    // Helper para renderizar o manual com quebras de linha
+    // Helper para renderizar o manual com quebras de linha e negrito
     const renderManual = (manualText: string) => {
         return manualText.split('\n').map((line, index) => {
             if (line.startsWith('**')) {
                  const parts = line.split('**');
-                 return <p key={index} className="mt-2"><strong className="text-foreground">{parts[1]}:</strong> {parts[2]}</p>
+                 return <p key={index} className="mt-2"><strong className="text-foreground">{parts[1]}</strong> {parts[2]}</p>
             }
             return <span key={index}>{line}</span>
         })
@@ -73,23 +73,27 @@ export function StudentDashboard({ student, profile }: StudentDashboardProps) {
                 <InsightQuadrant 
                     icon={<Brain className="h-6 w-6" />}
                     title="Minha Mente em Foco 🧘‍♀️"
-                    text={insights.mind}
-                />
+                >
+                   <p>{insights.mind}</p>
+                </InsightQuadrant>
                 <InsightQuadrant 
                     icon={<Rocket className="h-6 w-6" />}
                     title="Meus Superpoderes 🚀"
-                    text={insights.superpowers}
-                />
+                >
+                   <p>{insights.superpowers}</p>
+                </InsightQuadrant>
                 <InsightQuadrant 
                     icon={<Heart className="h-6 w-6" />}
                     title="O Que Me Move ❤️"
-                    text={insights.motivation}
-                />
+                >
+                    <p>{insights.motivation}</p>
+                </InsightQuadrant>
                 <InsightQuadrant
                     icon={<BookOpen className="h-6 w-6" />}
                     title="Meu 'Manual de Instruções' 📖"
-                    text={insights.manual}
-                />
+                >
+                    {renderManual(insights.manual)}
+                </InsightQuadrant>
             </div>
              <Card>
                 <CardHeader>
