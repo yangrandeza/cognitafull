@@ -24,11 +24,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Student, UnifiedProfile } from "@/lib/types";
-import { User, MoreHorizontal, FilePenLine, Trash2 } from "lucide-react";
+import { User, MoreHorizontal, FilePenLine, Trash2, Eye } from "lucide-react";
 import { EditStudentDialog } from "./edit-student-dialog";
 import { DeleteStudentDialog } from "./delete-student-dialog";
-import { deleteStudent } from "@/lib/firebase/firestore";
+import { StudentDetailsModal } from "./student-details-modal";
+import { deleteStudent, getProfilesByClass } from "@/lib/firebase/firestore";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { RawUnifiedProfile } from "@/lib/types";
 
 
 const varkOptions = ['Visual', 'Auditivo', 'Leitura/Escrita', 'Cinestésico'];
@@ -40,7 +42,7 @@ const jungianOptions = [
     'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
 ];
 
-export function StudentsList({ students: initialStudents, profiles }: { students: Student[], profiles: UnifiedProfile[] }) {
+export function StudentsList({ students: initialStudents, profiles, classId }: { students: Student[], profiles: UnifiedProfile[], classId: string }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [studentList, setStudentList] = useState<Student[]>(initialStudents);
   const [filters, setFilters] = useState({
@@ -49,10 +51,13 @@ export function StudentsList({ students: initialStudents, profiles }: { students
       jung: 'all',
       age: ''
   });
-  
+
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [rawProfiles, setRawProfiles] = useState<RawUnifiedProfile[]>([]);
+  const [loadingRawProfiles, setLoadingRawProfiles] = useState(false);
 
 
   useEffect(() => {
@@ -107,6 +112,28 @@ export function StudentsList({ students: initialStudents, profiles }: { students
   const openDeleteDialog = (student: Student) => {
       setSelectedStudent(student);
       setIsDeleteOpen(true);
+  }
+
+  const openDetailsModal = async (student: Student) => {
+    setSelectedStudent(student);
+    setIsDetailsOpen(true);
+
+    // Buscar perfis brutos se ainda não foram carregados
+    if (rawProfiles.length === 0 && !loadingRawProfiles) {
+      setLoadingRawProfiles(true);
+      try {
+        const profiles = await getProfilesByClass(classId);
+        setRawProfiles(profiles);
+      } catch (error) {
+        console.error('Erro ao buscar perfis brutos:', error);
+      } finally {
+        setLoadingRawProfiles(false);
+      }
+    }
+  }
+
+  const getStudentRawProfile = (studentId: string) => {
+    return rawProfiles.find(p => p.studentId === studentId);
   }
 
 
@@ -215,13 +242,22 @@ export function StudentsList({ students: initialStudents, profiles }: { students
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Abrir menu de ações</span>
-                          </Button>
-                        </DropdownMenuTrigger>
+                       <div className="flex items-center justify-end gap-2">
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={() => openDetailsModal(student)}
+                           title="Ver detalhes completos"
+                         >
+                           <Eye className="h-4 w-4" />
+                         </Button>
+                         <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Abrir menu de ações</span>
+                            </Button>
+                          </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
                           <DropdownMenuSeparator />
@@ -247,6 +283,7 @@ export function StudentsList({ students: initialStudents, profiles }: { students
                           
                         </DropdownMenuContent>
                       </DropdownMenu>
+                       </div>
                     </TableCell>
                   </TableRow>
               )
@@ -263,9 +300,9 @@ export function StudentsList({ students: initialStudents, profiles }: { students
 
     {selectedStudent && (
         <>
-            <EditStudentDialog 
+            <EditStudentDialog
                 key={`edit-${selectedStudent.id}`}
-                student={selectedStudent} 
+                student={selectedStudent}
                 onStudentUpdated={handleStudentUpdated}
                 isOpen={isEditOpen}
                 setIsOpen={setIsEditOpen}
@@ -276,6 +313,17 @@ export function StudentsList({ students: initialStudents, profiles }: { students
                 onConfirm={() => handleDeleteConfirm(selectedStudent.id)}
                 isOpen={isDeleteOpen}
                 setIsOpen={setIsDeleteOpen}
+            />
+            <StudentDetailsModal
+                key={`details-${selectedStudent.id}`}
+                student={selectedStudent}
+                profile={getStudentProfile(selectedStudent.id) || null}
+                rawProfile={getStudentRawProfile(selectedStudent.id) || null}
+                isOpen={isDetailsOpen}
+                onClose={() => {
+                  setIsDetailsOpen(false);
+                  setSelectedStudent(null);
+                }}
             />
         </>
     )}

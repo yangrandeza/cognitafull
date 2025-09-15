@@ -22,14 +22,27 @@ import {
   LogOut,
   ChevronDown,
   Loader2,
+  BookOpen,
+  BarChart3,
+  Building2,
+  PieChart,
+  Shield,
 } from "lucide-react";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { userSignOut } from "@/lib/firebase/auth";
 
 const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Painel", role: "teacher" },
-  { href: "/settings", icon: Settings, label: "Configurações", role: "teacher"},
-  { href: "/admin", icon: Users, label: "Admin", role: "admin" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Painel", roles: ["teacher"] },
+  { href: "/admin?tab=classes", icon: BookOpen, label: "Turmas da organização", roles: ["admin"] },
+  { href: "/admin?tab=insights", icon: BarChart3, label: "Insights organizacionais", roles: ["admin"] },
+  { href: "/admin?tab=teachers", icon: Users, label: "Gerenciar professores", roles: ["admin"] },
+  { href: "/settings", icon: Settings, label: "Configurações", roles: ["teacher", "admin", "superadmin"]},
+  // Super Admin sections
+  { href: "/superadmin", icon: BarChart3, label: "Dashboard Super", roles: ["superadmin"] },
+  { href: "/superadmin/organizations", icon: Building2, label: "Organizações", roles: ["superadmin"] },
+  { href: "/superadmin/users", icon: Users, label: "Usuários", roles: ["superadmin"] },
+  { href: "/superadmin/classes", icon: BookOpen, label: "Turmas", roles: ["superadmin"] },
+  { href: "/superadmin/analytics", icon: PieChart, label: "Analytics", roles: ["superadmin"] },
 ];
 
 function getInitials(name: string = ""): string {
@@ -40,6 +53,21 @@ function getInitials(name: string = ""): string {
         .slice(0, 2)
         .join('')
         .toUpperCase();
+}
+
+function getActiveVariant(currentPath: string, itemHref: string): boolean {
+    // Exact match for root paths
+    if (currentPath === itemHref) {
+        return true;
+    }
+
+    // For superadmin paths, only match exact path to avoid double selection
+    if (itemHref.startsWith('/superadmin')) {
+        return currentPath === itemHref;
+    }
+
+    // For other paths, use startsWith for sub-routes
+    return currentPath.startsWith(itemHref);
 }
 
 export function AppSidebar() {
@@ -73,12 +101,12 @@ export function AppSidebar() {
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2">
           {navItems.map((item) => {
-            if (!item.role || item.role === userRole) {
+            if (!item.roles || item.roles.includes(userRole || '')) {
               return (
                   <li key={item.label}>
                   <Link href={item.href}>
                       <Button
-                      variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
+                      variant={getActiveVariant(pathname, item.href) ? "secondary" : "ghost"}
                       className="w-full justify-start"
                       >
                       <item.icon className="mr-2 h-4 w-4" />
@@ -107,7 +135,11 @@ export function AppSidebar() {
                         </Avatar>
                         <div className="text-left">
                             <p className="text-sm font-medium">{userProfile.name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{userProfile.role === 'teacher' ? 'Professor(a)' : 'Admin'}</p>
+                            <p className="text-xs text-muted-foreground capitalize">
+                              {userProfile.role === 'teacher' ? 'Professor(a)' :
+                               userProfile.role === 'admin' ? 'Diretor(a)' :
+                               userProfile.role === 'superadmin' ? 'Superadmin' : 'Usuário'}
+                            </p>
                         </div>
                     </div>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />

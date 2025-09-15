@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -265,7 +264,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         )}
       </TabsContent>
       <TabsContent value="students">
-        <StudentsList students={students} profiles={processedProfiles} />
+        <StudentsList students={students} profiles={processedProfiles} classId={classId} />
       </TabsContent>
        <TabsContent value="strategies">
         <SavedStrategies savedStrategies={savedStrategies} />

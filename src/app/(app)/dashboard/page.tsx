@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -9,13 +10,16 @@ import { Users, ArrowRight, Loader2 } from "lucide-react";
 import { getClassesByTeacher } from "@/lib/firebase/firestore";
 import { auth } from "@/lib/firebase/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import type { Class } from "@/lib/types";
 import { CreateClassDialog } from "@/components/class/create-class-dialog";
 
 export default function DashboardPage() {
   const [user, loadingAuth] = useAuthState(auth);
+  const { userProfile, loading: loadingProfile } = useUserProfile();
   const [classes, setClasses] = useState<Class[]>([]);
   const [loadingClasses, setLoadingClasses] = useState(true);
+  const router = useRouter();
 
   const fetchClasses = async () => {
       if (user) {
@@ -33,17 +37,29 @@ export default function DashboardPage() {
       setLoadingClasses(false);
     }
   }, [user, loadingAuth]);
-  
+
+  // Redirect admin users to admin dashboard
+  useEffect(() => {
+    if (!loadingProfile && userProfile?.role === 'admin') {
+      router.push('/admin?tab=classes');
+    }
+  }, [userProfile, loadingProfile, router]);
+
   const handleClassCreated = () => {
     fetchClasses();
   }
 
-  if (loadingAuth || loadingClasses) {
+  if (loadingAuth || loadingClasses || loadingProfile) {
     return (
         <div className="flex-1 space-y-4 p-8 pt-6 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     )
+  }
+
+  // Don't render anything for admin users (they will be redirected)
+  if (userProfile?.role === 'admin') {
+    return null;
   }
   
   if (!user) {

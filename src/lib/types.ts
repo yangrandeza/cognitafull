@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase/firestore";
 
-export type UserRole = 'teacher' | 'admin';
+export type UserRole = 'teacher' | 'admin' | 'superadmin';
 
 export type UserProfile = {
   id: string; // Corresponds to Firebase Auth UID
@@ -8,6 +8,7 @@ export type UserProfile = {
   name: string;
   role: UserRole;
   organizationId: string;
+  status?: 'active' | 'pending' | 'inactive'; // For invited teachers
 };
 
 export type Organization = {
@@ -36,6 +37,17 @@ export type Class = {
   studentCount: number;
   responsesCount: number;
   createdAt: FieldValue;
+  // Custom fields configuration
+  enableCustomFields?: boolean;
+  customFields?: CustomField[];
+};
+
+export type CustomField = {
+  id: string;
+  label: string;
+  type: 'text' | 'number' | 'email' | 'select' | 'textarea';
+  required: boolean;
+  options?: string[]; // For select fields
 };
 
 export type Student = {

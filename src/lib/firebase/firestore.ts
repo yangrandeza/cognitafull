@@ -46,12 +46,12 @@ const createOrganizationAndUser = async (transaction: any, user: User, fullName:
     const orgRef = doc(collection(db, 'organizations'));
     transaction.set(orgRef, orgData);
 
-    // 2. Create the user profile with default teacher role
+    // 2. Create the user profile with default admin role
     const userProfileData: UserProfile = {
         id: user.uid,
         email: user.email || '',
         name: fullName,
-        role: 'teacher',
+        role: 'admin',
         organizationId: orgRef.id,
     };
     const userRef = doc(db, 'users', user.uid);
@@ -65,20 +65,55 @@ const createOrganizationAndUser = async (transaction: any, user: User, fullName:
 
 export const createUserProfileInFirestore = async (user: User, additionalData: Partial<UserProfile> = {}) => {
     const userRef = doc(db, 'users', user.uid);
-    
+
     return await runTransaction(db, async (transaction) => {
         const docSnap = await transaction.get(userRef);
 
         if (!docSnap.exists()) {
-            // First time user creates an organization and gets teacher role
-            const fullName = additionalData.name || user.displayName || 'Teacher';
-            const profile = await createOrganizationAndUser(transaction, user, fullName);
-            
-            // This needs to be run outside the transaction, but we can't await it here.
-            // It's a "best effort" update for the display name.
-            updateProfile(user, { displayName: fullName });
+            // Check if there's a pending teacher invitation for this email
+            const pendingTeacherQuery = query(
+                collection(db, 'users'),
+                where('email', '==', user.email),
+                where('status', '==', 'pending'),
+                where('role', '==', 'teacher')
+            );
+            const pendingTeacherSnapshot = await getDocs(pendingTeacherQuery);
 
-            return profile;
+            if (!pendingTeacherSnapshot.empty) {
+                // Found pending teacher invitation - activate it
+                const pendingTeacherDoc = pendingTeacherSnapshot.docs[0];
+                const teacherData = pendingTeacherDoc.data();
+
+                const activatedProfile: UserProfile = {
+                    id: user.uid,
+                    email: user.email || '',
+                    name: teacherData.name || user.displayName || 'Professor',
+                    role: 'teacher',
+                    organizationId: teacherData.organizationId,
+                    status: 'active',
+                };
+
+                // Create the new user document with the activated profile
+                transaction.set(userRef, activatedProfile);
+
+                // Delete the old pending document to prevent duplication
+                transaction.delete(pendingTeacherDoc.ref);
+
+                // Update Firebase Auth display name
+                updateProfile(user, { displayName: activatedProfile.name });
+
+                return activatedProfile;
+            } else {
+                // No pending invitation - create new organization and admin user
+                const fullName = additionalData.name || user.displayName || 'Admin';
+                const profile = await createOrganizationAndUser(transaction, user, fullName);
+
+                // This needs to be run outside the transaction, but we can't await it here.
+                // It's a "best effort" update for the display name.
+                updateProfile(user, { displayName: fullName });
+
+                return profile;
+            }
         }
         return docSnap.data() as UserProfile;
     });
@@ -120,12 +155,83 @@ export const updateUserProfile = async (userId: string, data: Partial<Pick<UserP
 
 export const getTeachersByOrganization = async (organizationId: string) => {
     const q = query(
-        collection(db, 'users'), 
+        collection(db, 'users'),
         where('organizationId', '==', organizationId),
         where('role', '==', 'teacher')
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+}
+
+export const getAdminsByOrganization = async (organizationId: string) => {
+    const q = query(
+        collection(db, 'users'),
+        where('organizationId', '==', organizationId),
+        where('role', '==', 'admin')
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+}
+
+export const getAllUsersByOrganization = async (organizationId: string) => {
+    const q = query(
+        collection(db, 'users'),
+        where('organizationId', '==', organizationId)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+}
+
+export const getAllOrganizations = async () => {
+    const q = query(collection(db, 'organizations'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Organization));
+}
+
+export const getAllUsers = async () => {
+    const q = query(collection(db, 'users'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as UserProfile);
+}
+
+export const updateUserRole = async (userId: string, newRole: UserProfile['role']) => {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, { role: newRole });
+}
+
+export const createTeacher = async (organizationId: string, teacherData: { name: string; email: string }) => {
+    // Check if user already exists
+    const existingUserQuery = query(
+        collection(db, 'users'),
+        where('email', '==', teacherData.email)
+    );
+    const existingUserSnapshot = await getDocs(existingUserQuery);
+
+    if (!existingUserSnapshot.empty) {
+        throw new Error("Já existe um usuário com este e-mail.");
+    }
+
+    // Create a pending teacher invitation
+    const teacherDoc = {
+        name: teacherData.name,
+        email: teacherData.email,
+        role: 'teacher' as const,
+        organizationId,
+        status: 'pending', // Will be set to 'active' when user signs up
+        createdAt: serverTimestamp(),
+    };
+    const docRef = await addDoc(collection(db, 'users'), teacherDoc);
+    return docRef.id;
+}
+
+export const updateTeacher = async (teacherId: string, updates: Partial<Pick<UserProfile, 'name' | 'status'>>) => {
+    const userRef = doc(db, 'users', teacherId);
+    await updateDoc(userRef, updates);
+}
+
+export const deleteTeacher = async (teacherId: string) => {
+    const userRef = doc(db, 'users', teacherId);
+    await deleteDoc(userRef);
 }
 
 
@@ -151,6 +257,36 @@ export const createClass = async (className: string, teacherId: string) => {
 
 export const getClassesByTeacher = async (teacherId: string): Promise<Class[]> => {
   const q = query(collection(db, 'classes'), where('teacherId', '==', teacherId));
+  const querySnapshot = await getDocs(q);
+  const classes = querySnapshot.docs.map(
+    (doc) => ({ id: doc.id, ...doc.data() } as Class)
+  );
+  // Sort manually after fetching to avoid needing a composite index
+  return classes.sort((a, b) => {
+    const aTimestamp = a.createdAt as Timestamp;
+    const bTimestamp = b.createdAt as Timestamp;
+    if (!aTimestamp || !bTimestamp) return 0;
+    return bTimestamp.toMillis() - aTimestamp.toMillis();
+  });
+};
+
+export const getClassesByOrganization = async (organizationId: string): Promise<Class[]> => {
+  const q = query(collection(db, 'classes'), where('organizationId', '==', organizationId));
+  const querySnapshot = await getDocs(q);
+  const classes = querySnapshot.docs.map(
+    (doc) => ({ id: doc.id, ...doc.data() } as Class)
+  );
+  // Sort manually after fetching to avoid needing a composite index
+  return classes.sort((a, b) => {
+    const aTimestamp = a.createdAt as Timestamp;
+    const bTimestamp = b.createdAt as Timestamp;
+    if (!aTimestamp || !bTimestamp) return 0;
+    return bTimestamp.toMillis() - aTimestamp.toMillis();
+  });
+};
+
+export const getAllClasses = async (): Promise<Class[]> => {
+  const q = query(collection(db, 'classes'));
   const querySnapshot = await getDocs(q);
   const classes = querySnapshot.docs.map(
     (doc) => ({ id: doc.id, ...doc.data() } as Class)
