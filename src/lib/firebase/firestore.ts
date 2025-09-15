@@ -37,7 +37,7 @@ import type {
 } from '../types';
 import { processProfiles } from '../insights-generator';
 
-const createOrganizationAndAdmin = async (transaction: any, user: User, fullName: string) => {
+const createOrganizationAndUser = async (transaction: any, user: User, fullName: string) => {
     // 1. Create the organization
     const orgData: Omit<Organization, 'id'> = {
         name: `${fullName}'s Organization`,
@@ -46,19 +46,19 @@ const createOrganizationAndAdmin = async (transaction: any, user: User, fullName
     const orgRef = doc(collection(db, 'organizations'));
     transaction.set(orgRef, orgData);
 
-    // 2. Create the admin user profile
+    // 2. Create the user profile with default teacher role
     const userProfileData: UserProfile = {
         id: user.uid,
         email: user.email || '',
         name: fullName,
-        role: 'admin',
-        organizationId: orgRef.id, 
+        role: 'teacher',
+        organizationId: orgRef.id,
     };
     const userRef = doc(db, 'users', user.uid);
     transaction.set(userRef, userProfileData);
-    
+
     // Auth profile is updated outside transaction
-    
+
     return userProfileData;
 }
 
@@ -70,9 +70,9 @@ export const createUserProfileInFirestore = async (user: User, additionalData: P
         const docSnap = await transaction.get(userRef);
 
         if (!docSnap.exists()) {
-            // First time user is always an admin and creates an organization
-            const fullName = additionalData.name || user.displayName || 'Admin';
-            const profile = await createOrganizationAndAdmin(transaction, user, fullName);
+            // First time user creates an organization and gets teacher role
+            const fullName = additionalData.name || user.displayName || 'Teacher';
+            const profile = await createOrganizationAndUser(transaction, user, fullName);
             
             // This needs to be run outside the transaction, but we can't await it here.
             // It's a "best effort" update for the display name.
@@ -379,4 +379,46 @@ export const getStrategiesByClass = async (classId: string): Promise<LearningStr
 export const deleteStrategy = async (strategyId: string): Promise<void> => {
     const strategyRef = doc(db, 'learningStrategies', strategyId);
     await deleteDoc(strategyRef);
+};
+
+export const deleteClass = async (classId: string): Promise<void> => {
+    await runTransaction(db, async (transaction) => {
+        // Get the class document
+        const classRef = doc(db, 'classes', classId);
+        const classDoc = await transaction.get(classRef);
+
+        if (!classDoc.exists()) {
+            throw new Error("Turma não existe!");
+        }
+
+        // Get all students in the class
+        const studentsQuery = query(collection(db, 'students'), where('classId', '==', classId));
+        const studentsSnapshot = await getDocs(studentsQuery);
+
+        // Get all profiles in the class
+        const profilesQuery = query(collection(db, 'unifiedProfiles'), where('classId', '==', classId));
+        const profilesSnapshot = await getDocs(profilesQuery);
+
+        // Get all strategies in the class
+        const strategiesQuery = query(collection(db, 'learningStrategies'), where('classId', '==', classId));
+        const strategiesSnapshot = await getDocs(strategiesQuery);
+
+        // Delete all students
+        studentsSnapshot.docs.forEach((studentDoc) => {
+            transaction.delete(studentDoc.ref);
+        });
+
+        // Delete all profiles
+        profilesSnapshot.docs.forEach((profileDoc) => {
+            transaction.delete(profileDoc.ref);
+        });
+
+        // Delete all strategies
+        strategiesSnapshot.docs.forEach((strategyDoc) => {
+            transaction.delete(strategyDoc.ref);
+        });
+
+        // Finally, delete the class itself
+        transaction.delete(classRef);
+    });
 };

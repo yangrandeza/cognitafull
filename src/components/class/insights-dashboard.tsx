@@ -18,6 +18,7 @@ import { InsightCard } from "./insight-card";
 import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
 import { SavedStrategies } from "@/components/class/saved-strategies";
+import { ClassSettings } from "@/components/class/class-settings";
 import { getSavedLearningStrategies } from "@/lib/actions";
 
 
@@ -89,27 +90,13 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     );
   }
 
-  if (!studentData || studentData.students.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-            <CardTitle className="font-headline">Sua turma ainda está vazia</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6 text-center text-muted-foreground space-y-4">
-          <p>
-            Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, o mosaico de aprendizagem aparecerá aqui.
-          </p>
-          <ShareClassDialog classId={classId} />
-        </CardContent>
-      </Card>
-    );
-  }
+  const hasStudents = studentData && studentData.students.length > 0;
 
   if (!dashboardData || !classData) {
     return <p>Erro ao gerar os dados do painel.</p>
   }
-  
-  const { students } = studentData;
+
+  const students = studentData?.students || [];
   const { teacherId } = classData;
   const { compassData, insightCards, classProfileSummary, teamsData, dissonanceData, communicationData, workPaceData } = dashboardData;
 
@@ -121,13 +108,26 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             <TabsTrigger value="students">Alunos ({students.length})</TabsTrigger>
             <TabsTrigger value="strategies">Estratégias</TabsTrigger>
             <TabsTrigger value="optimizer">Oráculo pedagógico</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
         </TabsList>
         <ShareClassDialog classId={classId} />
       </div>
 
       <TabsContent value="insights" className="space-y-6">
-
-        {demographicsData && (
+        {!hasStudents ? (
+          <Card>
+            <CardHeader>
+                <CardTitle className="font-headline">Sua turma ainda está vazia</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 text-center text-muted-foreground space-y-4">
+              <p>
+                Para começar a ver os insights, compartilhe o link do questionário com seus alunos. Assim que eles responderem, o mosaico de aprendizagem aparecerá aqui.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {demographicsData && (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -261,7 +261,8 @@ export function InsightsDashboard({ classId }: { classId: string }) {
                 </CardContent>
             </Card>
         </div>
-
+          </>
+        )}
       </TabsContent>
       <TabsContent value="students">
         <StudentsList students={students} profiles={processedProfiles} />
@@ -270,12 +271,15 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         <SavedStrategies savedStrategies={savedStrategies} />
       </TabsContent>
       <TabsContent value="optimizer">
-        <LessonOptimizer 
-            classProfileSummary={classProfileSummary} 
-            classId={classId} 
+        <LessonOptimizer
+            classProfileSummary={classProfileSummary}
+            classId={classId}
             teacherId={teacherId}
             onStrategySaved={handleStrategySaved}
         />
+      </TabsContent>
+      <TabsContent value="settings">
+        <ClassSettings classId={classId} className={classData.name} />
       </TabsContent>
     </Tabs>
   );

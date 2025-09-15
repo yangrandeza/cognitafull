@@ -6,7 +6,7 @@ import {
   type OptimizeLessonPlanInput,
   type OptimizeLessonPlanOutput,
 } from '@/ai/flows/lesson-plan-optimizer';
-import { saveStrategy as saveStrategyInDb, getStrategiesByClass as getStrategiesFromDb, deleteStrategy as deleteStrategyFromDb } from './firebase/firestore';
+import { saveStrategy as saveStrategyInDb, getStrategiesByClass as getStrategiesFromDb, deleteStrategy as deleteStrategyFromDb, deleteClass as deleteClassFromDb } from './firebase/firestore';
 import { NewLearningStrategy, LearningStrategy } from './types';
 
 
@@ -70,5 +70,15 @@ export async function deleteLearningStrategy(strategyId: string): Promise<{succe
     } catch (error) {
         console.error("Error deleting learning strategy:", error);
         return { success: false, error: "Falha ao excluir a estratégia."};
+    }
+}
+
+export async function deleteClassAction(classId: string): Promise<{success: boolean, error?: string}> {
+    try {
+        await deleteClassFromDb(classId);
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting class:", error);
+        return { success: false, error: "Falha ao excluir a turma."};
     }
 }
