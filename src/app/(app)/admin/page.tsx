@@ -2,10 +2,10 @@
 
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
 
-export default function AdminPage() {
+function AdminPageContent() {
   const { userProfile, loading } = useUserProfile();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,5 +60,17 @@ export default function AdminPage() {
       </div>
       <AdminDashboard />
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 space-y-4 p-8 pt-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <AdminPageContent />
+    </Suspense>
   );
 }
