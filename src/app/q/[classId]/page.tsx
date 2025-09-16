@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { BrainCircuit, ArrowLeft, ArrowRight, Check, Loader2, PartyPopper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { submitQuizAnswers } from '@/lib/firebase/firestore';
-import type { QuizAnswers } from '@/lib/types';
+import { submitQuizAnswers, getClassById } from '@/lib/firebase/firestore';
+import type { QuizAnswers, Class, CustomField } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
@@ -269,7 +270,10 @@ export default function QuestionnairePage() {
   const [studentInfo, setStudentInfo] = useState({ name: '', age: '', email: '', gender: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newStudentId, setNewStudentId] = useState<string | null>(null);
-  
+  const [classConfig, setClassConfig] = useState<Class | null>(null);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
+  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+
   const params = useParams();
   const { toast } = useToast();
   const classId = params.classId as string;
@@ -277,6 +281,33 @@ export default function QuestionnairePage() {
   const currentQuestion = questions[step];
   const isLastQuestion = step === totalQuestions;
 
+  // Fetch class configuration on component mount
+  useEffect(() => {
+    const fetchClassConfig = async () => {
+      try {
+        const config = await getClassById(classId);
+        setClassConfig(config);
+      } catch (error) {
+        console.error('Error fetching class config:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar configuração",
+          description: "Não foi possível carregar as configurações da turma.",
+        });
+      } finally {
+        setIsLoadingConfig(false);
+      }
+    };
+
+    if (classId) {
+      fetchClassConfig();
+    }
+  }, [classId, toast]);
+
+  // Handle custom field changes
+  const handleCustomFieldChange = (fieldId: string, value: string) => {
+    setCustomFieldValues(prev => ({ ...prev, [fieldId]: value }));
+  };
 
   const handleStudentInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -334,8 +365,24 @@ export default function QuestionnairePage() {
         });
         return;
       }
+
+      // Validate custom fields
+      if (classConfig?.enableCustomFields && classConfig?.customFields) {
+        const missingFields = classConfig.customFields
+          .filter(field => field.required && !customFieldValues[field.id]?.trim())
+          .map(field => field.label);
+
+        if (missingFields.length > 0) {
+          toast({
+            variant: "destructive",
+            title: "Campos obrigatórios",
+            description: `Por favor, preencha os seguintes campos: ${missingFields.join(', ')}`,
+          });
+          return;
+        }
+      }
     }
-    
+
     if (!validateCurrentStep()) {
        toast({
           variant: "destructive",
@@ -352,7 +399,7 @@ export default function QuestionnairePage() {
 
   const handleBack = () => {
     if (step > 0) {
-      setStep(step + 1);
+      setStep(step - 1);
     }
   };
 
@@ -368,14 +415,20 @@ export default function QuestionnairePage() {
 
     setIsSubmitting(true);
     try {
-        const studentId = await submitQuizAnswers(classId, studentInfo, answers);
+        // Include custom field values in student info
+        const studentInfoWithCustomFields = {
+          ...studentInfo,
+          customFields: customFieldValues
+        };
+
+        const studentId = await submitQuizAnswers(classId, studentInfoWithCustomFields, answers);
         setNewStudentId(studentId);
         toast({
             title: "Respostas enviadas!",
             description: "Agradecemos sua participação.",
         });
         // We change the step to the finish card AFTER submission is successful
-        setStep(questions.length - 1); 
+        setStep(questions.length - 1);
     } catch (error) {
         console.error("Submission error:", error);
         toast({
@@ -394,9 +447,12 @@ export default function QuestionnairePage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <header className="w-full max-w-2xl mb-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <BrainCircuit className="h-6 w-6 text-primary" />
-          <span className="font-headline text-lg">MUDEAI</span>
+        <Link href="/" className="flex items-center justify-center">
+          <img
+            src="/logo.svg"
+            alt="MUDEAI Logo"
+            className="h-8 w-auto"
+          />
         </Link>
       </header>
       <Card className="w-full max-w-2xl">
@@ -440,6 +496,83 @@ export default function QuestionnairePage() {
                             </Select>
                         </div>
                      </div>
+
+                     {/* Custom Fields */}
+                     {classConfig?.enableCustomFields && classConfig?.customFields && classConfig.customFields.length > 0 && (
+                        <div className="space-y-4 pt-4 border-t">
+                            <h3 className="text-lg font-semibold">Informações Adicionais</h3>
+                            {classConfig.customFields.map((field) => (
+                                <div key={field.id} className="grid gap-2">
+                                    <Label htmlFor={`custom_${field.id}`}>
+                                        {field.label}
+                                        {field.required && <span className="text-destructive ml-1">*</span>}
+                                    </Label>
+
+                                    {field.type === 'text' && (
+                                        <Input
+                                            id={`custom_${field.id}`}
+                                            placeholder={`Digite ${field.label.toLowerCase()}`}
+                                            value={customFieldValues[field.id] || ''}
+                                            onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
+                                            required={field.required}
+                                        />
+                                    )}
+
+                                    {field.type === 'number' && (
+                                        <Input
+                                            id={`custom_${field.id}`}
+                                            type="number"
+                                            placeholder={`Digite ${field.label.toLowerCase()}`}
+                                            value={customFieldValues[field.id] || ''}
+                                            onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
+                                            required={field.required}
+                                        />
+                                    )}
+
+                                    {field.type === 'email' && (
+                                        <Input
+                                            id={`custom_${field.id}`}
+                                            type="email"
+                                            placeholder={`Digite ${field.label.toLowerCase()}`}
+                                            value={customFieldValues[field.id] || ''}
+                                            onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
+                                            required={field.required}
+                                        />
+                                    )}
+
+                                    {field.type === 'textarea' && (
+                                        <Textarea
+                                            id={`custom_${field.id}`}
+                                            placeholder={`Digite ${field.label.toLowerCase()}`}
+                                            value={customFieldValues[field.id] || ''}
+                                            onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
+                                            required={field.required}
+                                            rows={3}
+                                        />
+                                    )}
+
+                                    {field.type === 'select' && field.options && (
+                                        <Select
+                                            value={customFieldValues[field.id] || ''}
+                                            onValueChange={(value) => handleCustomFieldChange(field.id, value)}
+                                            required={field.required}
+                                        >
+                                            <SelectTrigger id={`custom_${field.id}`}>
+                                                <SelectValue placeholder="Selecione uma opção" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {field.options.map((option, index) => (
+                                                    <SelectItem key={index} value={option}>
+                                                        {option}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                     )}
                 </div>
             </CardContent>
             <CardFooter className="justify-end">

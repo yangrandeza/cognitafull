@@ -306,6 +306,28 @@ export const getClassById = async (classId: string): Promise<Class | null> => {
     return classSnap.exists() ? ({ id: classSnap.id, ...classSnap.data() } as Class) : null;
 };
 
+export const updateClass = async (classId: string, updates: Partial<Pick<Class, 'enableCustomFields' | 'customFields'>>) => {
+    const classRef = doc(db, 'classes', classId);
+
+    // Filter out undefined values to avoid Firestore errors
+    const cleanUpdates: Record<string, any> = {};
+    Object.entries(updates).forEach(([key, value]) => {
+        if (value !== undefined) {
+            cleanUpdates[key] = value;
+        } else {
+            console.log(`Filtering out undefined value for key: ${key}`);
+        }
+    });
+
+    console.log('Clean updates:', cleanUpdates);
+
+    if (Object.keys(cleanUpdates).length > 0) {
+        await updateDoc(classRef, cleanUpdates);
+    } else {
+        console.log('No valid updates to save');
+    }
+};
+
 
 // Student and Profile Functions
 
@@ -361,7 +383,7 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
 
 
 
-export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string, email?: string, gender?: string}, answers: QuizAnswers): Promise<string> => {
+export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string, email?: string, gender?: string, customFields?: Record<string, string>}, answers: QuizAnswers): Promise<string> => {
      let studentId = "";
      await runTransaction(db, async (transaction) => {
         const classRef = doc(db, 'classes', classId);
@@ -370,7 +392,21 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
             throw new Error("Turma não existe!");
         }
 
-        // 1. Create the new student document
+        // Generate IDs for the documents we'll create
+        const studentRef = doc(collection(db, 'students'));
+        const profileRef = doc(collection(db, 'unifiedProfiles'));
+        studentId = studentRef.id; // Capture the new student's ID
+
+        // 1. Create the unified profile with raw answers first
+        const newProfileData: NewUnifiedProfile = {
+            studentId: studentRef.id,
+            classId: classId,
+            rawAnswers: answers,
+            createdAt: serverTimestamp(),
+        };
+        transaction.set(profileRef, newProfileData);
+
+        // 2. Create the new student document with the profile ID already included
         const newStudentData: NewStudent = {
             name: studentInfo.name,
             age: parseInt(studentInfo.age, 10),
@@ -379,25 +415,12 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
             classId,
             quizStatus: 'completed',
             createdAt: serverTimestamp(),
+            unifiedProfileId: profileRef.id, // Include profile ID in creation
+            customFields: studentInfo.customFields || {},
         };
-        const studentRef = doc(collection(db, 'students'));
         transaction.set(studentRef, newStudentData);
-        studentId = studentRef.id; // Capture the new student's ID
 
-        // 2. Create the unified profile with raw answers
-        const newProfileData: NewUnifiedProfile = {
-            studentId: studentRef.id,
-            classId: classId,
-            rawAnswers: answers,
-            createdAt: serverTimestamp(),
-        };
-        const profileRef = doc(collection(db, 'unifiedProfiles'));
-        transaction.set(profileRef, newProfileData);
-        
-        // 3. Update the student with the profile ID
-        transaction.update(studentRef, { unifiedProfileId: profileRef.id });
-
-        // 4. Atomically update the class counters
+        // 3. Atomically update the class counters
         const newStudentCount = (classDoc.data().studentCount || 0) + 1;
         const newResponsesCount = (classDoc.data().responsesCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount, responsesCount: newResponsesCount });

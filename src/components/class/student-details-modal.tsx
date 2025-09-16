@@ -547,9 +547,14 @@ export function StudentDetailsModal({
 
                     return (
                       <>
-                        <div className="text-sm text-muted-foreground mb-4">
-                          Mostrando {mappedAnswers.length} de {quizAnswers.length} respostas do quiz
-                        </div>
+        <div className="text-sm text-muted-foreground mb-4">
+          Mostrando {mappedAnswers.length} de {quizAnswers.length} respostas do quiz
+        </div>
+        {quizAnswers.length > mappedAnswers.length && (
+          <div className="text-xs text-amber-600 mb-4 p-2 bg-amber-50 rounded">
+            ⚠️ Algumas respostas não estão sendo exibidas devido a mapeamento incompleto das questões.
+          </div>
+        )}
                         {mappedAnswers.map(([questionId, answer]) => {
                           const question = quizQuestionsMap[questionId];
                           return (

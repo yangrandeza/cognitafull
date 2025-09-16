@@ -28,7 +28,7 @@ import { User, MoreHorizontal, FilePenLine, Trash2, Eye } from "lucide-react";
 import { EditStudentDialog } from "./edit-student-dialog";
 import { DeleteStudentDialog } from "./delete-student-dialog";
 import { StudentDetailsModal } from "./student-details-modal";
-import { deleteStudent, getProfilesByClass } from "@/lib/firebase/firestore";
+import { deleteStudent, getProfilesByClass, getClassById } from "@/lib/firebase/firestore";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { RawUnifiedProfile } from "@/lib/types";
 
@@ -58,11 +58,32 @@ export function StudentsList({ students: initialStudents, profiles, classId }: {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [rawProfiles, setRawProfiles] = useState<RawUnifiedProfile[]>([]);
   const [loadingRawProfiles, setLoadingRawProfiles] = useState(false);
+  const [classConfig, setClassConfig] = useState<any>(null);
+  const [loadingClassConfig, setLoadingClassConfig] = useState(false);
 
 
   useEffect(() => {
     setStudentList(initialStudents);
   }, [initialStudents]);
+
+  // Buscar configuração da turma para obter campos personalizados
+  useEffect(() => {
+    const fetchClassConfig = async () => {
+      if (!classId) return;
+
+      setLoadingClassConfig(true);
+      try {
+        const config = await getClassById(classId);
+        setClassConfig(config);
+      } catch (error) {
+        console.error('Erro ao buscar configuração da turma:', error);
+      } finally {
+        setLoadingClassConfig(false);
+      }
+    };
+
+    fetchClassConfig();
+  }, [classId]);
 
   const getStudentProfile = (studentId: string) => {
     return profiles.find(p => p.studentId === studentId);
@@ -130,6 +151,11 @@ export function StudentsList({ students: initialStudents, profiles, classId }: {
         setLoadingRawProfiles(false);
       }
     }
+  }
+
+  // Função para obter os campos personalizados do estudante
+  const getStudentCustomFields = (student: Student) => {
+    return student.customFields || {};
   }
 
   const getStudentRawProfile = (studentId: string) => {
@@ -319,6 +345,8 @@ export function StudentsList({ students: initialStudents, profiles, classId }: {
                 student={selectedStudent}
                 profile={getStudentProfile(selectedStudent.id) || null}
                 rawProfile={getStudentRawProfile(selectedStudent.id) || null}
+                customFields={classConfig?.customFields || []}
+                customFieldValues={getStudentCustomFields(selectedStudent)}
                 isOpen={isDetailsOpen}
                 onClose={() => {
                   setIsDetailsOpen(false);

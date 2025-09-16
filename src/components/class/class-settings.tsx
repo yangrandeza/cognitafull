@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { DeleteConfirmationDialog } from "@/components/common/delete-confirmation-dialog";
 import { deleteClassAction } from "@/lib/actions";
+import { getClassById, updateClass } from "@/lib/firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/use-permissions";
-import { Settings, Trash2, Plus, X, FileText, Shield } from "lucide-react";
-import type { CustomField } from "@/lib/types";
+import { Settings, Trash2, Plus, X, FileText, Shield, Save } from "lucide-react";
+import type { CustomField, Class } from "@/lib/types";
 
 interface ClassSettingsProps {
   classId: string;
@@ -30,8 +31,70 @@ export function ClassSettings({ classId, className }: ClassSettingsProps) {
   const [newFieldType, setNewFieldType] = useState<CustomField['type']>('text');
   const [newFieldRequired, setNewFieldRequired] = useState(false);
   const [newFieldOptions, setNewFieldOptions] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  // Load existing class configuration
+  useEffect(() => {
+    const loadClassConfig = async () => {
+      try {
+        const classData = await getClassById(classId);
+        if (classData) {
+          setEnableCustomFields(classData.enableCustomFields || false);
+          setCustomFields(classData.customFields || []);
+        }
+      } catch (error) {
+        console.error('Error loading class config:', error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao carregar configurações",
+          description: "Não foi possível carregar as configurações da turma.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (classId) {
+      loadClassConfig();
+    }
+  }, [classId, toast]);
+
+  // Save class configuration
+  const saveClassConfig = async () => {
+    setIsSaving(true);
+    try {
+      console.log('Saving class config:', { enableCustomFields, customFields });
+      await updateClass(classId, {
+        enableCustomFields,
+        customFields
+      });
+      setHasChanges(false);
+      toast({
+        title: "Configurações salvas",
+        description: "As configurações da turma foram salvas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Error saving class config:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as configurações.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Track changes (only after initial load)
+  useEffect(() => {
+    if (!isLoading) {
+      setHasChanges(true);
+    }
+  }, [enableCustomFields, customFields, isLoading]);
 
   // Custom Fields Functions
   const addCustomField = () => {
@@ -49,7 +112,9 @@ export function ClassSettings({ classId, className }: ClassSettingsProps) {
       label: newFieldLabel.trim(),
       type: newFieldType,
       required: newFieldRequired,
-      options: newFieldType === 'select' ? newFieldOptions.split(',').map(opt => opt.trim()).filter(opt => opt) : undefined
+      ...(newFieldType === 'select' && newFieldOptions.trim() ? {
+        options: newFieldOptions.split(',').map(opt => opt.trim()).filter(opt => opt)
+      } : {})
     };
 
     setCustomFields([...customFields, newField]);
@@ -116,6 +181,25 @@ export function ClassSettings({ classId, className }: ClassSettingsProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Save Button */}
+          {hasChanges && (
+            <div className="flex justify-end">
+              <Button onClick={saveClassConfig} disabled={isSaving} className="flex items-center gap-2">
+                {isSaving ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Salvar Configurações
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
           {/* Campos Adicionais do Quiz */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">

@@ -61,6 +61,7 @@ export type Student = {
   quizStatus: 'pending' | 'completed';
   unifiedProfileId?: string;
   createdAt: string; // Changed from FieldValue to string for serialization
+  customFields?: Record<string, string>; // Additional custom fields from quiz
 };
 
 export type QuizAnswers = Record<string, any>;
@@ -74,6 +75,7 @@ export type NewStudent = {
     quizStatus: 'completed';
     createdAt: FieldValue;
     unifiedProfileId?: string;
+    customFields?: Record<string, string>;
 };
 
 export type VarkProfile = {
