@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,8 +16,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { BrainCircuit } from "lucide-react";
-import { signUpWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { BrainCircuit, AlertTriangle } from "lucide-react";
+import { signUpWithEmail, signInWithGoogle, checkRegistrationStatus } from "@/lib/firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import {
   Form,
@@ -38,6 +40,8 @@ type FormData = z.infer<typeof formSchema>;
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [registrationBlocked, setRegistrationBlocked] = useState(false);
+  const [blockMessage, setBlockMessage] = useState('');
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -47,6 +51,17 @@ export default function SignupPage() {
       password: "",
     },
   });
+
+  // Check registration status on component mount
+  useEffect(() => {
+    const checkStatus = async () => {
+      const status = await checkRegistrationStatus();
+      setRegistrationBlocked(status.blocked);
+      setBlockMessage(status.message);
+    };
+
+    checkStatus();
+  }, []);
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     const { email, password, fullName } = data;
@@ -91,6 +106,15 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {registrationBlocked && (
+            <Alert className="mb-4 border-destructive/50 text-destructive dark:border-destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {blockMessage || 'Novos registros estão temporariamente bloqueados.'}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
               <FormField
@@ -136,12 +160,21 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full font-headline" disabled={form.formState.isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full font-headline"
+                disabled={form.formState.isSubmitting || registrationBlocked}
+              >
                 {form.formState.isSubmitting ? "Criando conta..." : "Criar conta"}
               </Button>
             </form>
           </Form>
-          <Button variant="outline" className="w-full mt-4" onClick={handleGoogleSignIn}>
+          <Button
+            variant="outline"
+            className="w-full mt-4"
+            onClick={handleGoogleSignIn}
+            disabled={registrationBlocked}
+          >
             Cadastrar com Google
           </Button>
           <div className="mt-4 text-center text-sm">

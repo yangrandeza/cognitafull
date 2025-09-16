@@ -45,7 +45,7 @@ export type Class = {
 export type CustomField = {
   id: string;
   label: string;
-  type: 'text' | 'number' | 'email' | 'select' | 'textarea';
+  type: 'text' | 'number' | 'email' | 'phone' | 'select' | 'textarea';
   required: boolean;
   options?: string[]; // For select fields
 };

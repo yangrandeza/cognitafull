@@ -1,5 +1,5 @@
-import { SuperAdminDashboard } from "@/components/admin/superadmin-dashboard";
+import { redirect } from 'next/navigation';
 
 export default function SuperAdminPage() {
-  return <SuperAdminDashboard />;
+  redirect('/superadmin/system');
 }

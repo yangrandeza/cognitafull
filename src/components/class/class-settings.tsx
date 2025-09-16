@@ -235,6 +235,7 @@ export function ClassSettings({ classId, className }: ClassSettingsProps) {
                                   {field.type === 'text' ? 'Texto' :
                                    field.type === 'number' ? 'Número' :
                                    field.type === 'email' ? 'E-mail' :
+                                   field.type === 'phone' ? 'Telefone' :
                                    field.type === 'select' ? 'Seleção' : 'Área de Texto'}
                                 </Badge>
                                 {field.required && (
@@ -282,6 +283,7 @@ export function ClassSettings({ classId, className }: ClassSettingsProps) {
                           <SelectItem value="text">Texto</SelectItem>
                           <SelectItem value="number">Número</SelectItem>
                           <SelectItem value="email">E-mail</SelectItem>
+                          <SelectItem value="phone">Telefone</SelectItem>
                           <SelectItem value="select">Seleção</SelectItem>
                           <SelectItem value="textarea">Área de Texto</SelectItem>
                         </SelectContent>

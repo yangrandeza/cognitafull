@@ -17,14 +17,15 @@ import { useToast } from '@/hooks/use-toast';
 import { submitQuizAnswers, getClassById } from '@/lib/firebase/firestore';
 import type { QuizAnswers, Class, CustomField } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { QuizConsentDialog } from '@/components/common/quiz-consent-dialog';
 
 
 const questions = [
   // Intro
   {
     type: 'intro',
-    title: 'Bem-vindo(a) ao cognita!',
-    description: "Vamos descobrir seus superpoderes de aprendizagem. para cada pergunta, escolha a opção que mais se parece com você. não há respostas certas ou erradas. confie na sua primeira impressão!",
+    title: 'Bem-vindo(a) ao MUDEAI!',
+    description: "Vamos descobrir seus superpoderes de aprendizagem. para cada pergunta, escolha a opção que mais se parece com você. não há respostas certas ou erradas. Confie na sua primeira impressão!",
   },
   // VARK
   {
@@ -273,6 +274,8 @@ export default function QuestionnairePage() {
   const [classConfig, setClassConfig] = useState<Class | null>(null);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
   const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
 
   const params = useParams();
   const { toast } = useToast();
@@ -357,13 +360,52 @@ export default function QuestionnairePage() {
 
   const handleNext = () => {
     if (currentQuestion.type === 'intro') {
-      if (!studentInfo.name || !studentInfo.age) {
+      if (!studentInfo.name || !studentInfo.age || !studentInfo.email) {
         toast({
           variant: "destructive",
           title: "Campos obrigatórios",
-          description: "Por favor, preencha seu nome e idade para começar.",
+          description: "Por favor, preencha seu nome, idade e e-mail para começar.",
         });
         return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(studentInfo.email)) {
+        toast({
+          variant: "destructive",
+          title: "E-mail inválido",
+          description: "Por favor, insira um endereço de e-mail válido.",
+        });
+        return;
+      }
+
+      // Validate custom fields
+      if (classConfig?.enableCustomFields && classConfig?.customFields) {
+        for (const field of classConfig.customFields) {
+          const value = customFieldValues[field.id];
+          if (field.required && (!value || !value.trim())) {
+            toast({
+              variant: "destructive",
+              title: "Campo obrigatório",
+              description: `Por favor, preencha o campo "${field.label}".`,
+            });
+            return;
+          }
+
+          // Validate phone fields
+          if (field.type === 'phone' && value && value.trim()) {
+            const phoneRegex = /^[\+]?[\d\s\-\(\)]{10,}$/;
+            if (!phoneRegex.test(value.trim())) {
+              toast({
+                variant: "destructive",
+                title: "Telefone inválido",
+                description: `Por favor, insira um número de telefone válido para "${field.label}".`,
+              });
+              return;
+            }
+          }
+        }
       }
 
       // Validate custom fields
@@ -381,6 +423,10 @@ export default function QuestionnairePage() {
           return;
         }
       }
+
+      // Show consent dialog instead of proceeding directly
+      setShowConsentDialog(true);
+      return;
     }
 
     if (!validateCurrentStep()) {
@@ -395,6 +441,24 @@ export default function QuestionnairePage() {
     if (step < questions.length - 1) {
       setStep(step + 1);
     }
+  };
+
+  const handleConsentAccept = () => {
+    setConsentAccepted(true);
+    setShowConsentDialog(false);
+    // Now proceed to the first question
+    if (step < questions.length - 1) {
+      setStep(step + 1);
+    }
+  };
+
+  const handleConsentDecline = () => {
+    setShowConsentDialog(false);
+    toast({
+      variant: "destructive",
+      title: "Consentimento necessário",
+      description: "Você precisa aceitar os termos de privacidade para continuar com o questionário.",
+    });
   };
 
   const handleBack = () => {
@@ -473,8 +537,8 @@ export default function QuestionnairePage() {
                         <Input id="name" placeholder="Seu nome completo" value={studentInfo.name} onChange={handleStudentInfoChange} required/>
                     </div>
                      <div className="grid gap-2">
-                        <Label htmlFor="email">E-mail (opcional)</Label>
-                        <Input id="email" type="email" placeholder="seu.email@exemplo.com" value={studentInfo.email} onChange={handleStudentInfoChange} />
+                        <Label htmlFor="email">E-mail</Label>
+                        <Input id="email" type="email" placeholder="seu.email@exemplo.com" value={studentInfo.email} onChange={handleStudentInfoChange} required/>
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
@@ -533,6 +597,17 @@ export default function QuestionnairePage() {
                                         <Input
                                             id={`custom_${field.id}`}
                                             type="email"
+                                            placeholder={`Digite ${field.label.toLowerCase()}`}
+                                            value={customFieldValues[field.id] || ''}
+                                            onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
+                                            required={field.required}
+                                        />
+                                    )}
+
+                                    {field.type === 'phone' && (
+                                        <Input
+                                            id={`custom_${field.id}`}
+                                            type="tel"
                                             placeholder={`Digite ${field.label.toLowerCase()}`}
                                             value={customFieldValues[field.id] || ''}
                                             onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
@@ -688,6 +763,13 @@ export default function QuestionnairePage() {
             </>
         )}
       </Card>
+
+      {/* Consent Dialog */}
+      <QuizConsentDialog
+        isOpen={showConsentDialog}
+        onAccept={handleConsentAccept}
+        onDecline={handleConsentDecline}
+      />
     </div>
   );
 }

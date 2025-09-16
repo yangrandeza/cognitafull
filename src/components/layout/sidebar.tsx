@@ -38,7 +38,7 @@ const navItems = [
   { href: "/admin?tab=teachers", icon: Users, label: "Gerenciar professores", roles: ["admin"] },
   { href: "/settings", icon: Settings, label: "Configurações", roles: ["teacher", "admin", "superadmin"]},
   // Super Admin sections
-  { href: "/superadmin", icon: BarChart3, label: "Dashboard Super", roles: ["superadmin"] },
+  { href: "/superadmin/system", icon: Shield, label: "Sistema", roles: ["superadmin"] },
   { href: "/superadmin/organizations", icon: Building2, label: "Organizações", roles: ["superadmin"] },
   { href: "/superadmin/users", icon: Users, label: "Usuários", roles: ["superadmin"] },
   { href: "/superadmin/classes", icon: BookOpen, label: "Turmas", roles: ["superadmin"] },
@@ -56,14 +56,19 @@ function getInitials(name: string = ""): string {
 }
 
 function getActiveVariant(currentPath: string, itemHref: string): boolean {
+    // Special case: if user is on /superadmin, redirect to /superadmin/system
+    if (currentPath === '/superadmin' && itemHref === '/superadmin/system') {
+        return true;
+    }
+
     // Exact match for root paths
     if (currentPath === itemHref) {
         return true;
     }
 
-    // For superadmin paths, only match exact path to avoid double selection
+    // For superadmin paths, match exact path or sub-paths
     if (itemHref.startsWith('/superadmin')) {
-        return currentPath === itemHref;
+        return currentPath === itemHref || currentPath.startsWith(itemHref + '/');
     }
 
     // For other paths, use startsWith for sub-routes
