@@ -1,4 +1,4 @@
-# **App Name**: Cognita 360
+# **App Name**: MUDEAI
 
 ## Core Features:
 
@@ -12,9 +12,10 @@
 
 ## Style Guidelines:
 
-- Primary color: Deep purple (#4A148C), evoking wisdom and sophistication.
+- Primary color: Orange (#f09c17), evoking energy and creativity.
+- Secondary color: Purple (#8c52ff), providing depth and sophistication.
 - Background color: Light lavender (#E6E6FA), providing a soft and calming backdrop.
-- Accent color: Soft pink (#D81B60), drawing attention and balancing with compassion and approachability. It adds visual interest and highlights key interactive elements.
+- Accent color: Purple (#8c52ff), drawing attention and balancing with innovation and approachability. It adds visual interest and highlights key interactive elements.
 - Font pairing: 'Poppins' (sans-serif) for headlines, 'PT Sans' (sans-serif) for body text.
 - Code font: 'Source Code Pro' for displaying code snippets.
 - Use clean, modern icons representing learning styles and personality traits.

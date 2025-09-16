@@ -79,7 +79,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-sm mx-auto">
         <CardHeader className="text-center">
-          <BrainCircuit className="mx-auto h-10 w-10 text-primary mb-2" />
+          <img src="/logo.svg" alt="MUDEAI Logo" className="mx-auto h-12 w-auto mb-2" />
           <CardTitle className="text-2xl font-headline">Bem-vindo de volta</CardTitle>
           <CardDescription>Insira suas credenciais para acessar sua conta</CardDescription>
         </CardHeader>

@@ -396,7 +396,7 @@ export default function QuestionnairePage() {
       <header className="w-full max-w-2xl mb-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <BrainCircuit className="h-6 w-6 text-primary" />
-          <span className="font-headline text-lg">Cognita 360</span>
+          <span className="font-headline text-lg">MUDEAI</span>
         </Link>
       </header>
       <Card className="w-full max-w-2xl">
@@ -558,7 +558,3 @@ export default function QuestionnairePage() {
     </div>
   );
 }
-
-    
-
-    

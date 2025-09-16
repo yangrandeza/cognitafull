@@ -94,8 +94,7 @@ export function AppSidebar() {
     <aside className="w-64 flex-shrink-0 border-r bg-card flex flex-col">
       <div className="flex h-16 items-center border-b px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <BrainCircuit className="h-6 w-6 text-primary" />
-          <span className="font-headline">Cognita 360</span>
+          <img src="/logo.svg" alt="MUDEAI Logo" className="h-8 w-auto" />
         </Link>
       </div>
       <nav className="flex-1 px-4 py-4">

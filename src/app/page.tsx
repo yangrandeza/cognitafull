@@ -8,7 +8,7 @@ import { Footer } from '@/components/layout/footer';
 export default function Home() {
   const features = [
     {
-      icon: <BrainCircuit className="w-8 h-8 text-primary" />,
+      icon: <img src="/logo.svg" alt="MUDEAI Logo" className="w-8 h-8 object-contain" />,
       title: 'Perfis de aluno 360°',
       description: 'Vá além das notas com perfis holísticos que cobrem VARK, DISC, tipos junguianos e valores de Schwartz.',
     },
@@ -41,7 +41,7 @@ export default function Home() {
                   Desbloqueie o potencial de cada aluno
                 </h1>
                 <p className="text-lg text-foreground/80">
-                  O Cognita 360 transforma a sala de aula, fornecendo aos professores insights profundos e acionáveis sobre os perfis de aprendizagem e comportamentais de seus alunos. Personalize o ensino, aumente o engajamento e promova o crescimento como nunca antes.
+                  O MUDEAI transforma a sala de aula, fornecendo aos professores insights profundos e acionáveis sobre os perfis de aprendizagem e comportamentais de seus alunos. Personalize o ensino, aumente o engajamento e promova o crescimento como nunca antes.
                 </p>
                 <div className="flex space-x-4">
                   <Button asChild size="lg" className="font-headline">
@@ -56,7 +56,7 @@ export default function Home() {
                 <div className="absolute w-full h-full rounded-2xl border border-white/40 bg-white/20 backdrop-blur-lg shadow-2xl"></div>
                  <div className="relative grid grid-cols-2 gap-8 p-8">
                     <div className="p-6 rounded-2xl bg-white/30 backdrop-blur-md shadow-lg flex flex-col items-center justify-center text-center space-y-2 hover:scale-105 transition-transform duration-300">
-                        <BrainCircuit className="w-12 h-12 text-primary"/>
+                        <img src="/logo.svg" alt="MUDEAI Logo" className="w-12 h-12 object-contain" />
                         <p className="font-semibold text-foreground/80">Perfis 360°</p>
                     </div>
                      <div className="p-6 rounded-2xl bg-white/30 backdrop-blur-md shadow-lg flex flex-col items-center justify-center text-center space-y-2 hover:scale-105 transition-transform duration-300">
@@ -82,7 +82,7 @@ export default function Home() {
             <div className="text-center space-y-4 mb-12">
               <h2 className="font-headline text-3xl md:text-4xl font-bold">Uma nova dimensão do ensino</h2>
               <p className="text-lg max-w-3xl mx-auto text-foreground/70">
-                O Cognita 360 é mais do que uma ferramenta; é seu parceiro na criação de um ambiente de aprendizagem mais eficaz e empático.
+                O MUDEAI é mais do que uma ferramenta; é seu parceiro na criação de um ambiente de aprendizagem mais eficaz e empático.
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">

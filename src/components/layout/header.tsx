@@ -17,8 +17,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <BrainCircuit className="h-6 w-6 text-primary" />
-            <span className="font-bold font-headline">Cognita 360</span>
+            <img src="/logo.svg" alt="MUDEAI Logo" className="h-8 w-auto" />
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
@@ -50,8 +49,7 @@ export function Header() {
                     href="/"
                     className="flex items-center space-x-2"
                   >
-                    <BrainCircuit className="h-6 w-6 text-primary" />
-                    <span className="font-bold font-headline">Cognita 360</span>
+                    <img src="/logo.svg" alt="MUDEAI Logo" className="h-8 w-auto" />
                   </Link>
                   {navLinks.map((link) => (
                     <Link

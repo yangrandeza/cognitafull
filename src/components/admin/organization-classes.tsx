@@ -133,7 +133,6 @@ export function OrganizationClasses() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight font-headline">Turmas da organização</h2>
           <p className="text-muted-foreground">
             Visualize e acesse todas as turmas criadas pelos professores da sua instituição.
           </p>

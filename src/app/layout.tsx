@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Cognita 360',
+  title: 'MUDEAI',
   description: 'Transformando salas de aula com insights personalizados.',
 };
 

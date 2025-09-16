@@ -15,7 +15,7 @@ export function PrivacyPolicy({ onAccept, showAcceptButton = false }: PrivacyPol
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <Shield className="h-6 w-6 text-primary" />
-          Política de Privacidade - Cognita 360
+          Política de Privacidade - MUDEAI
         </CardTitle>
         <CardDescription>
           Última atualização: {new Date().toLocaleDateString('pt-BR')}
@@ -31,7 +31,7 @@ export function PrivacyPolicy({ onAccept, showAcceptButton = false }: PrivacyPol
                 1. Introdução
               </h3>
               <p className="text-muted-foreground">
-                A presente Política de Privacidade descreve como o Cognita 360 coleta, utiliza, armazena e protege suas informações pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
+                A presente Política de Privacidade descreve como o MUDEAI coleta, utiliza, armazena e protege suas informações pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
               </p>
             </section>
 
@@ -156,7 +156,7 @@ export function PrivacyPolicy({ onAccept, showAcceptButton = false }: PrivacyPol
             <section>
               <h3 className="font-semibold text-base mb-3">9. Menores de Idade</h3>
               <p className="text-muted-foreground">
-                O Cognita 360 é destinado ao uso educacional. Para menores de 18 anos,
+                O MUDEAI é destinado ao uso educacional. Para menores de 18 anos,
                 é necessário o consentimento dos responsáveis legais para o tratamento de dados pessoais.
                 Instituições educacionais devem garantir que todos os consentimentos necessários sejam obtidos.
               </p>
@@ -189,7 +189,7 @@ export function PrivacyPolicy({ onAccept, showAcceptButton = false }: PrivacyPol
             <section className="border-t pt-4">
               <h3 className="font-semibold text-base mb-3">12. Consentimento</h3>
               <p className="text-muted-foreground">
-                Ao utilizar o Cognita 360 e aceitar esta política, você consente com o tratamento de seus dados
+                Ao utilizar o MUDEAI e aceitar esta política, você consente com o tratamento de seus dados
                 pessoais conforme descrito acima, em conformidade com a LGPD e demais legislações aplicáveis.
               </p>
             </section>
