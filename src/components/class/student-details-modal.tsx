@@ -110,11 +110,11 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'P', label: 'Manter as opções em aberto e se adaptar conforme as coisas acontecem.' },
     ],
   },
-  // DISC Questions
-  'disc_1': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  // DISC Questions - Cada questão gera duas respostas separadas (_most e _least)
+  'disc_1_most': {
+    question: 'Grupo 1 - Qual palavra é MAIS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
     options: [
       { value: 'Decidido', label: 'Decidido' },
       { value: 'Influente', label: 'Influente' },
@@ -122,10 +122,21 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'Detalhado', label: 'Detalhado' },
     ],
   },
-  'disc_2': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  'disc_1_least': {
+    question: 'Grupo 1 - Qual palavra é MENOS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
+    options: [
+      { value: 'Decidido', label: 'Decidido' },
+      { value: 'Influente', label: 'Influente' },
+      { value: 'Paciente', label: 'Paciente' },
+      { value: 'Detalhado', label: 'Detalhado' },
+    ],
+  },
+  'disc_2_most': {
+    question: 'Grupo 2 - Qual palavra é MAIS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
     options: [
       { value: 'Competitivo', label: 'Competitivo' },
       { value: 'Otimista', label: 'Otimista' },
@@ -133,10 +144,21 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'Cauteloso', label: 'Cauteloso' },
     ],
   },
-  'disc_3': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  'disc_2_least': {
+    question: 'Grupo 2 - Qual palavra é MENOS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
+    options: [
+      { value: 'Competitivo', label: 'Competitivo' },
+      { value: 'Otimista', label: 'Otimista' },
+      { value: 'Estável', label: 'Estável' },
+      { value: 'Cauteloso', label: 'Cauteloso' },
+    ],
+  },
+  'disc_3_most': {
+    question: 'Grupo 3 - Qual palavra é MAIS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
     options: [
       { value: 'Direto', label: 'Direto' },
       { value: 'Sociável', label: 'Sociável' },
@@ -144,10 +166,21 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'Perfeccionista', label: 'Perfeccionista' },
     ],
   },
-  'disc_4': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  'disc_3_least': {
+    question: 'Grupo 3 - Qual palavra é MENOS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
+    options: [
+      { value: 'Direto', label: 'Direto' },
+      { value: 'Sociável', label: 'Sociável' },
+      { value: 'Previsível', label: 'Previsível' },
+      { value: 'Perfeccionista', label: 'Perfeccionista' },
+    ],
+  },
+  'disc_4_most': {
+    question: 'Grupo 4 - Qual palavra é MAIS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
     options: [
       { value: 'Ousado', label: 'Ousado' },
       { value: 'Entusiasmado', label: 'Entusiasmado' },
@@ -155,10 +188,21 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'Sistemático', label: 'Sistemático' },
     ],
   },
-  'disc_5': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  'disc_4_least': {
+    question: 'Grupo 4 - Qual palavra é MENOS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
+    options: [
+      { value: 'Ousado', label: 'Ousado' },
+      { value: 'Entusiasmado', label: 'Entusiasmado' },
+      { value: 'Calmo', label: 'Calmo' },
+      { value: 'Sistemático', label: 'Sistemático' },
+    ],
+  },
+  'disc_5_most': {
+    question: 'Grupo 5 - Qual palavra é MAIS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
     options: [
       { value: 'Focado em resultados', label: 'Focado em resultados' },
       { value: 'Inspirador', label: 'Inspirador' },
@@ -166,10 +210,21 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'Lógico', label: 'Lógico' },
     ],
   },
-  'disc_6': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  'disc_5_least': {
+    question: 'Grupo 5 - Qual palavra é MENOS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
+    options: [
+      { value: 'Focado em resultados', label: 'Focado em resultados' },
+      { value: 'Inspirador', label: 'Inspirador' },
+      { value: 'Apoiador', label: 'Apoiador' },
+      { value: 'Lógico', label: 'Lógico' },
+    ],
+  },
+  'disc_6_most': {
+    question: 'Grupo 6 - Qual palavra é MAIS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
     options: [
       { value: 'Exigente', label: 'Exigente' },
       { value: 'Comunicativo', label: 'Comunicativo' },
@@ -177,10 +232,21 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'Preciso', label: 'Preciso' },
     ],
   },
-  'disc_7': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  'disc_6_least': {
+    question: 'Grupo 6 - Qual palavra é MENOS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
+    options: [
+      { value: 'Exigente', label: 'Exigente' },
+      { value: 'Comunicativo', label: 'Comunicativo' },
+      { value: 'Consistente', label: 'Consistente' },
+      { value: 'Preciso', label: 'Preciso' },
+    ],
+  },
+  'disc_7_most': {
+    question: 'Grupo 7 - Qual palavra é MAIS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
     options: [
       { value: 'Pioneiro', label: 'Pioneiro' },
       { value: 'Convincente', label: 'Convincente' },
@@ -188,10 +254,32 @@ const quizQuestionsMap: Record<string, { question: string; part: string; type: s
       { value: 'Cuidadoso', label: 'Cuidadoso' },
     ],
   },
-  'disc_8': {
-    question: 'Em cada grupo de quatro palavras, escolha a que é MAIS parecida com você e a que é MENOS parecida com você.',
+  'disc_7_least': {
+    question: 'Grupo 7 - Qual palavra é MENOS parecida com você?',
     part: 'Parte 2: Como você age e interage (DISC)',
-    type: 'disc',
+    type: 'disc_choice',
+    options: [
+      { value: 'Pioneiro', label: 'Pioneiro' },
+      { value: 'Convincente', label: 'Convincente' },
+      { value: 'Leal', label: 'Leal' },
+      { value: 'Cuidadoso', label: 'Cuidadoso' },
+    ],
+  },
+  'disc_8_most': {
+    question: 'Grupo 8 - Qual palavra é MAIS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
+    options: [
+      { value: 'Independente', label: 'Independente' },
+      { value: 'Divertido', label: 'Divertido' },
+      { value: 'Harmonioso', label: 'Harmonioso' },
+      { value: 'Organizado', label: 'Organizado' },
+    ],
+  },
+  'disc_8_least': {
+    question: 'Grupo 8 - Qual palavra é MENOS parecida com você?',
+    part: 'Parte 2: Como você age e interage (DISC)',
+    type: 'disc_choice',
     options: [
       { value: 'Independente', label: 'Independente' },
       { value: 'Divertido', label: 'Divertido' },
@@ -443,24 +531,26 @@ export function StudentDetailsModal({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Valores Principais:</h4>
-                  <div className="flex flex-wrap gap-2">
+              <div className="space-y-6">
+                <div className="min-h-0">
+                  <h4 className="font-medium mb-3">Valores Principais:</h4>
+                  <div className="flex flex-wrap gap-2 min-h-0">
                     {profile.schwartzValues.top_values.map((value) => (
-                      <Badge key={value} variant="outline">
+                      <Badge key={value} variant="outline" className="text-sm">
                         {value}
                       </Badge>
                     ))}
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2">Pontuações Detalhadas:</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <div className="min-h-0">
+                  <h4 className="font-medium mb-3">Pontuações Detalhadas:</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-h-0">
                     {Object.entries(profile.schwartzValues.scores).map(([value, score]) => (
-                      <div key={value} className="flex justify-between items-center p-2 bg-muted rounded">
-                        <span className="text-sm">{value}</span>
-                        <span className="font-medium">{score}</span>
+                      <div key={value} className="flex justify-between items-center p-3 bg-muted rounded-md border">
+                        <span className="text-sm font-medium flex-1 mr-2">{value}</span>
+                        <span className="font-bold text-lg bg-primary text-primary-foreground px-2 py-1 rounded text-sm">
+                          {score}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -508,11 +598,9 @@ export function StudentDetailsModal({
         return scaleLabels[answer as keyof typeof scaleLabels] || answer;
       }
 
-      if (question.type === 'disc' && allAnswers) {
-        // Para perguntas DISC, as respostas estão em campos separados
-        const most = allAnswers[`${questionId}_most`];
-        const least = allAnswers[`${questionId}_least`];
-        return `Mais parecido: ${most || 'N/A'} | Menos parecido: ${least || 'N/A'}`;
+      if ((question.type === 'disc' || question.type === 'disc_choice') && typeof answer === 'string') {
+        // Para perguntas DISC, mostra apenas a resposta selecionada
+        return answer;
       }
 
       return typeof answer === 'string' ? answer :
@@ -543,7 +631,7 @@ export function StudentDetailsModal({
                         questionId.startsWith('schwartz_')
                       );
 
-                    const mappedAnswers = quizAnswers.filter(([questionId]) => quizQuestionsMap[questionId]);
+                    const mappedAnswers = quizAnswers.filter(([questionId]) => !!quizQuestionsMap[questionId]);
 
                     return (
                       <>
@@ -609,35 +697,45 @@ export function StudentDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-6xl max-h-[95vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Detalhes do Aluno: {student.name}</DialogTitle>
           <DialogDescription>
             Informações completas sobre o aluno e seus perfis de aprendizagem
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
-          <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+        <div className="flex-1 overflow-hidden">
+          <Tabs defaultValue="basic" className="h-full flex flex-col">
+            <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
               <TabsTrigger value="basic">Informações Básicas</TabsTrigger>
               <TabsTrigger value="profiles">Perfis</TabsTrigger>
               <TabsTrigger value="answers">Respostas do Quiz</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="basic" className="space-y-4 mt-4">
-              {renderBasicInfo()}
-            </TabsContent>
+            <div className="flex-1 overflow-hidden mt-4">
+              <TabsContent value="basic" className="h-full overflow-auto">
+                <div className="space-y-4">
+                  {renderBasicInfo()}
+                </div>
+              </TabsContent>
 
-            <TabsContent value="profiles" className="space-y-4 mt-4">
-              {renderProfiles()}
-            </TabsContent>
+              <TabsContent value="profiles" className="h-full overflow-hidden">
+                <ScrollArea className="h-[600px] w-full rounded-md border p-4">
+                  <div className="space-y-4">
+                    {renderProfiles()}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
 
-            <TabsContent value="answers" className="space-y-4 mt-4">
-              {renderQuizAnswers()}
-            </TabsContent>
+              <TabsContent value="answers" className="h-full overflow-auto">
+                <div className="space-y-4">
+                  {renderQuizAnswers()}
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
