@@ -8,7 +8,7 @@ import { Menu, BrainCircuit } from "lucide-react";
 
 export function Header() {
   const navLinks = [
-    { href: "#features", label: "Recursos" },
+    { href: "#recursos", label: "Recursos" },
     { href: "/login", label: "Entrar" },
   ];
 
@@ -31,6 +31,9 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            <Button asChild variant="outline" className="font-headline">
+              <a href="https://wa.me/554491857303" target="_blank" rel="noopener noreferrer">Solicite uma Demonstração</a>
+            </Button>
              <Button asChild className="font-headline">
               <Link href="/signup">Cadastre-se</Link>
             </Button>
@@ -60,6 +63,9 @@ export function Header() {
                       {link.label}
                     </Link>
                   ))}
+                  <Button asChild variant="outline" className="font-headline">
+                    <a href="https://wa.me/554491857303" target="_blank" rel="noopener noreferrer">Solicite uma Demonstração</a>
+                  </Button>
                    <Button asChild className="font-headline">
                     <Link href="/signup">Cadastre-se</Link>
                   </Button>
