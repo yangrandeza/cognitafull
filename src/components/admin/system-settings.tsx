@@ -23,6 +23,7 @@ export function SystemSettings({ className }: SystemSettingsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
   const { toast } = useToast();
 
   // Load current settings
@@ -198,6 +199,8 @@ export function SystemSettings({ className }: SystemSettingsProps) {
           </div>
         </div>
 
+
+
         {/* Information */}
         <div className="p-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
           <div className="flex items-start gap-3">
@@ -214,6 +217,8 @@ export function SystemSettings({ className }: SystemSettingsProps) {
           </div>
         </div>
       </CardContent>
+
+
     </Card>
   );
 }

@@ -51,6 +51,54 @@ export const updateRegistrationStatus = async (blocked: boolean, message: string
   }
 };
 
+// Send email using Firebase Cloud Functions (requires setup)
+export const sendEmailViaFirebase = async (to: string, subject: string, htmlContent: string) => {
+  try {
+    // This would call a Firebase Cloud Function that handles email sending
+    // The Cloud Function would use a service like SendGrid, Mailgun, or similar
+    const response = await fetch('/api/sendEmail', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to,
+        subject,
+        htmlContent,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send email');
+    }
+
+    const result = await response.json();
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return { success: false, error: (error as Error).message };
+  }
+};
+
+// Alternative: Send email using Firebase Extensions (Trigger Email)
+export const sendEmailViaExtension = async (to: string, templateId: string, templateData: any) => {
+  try {
+    // This would trigger a Firebase Extension for email sending
+    await addDoc(collection(db, 'mail'), {
+      to,
+      template: {
+        id: templateId,
+        data: templateData,
+      },
+      createdAt: serverTimestamp(),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending email via extension:', error);
+    return { success: false, error: (error as Error).message };
+  }
+};
+
 // Sign up with email and password
 export const signUpWithEmail = async (email: string, password: string, fullName: string) => {
   try {

@@ -27,6 +27,7 @@ import {
   Building2,
   PieChart,
   Shield,
+  Mail,
 } from "lucide-react";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { userSignOut } from "@/lib/firebase/auth";
@@ -39,6 +40,7 @@ const navItems = [
   { href: "/settings", icon: Settings, label: "Configurações", roles: ["teacher", "admin", "superadmin"]},
   // Super Admin sections
   { href: "/superadmin/system", icon: Shield, label: "Sistema", roles: ["superadmin"] },
+  { href: "/superadmin/emails", icon: Mail, label: "Emails", roles: ["superadmin"] },
   { href: "/superadmin/organizations", icon: Building2, label: "Organizações", roles: ["superadmin"] },
   { href: "/superadmin/users", icon: Users, label: "Usuários", roles: ["superadmin"] },
   { href: "/superadmin/classes", icon: BookOpen, label: "Turmas", roles: ["superadmin"] },

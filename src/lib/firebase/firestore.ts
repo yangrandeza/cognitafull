@@ -88,7 +88,7 @@ export const createUserProfileInFirestore = async (user: User, additionalData: P
                     id: user.uid,
                     email: user.email || '',
                     name: teacherData.name || user.displayName || 'Professor',
-                    role: 'teacher',
+                    role: teacherData.role || 'teacher', // ✅ Garante que seja professor
                     organizationId: teacherData.organizationId,
                     status: 'active',
                 };
@@ -221,7 +221,43 @@ export const createTeacher = async (organizationId: string, teacherData: { name:
         createdAt: serverTimestamp(),
     };
     const docRef = await addDoc(collection(db, 'users'), teacherDoc);
-    return docRef.id;
+
+    // ✅ TRIGGER: Send invitation email to teacher
+    try {
+        // Import email service dynamically to avoid circular dependencies
+        const { emailService } = await import('../email-service');
+
+        // Get admin info for the invitation
+        const adminQuery = query(
+            collection(db, 'users'),
+            where('organizationId', '==', organizationId),
+            where('role', '==', 'admin')
+        );
+        const adminSnapshot = await getDocs(adminQuery);
+        const adminData = adminSnapshot.docs[0]?.data();
+
+        if (adminData) {
+            await emailService.sendTeacherInvitationEmail(
+                teacherData.email,
+                teacherData.name,
+                adminData.name || 'Administrador',
+                'Escola MUDEAI', // schoolName
+                `${process.env.NEXT_PUBLIC_APP_URL}/accept-invitation/${docRef.id}`,
+                new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days expiry
+            );
+        }
+    } catch (emailError) {
+        console.error('Erro ao enviar email de convite para professor:', emailError);
+        // Don't fail the teacher creation if email fails
+    }
+
+    // Return invitation details including shareable link
+    return {
+        teacherId: docRef.id,
+        invitationLink: `${process.env.NEXT_PUBLIC_APP_URL}/accept-invitation/${docRef.id}`,
+        emailSent: true, // Email was attempted (doesn't mean it succeeded)
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    };
 }
 
 export const updateTeacher = async (teacherId: string, updates: Partial<Pick<UserProfile, 'name' | 'status'>>) => {
@@ -385,6 +421,9 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
 
 export const submitQuizAnswers = async (classId: string, studentInfo: { name: string; age: string, email?: string, gender?: string, customFields?: Record<string, string>}, answers: QuizAnswers): Promise<string> => {
      let studentId = "";
+     let classData: any = null;
+     let profileId = "";
+
      await runTransaction(db, async (transaction) => {
         const classRef = doc(db, 'classes', classId);
         const classDoc = await transaction.get(classRef);
@@ -392,10 +431,14 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
             throw new Error("Turma não existe!");
         }
 
+        // Store class data for use outside transaction
+        classData = classDoc.data();
+
         // Generate IDs for the documents we'll create
         const studentRef = doc(collection(db, 'students'));
         const profileRef = doc(collection(db, 'unifiedProfiles'));
         studentId = studentRef.id; // Capture the new student's ID
+        profileId = profileRef.id; // Capture the profile ID
 
         // 1. Create the unified profile with raw answers first
         const newProfileData: NewUnifiedProfile = {
@@ -421,10 +464,62 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
         transaction.set(studentRef, newStudentData);
 
         // 3. Atomically update the class counters
-        const newStudentCount = (classDoc.data().studentCount || 0) + 1;
-        const newResponsesCount = (classDoc.data().responsesCount || 0) + 1;
+        const newStudentCount = (classData.studentCount || 0) + 1;
+        const newResponsesCount = (classData.responsesCount || 0) + 1;
         transaction.update(classRef, { studentCount: newStudentCount, responsesCount: newResponsesCount });
     });
+
+    // ✅ TRIGGER: Send emails after quiz completion
+    try {
+        // Import email service dynamically to avoid circular dependencies
+        const { emailService } = await import('../email-service');
+
+        // Get teacher info
+        const teacherProfile = await getUserProfile(classData.teacherId);
+
+        // Process quiz results
+        const rawProfile = {
+            id: profileId,
+            studentId: studentId,
+            classId: classId,
+            rawAnswers: answers,
+            createdAt: new Date().toISOString(),
+        } as RawUnifiedProfile;
+
+        const [processedProfile] = processProfiles([rawProfile]);
+
+        // ✅ Send quiz results to student (if email provided)
+        if (studentInfo.email) {
+            await emailService.sendQuizResultsEmail(
+                studentInfo.email,
+                studentInfo.name,
+                classData.name,
+                studentId,
+                {
+                    vark: (processedProfile as any).vark || 'Não determinado',
+                    disc: (processedProfile as any).disc || 'Não determinado',
+                    jung: (processedProfile as any).jung || 'Não determinado',
+                    schwartz: (processedProfile as any).schwartz || 'Não determinado',
+                },
+                undefined, // whatsappNumber (not available in quiz submission)
+                teacherProfile?.name
+            );
+        }
+
+        // ✅ Send notification to teacher (using welcome email as notification)
+        if (teacherProfile?.email) {
+            await emailService.sendWelcomeEmail(
+                teacherProfile.email,
+                teacherProfile.name,
+                `${studentInfo.name} completou o questionário na turma ${classData.name}`
+            );
+        }
+
+    } catch (emailError) {
+        console.error('Erro ao enviar emails após conclusão do quiz:', emailError);
+        // Don't fail the quiz submission if emails fail
+    }
+
     return studentId; // Return the student ID
 };
 
