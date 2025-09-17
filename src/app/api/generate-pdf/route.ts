@@ -772,7 +772,7 @@ function createHTMLTemplate(student: any, profile: any, insights: any): string {
             <a href="https://wa.me/5511999999999" class="button">
               💬 WhatsApp
             </a>
-            <a href="mailto:suporte@ai.mudeeducacao.com.br" class="button">
+            <a href="mailto:contato@mudeeducacao.com.br" class="button">
               📧 Email
             </a>
           </div>
@@ -785,7 +785,7 @@ function createHTMLTemplate(student: any, profile: any, insights: any): string {
         <div class="footer-tagline">DHO de empresas e gestor escolar solicitem demonstração de toda a ferramenta para conhecer todo o seu potencial.</div>
         <div class="footer-links">
           <span>Visite: https://ai.mudeeducacao.com.br</span>
-          <span>Contato: suporte@ai.mudeeducacao.com.br</span>
+          <span>Contato: contato@mudeeducacao.com.br</span>
         </div>
       </div>
     </body>

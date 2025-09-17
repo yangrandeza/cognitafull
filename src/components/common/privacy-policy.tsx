@@ -178,8 +178,8 @@ export function PrivacyPolicy({ onAccept, showAcceptButton = false }: PrivacyPol
               <div className="text-muted-foreground">
                 <p>Para exercer seus direitos ou esclarecer dúvidas sobre esta política:</p>
                 <ul className="list-disc list-inside space-y-1 ml-4 mt-2">
-                  <li>E-mail: privacidade@cognita360.com</li>
-                  <li>Encarregado de Dados (DPO): dpo@cognita360.com</li>
+                  <li>E-mail: contato@mudeeducacao.com.br</li>
+                  <li>Encarregado de Dados (DPO): contato@mudeeducacao.com.br</li>
                   <li>Prazo para resposta: até 15 dias úteis</li>
                 </ul>
               </div>
