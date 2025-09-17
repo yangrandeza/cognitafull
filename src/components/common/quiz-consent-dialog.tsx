@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Shield, FileText, Users, Database, Lock, Mail } from "lucide-react";
+import { Shield, FileText, Users, Database, Lock, Mail, Clock } from "lucide-react";
 
 interface QuizConsentDialogProps {
   isOpen: boolean;
@@ -130,7 +130,10 @@ export function QuizConsentDialog({ isOpen, onAccept, onDecline }: QuizConsentDi
 
             {/* Seção 7: Retenção */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-base">7. Retenção de dados</h3>
+              <h3 className="font-semibold text-base flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                7. Retenção de dados
+              </h3>
               <div className="pl-6 space-y-2">
                 <p>Seus dados pessoais serão mantidos apenas pelo tempo necessário para as finalidades descritas</p>
                 <p>Dados acadêmicos podem ser mantidos por até 5 anos após sua conclusão do curso</p>
