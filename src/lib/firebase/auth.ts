@@ -54,9 +54,15 @@ export const updateRegistrationStatus = async (blocked: boolean, message: string
 // Send email using Firebase Cloud Functions (requires setup)
 export const sendEmailViaFirebase = async (to: string, subject: string, htmlContent: string) => {
   try {
-    // This would call a Firebase Cloud Function that handles email sending
-    // The Cloud Function would use a service like SendGrid, Mailgun, or similar
-    const response = await fetch('/api/sendEmail', {
+    // Check if we're in production (Netlify) or development
+    const isProduction = process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL.includes('netlify');
+
+    // Use Netlify function URL in production, Next.js API route in development
+    const apiUrl = isProduction
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/.netlify/functions/sendEmail`
+      : '/api/sendEmail';
+
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

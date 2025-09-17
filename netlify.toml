@@ -63,6 +63,10 @@
 [functions.generate-pdf]
   max_age = 10
 
+# Configurações específicas para Email
+[functions.sendEmail]
+  max_age = 10
+
 # Build hooks (opcional)
 [build.hooks]
   prebuild = "echo 'Starting Netlify build...'"

@@ -1,6 +1,9 @@
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
+// Configuração específica para Netlify Functions
+const isNetlify = process.env.NETLIFY || process.env.NETLIFY_LOCAL;
+
 function generateStudentInsights(profile, student) {
   // Análise dinâmica baseada nos resultados dos testes
   const vark = profile.varkProfile?.dominant || 'Visual';
@@ -746,11 +749,22 @@ exports.handler = async (event, context) => {
     // Criar template HTML
     const htmlContent = createHTMLTemplate(student, profile, insights);
 
-    // Configurar Puppeteer para Netlify
+    // Configurar Puppeteer para Netlify Functions
     const browser = await puppeteer.launch({
-      args: chromium.args,
+      args: isNetlify ? [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process', // <- this one doesn't work in Windows
+        '--disable-gpu'
+      ] : chromium.args,
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
 
     try {
