@@ -1,0 +1,72 @@
+[build]
+  # Diretório de publicação
+  publish = ".next"
+
+  # Comando de build
+  command = "npm run build"
+
+  # Diretório de funções (para API routes)
+  functions = "netlify/functions"
+
+[build.environment]
+  # Variáveis de ambiente para build
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+
+# Headers para segurança e performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Headers específicos para API routes
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+# Headers para arquivos estáticos
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Headers para PDFs
+[[headers]]
+  for = "/api/generate-pdf"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Content-Type = "application/pdf"
+
+# Redirects para SPA
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Redirect para index
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Função serverless para Puppeteer
+[functions]
+  directory = "netlify/functions"
+
+# Configurações específicas para Puppeteer
+[functions.generate-pdf]
+  max_age = 10
+
+# Build hooks (opcional)
+[build.hooks]
+  prebuild = "echo 'Starting Netlify build...'"
+
+# Plugins (se necessário)
+# [[plugins]]
+#   package = "@netlify/plugin-nextjs"

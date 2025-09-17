@@ -438,8 +438,8 @@ export default function SuperAdminEmailsPage() {
                 <div className="bg-muted p-3 rounded-lg font-mono text-sm">
                   <div>EMAIL_USER=mude.rise@gmail.com</div>
                   <div>EMAIL_PASS=[CONFIGURADO]</div>
-                  <div>EMAIL_FROM=noreply@mudeai.com</div>
-                  <div>NEXT_PUBLIC_APP_URL=https://mudeai.com</div>
+                  <div>EMAIL_FROM=noreply@ai.mudeeducacao.com.br</div>
+                  <div>NEXT_PUBLIC_APP_URL=https://ai.mudeeducacao.com.br</div>
                 </div>
               </div>
             </CardContent>

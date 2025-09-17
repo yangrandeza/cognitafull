@@ -119,6 +119,13 @@ export const signUpWithEmail = async (email: string, password: string, fullName:
     const user = userCredential.user;
     // This will create a profile if one doesn't exist.
     await createUserProfileInFirestore(user, { name: fullName });
+
+    // Set session storage to trigger onboarding for new users
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mudeai-new-user', 'true');
+      sessionStorage.setItem('mudeai-temp-password', password);
+    }
+
     return { user, error: null };
   } catch (error) {
     return { user: null, error: (error as Error).message };

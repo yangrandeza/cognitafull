@@ -9,6 +9,7 @@ export type UserProfile = {
   role: UserRole;
   organizationId: string;
   status?: 'active' | 'pending' | 'inactive'; // For invited teachers
+  createdAt?: any; // Timestamp from Firestore
 };
 
 export type Organization = {

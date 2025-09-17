@@ -123,7 +123,7 @@ export function QuizConsentDialog({ isOpen, onAccept, onDecline }: QuizConsentDi
               </h3>
               <div className="pl-6 space-y-2">
                 <p>Para exercer seus direitos ou tirar dúvidas sobre privacidade:</p>
-                <p><strong>E-mail:</strong> privacidade@mudeai.com</p>
+                <p><strong>E-mail:</strong> privacidade@ai.mudeeducacao.com.br</p>
                 <p><strong>Responsável:</strong> Encarregado de Dados - LGPD</p>
               </div>
             </div>

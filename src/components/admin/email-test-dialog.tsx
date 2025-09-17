@@ -226,7 +226,7 @@ export function EmailTestDialog({ isOpen, onClose }: EmailTestDialogProps) {
           .replace(/\{\{teacherName\}\}/g, "Maria Santos")
           .replace(/\{\{schoolName\}\}/g, "Escola Estadual São Paulo")
           .replace(/\{\{adminName\}\}/g, "Dr. João Silva")
-          .replace(/\{\{invitationLink\}\}/g, `${process.env.NEXT_PUBLIC_APP_URL || 'https://mudeai.com'}/accept-invitation/demo-token`)
+          .replace(/\{\{invitationLink\}\}/g, `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.mudeeducacao.com.br'}/accept-invitation/demo-token`)
           .replace(/\{\{expiryDate\}\}/g, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'));
 
         result = await sendEmailViaFirebase(testEmail, subject, html);
@@ -237,7 +237,7 @@ export function EmailTestDialog({ isOpen, onClose }: EmailTestDialogProps) {
           "Maria Santos",
           "Escola Estadual São Paulo",
           "Dr. João Silva",
-          `${process.env.NEXT_PUBLIC_APP_URL || 'https://mudeai.com'}/accept-invitation/demo-token`,
+          `${process.env.NEXT_PUBLIC_APP_URL || 'https://ai.mudeeducacao.com.br'}/accept-invitation/demo-token`,
           new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         );
       }

@@ -71,7 +71,7 @@ export const emailTemplates = {
               🎓 <strong>MUDEAI</strong> - Transformando o aprendizado através da inteligência artificial
             </p>
             <p style="color: #9ca3af; font-size: 12px; margin: 5px 0 0 0;">
-              Dúvidas? Entre em contato: suporte@mudeai.com
+              Dúvidas? Entre em contato: suporte@ai.mudeeducacao.com.br
             </p>
           </div>
         </div>
@@ -275,7 +275,7 @@ export const emailTemplates = {
               Precisa de ajuda? Nossa equipe está aqui para você!
             </p>
             <div style="display: flex; justify-content: center; gap: 10px;">
-              <a href="mailto:suporte@mudeai.com"
+              <a href="mailto:suporte@ai.mudeeducacao.com.br"
                  style="background: #6b7280; color: white; padding: 10px 20px; text-decoration: none; border-radius: 25px; font-size: 14px;">
                 📧 Email
               </a>

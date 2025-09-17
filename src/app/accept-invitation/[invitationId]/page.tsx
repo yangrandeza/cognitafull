@@ -200,6 +200,10 @@ export default function AcceptInvitationPage() {
       // 2. Create a new active document with the correct Firebase Auth UID
       // 3. Delete the old pending document
 
+      // Set session storage to trigger onboarding
+      sessionStorage.setItem('mudeai-new-user', 'true');
+      sessionStorage.setItem('mudeai-temp-password', tempPassword);
+
       toast({
         title: "Convite aceito!",
         description: "Sua conta foi criada com sucesso. Você será redirecionado em instantes.",

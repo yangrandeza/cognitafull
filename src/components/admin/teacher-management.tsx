@@ -13,6 +13,7 @@ import { TeacherInvitationLink } from "./teacher-invitation-link";
 import { useToast } from "@/hooks/use-toast";
 import { createTeacher, getTeachersByOrganization, deleteTeacher } from "@/lib/firebase/firestore";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { UserProfile } from "@/lib/types";
 import {
   Plus,
   Users,
@@ -24,24 +25,15 @@ import {
   AlertTriangle
 } from "lucide-react";
 
-interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  createdAt: any;
-}
-
 export function TeacherManagement() {
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [teachers, setTeachers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showInvitationDialog, setShowInvitationDialog] = useState(false);
   const [invitationData, setInvitationData] = useState<any>(null);
   const [newTeacher, setNewTeacher] = useState({ name: "", email: "" });
   const [creating, setCreating] = useState(false);
-  const { user: userProfile } = useUserProfile();
+  const { userProfile } = useUserProfile();
   const { toast } = useToast();
 
   // Load teachers
@@ -323,6 +315,7 @@ export function TeacherManagement() {
                     <TableHead>Email</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Data de Criação</TableHead>
+                    <TableHead>Link de Convite</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -331,8 +324,29 @@ export function TeacherManagement() {
                     <TableRow key={teacher.id}>
                       <TableCell className="font-medium">{teacher.name}</TableCell>
                       <TableCell>{teacher.email}</TableCell>
-                      <TableCell>{getStatusBadge(teacher.status)}</TableCell>
+                      <TableCell>{getStatusBadge(teacher.status || 'pending')}</TableCell>
                       <TableCell>{formatDate(teacher.createdAt)}</TableCell>
+                      <TableCell>
+                        {teacher.status === 'pending' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL}/accept-invitation/${teacher.id}`;
+                              navigator.clipboard.writeText(invitationLink);
+                              toast({
+                                title: "Link copiado!",
+                                description: "O link de convite foi copiado para a área de transferência.",
+                              });
+                            }}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            📋 Copiar Link
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Button
                           variant="outline"
