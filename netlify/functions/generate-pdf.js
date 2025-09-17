@@ -717,7 +717,7 @@ function createHTMLTemplate(student, profile, insights) {
       <!-- Footer -->
       <div class="footer">
         <div class="footer-logo">MUDEAI</div>
-        <div class="footer-tagline">Transformando o aprendizado através da inteligência artificial</div>
+        <div class="footer-tagline">DHO de empresas e gestor escolar solicitem demonstração de toda a ferramenta para conhecer todo o seu potencial.</div>
         <div class="footer-links">
           <span>Visite: https://ai.mudeeducacao.com.br</span>
           <span>Contato: suporte@ai.mudeeducacao.com.br</span>
