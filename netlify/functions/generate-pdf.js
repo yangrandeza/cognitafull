@@ -766,22 +766,26 @@ exports.handler = async (event, context) => {
     // Criar template HTML
     const htmlContent = createHTMLTemplate(student, profile, insights);
 
-    // Configurar Puppeteer para Netlify Functions
+    // Configurar Puppeteer para Netlify Functions com configuração minimal
     const browser = await puppeteer.launch({
       args: isNetlify ? [
-        ...chromium.args,
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
         '--no-first-run',
-        '--no-zygote',
-        '--single-process', // <- this one doesn't work in Windows
-        '--disable-gpu'
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-images',
+        '--disable-javascript',
+        '--disable-dev-tools'
       ] : chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: true,
       ignoreHTTPSErrors: true,
+      timeout: 30000, // 30 seconds timeout
     });
 
     try {
