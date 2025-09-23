@@ -1,25 +1,8 @@
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
-const { initializeApp, getApps, getApp } = require('firebase/app');
-const { getFirestore, collection, addDoc, updateDoc, serverTimestamp } = require('firebase/firestore');
 
 // Configuração específica para Netlify Functions
 const isNetlify = process.env.NETLIFY || process.env.NETLIFY_LOCAL;
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
-};
-
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
 
 function generateStudentInsights(profile, student) {
   // Análise dinâmica baseada nos resultados dos testes
@@ -298,12 +281,9 @@ function createHTMLTemplate(student, profile, insights) {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Relatório de Perfil de Aprendizagem - ${studentName}</title>
-      <script src="https://cdn.tailwindcss.com"></script>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
         body {
-          font-family: 'Inter', sans-serif;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           margin: 0;
           padding: 20px;
           background: white;
@@ -749,8 +729,11 @@ function createHTMLTemplate(student, profile, insights) {
 }
 
 exports.handler = async (event, context) => {
+  console.log('PDF generation started for Netlify function');
+
   // Apenas aceitar POST
   if (event.httpMethod !== 'POST') {
+    console.log('Method not allowed:', event.httpMethod);
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method not allowed' })
@@ -758,37 +741,52 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('Parsing request body...');
     const { student, profile } = JSON.parse(event.body);
 
-    // Gerar insights
+    if (!student || !profile) {
+      console.error('Missing student or profile data');
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Dados do aluno ou perfil não fornecidos' })
+      };
+    }
+
+    console.log('Generating insights...');
     const insights = generateStudentInsights(profile, student);
 
-    // Criar template HTML
+    console.log('Creating HTML template...');
     const htmlContent = createHTMLTemplate(student, profile, insights);
 
-    // Configurar Puppeteer para Netlify Functions com configuração minimal
+    console.log('Launching Puppeteer browser...');
+    // Configurar Puppeteer para Netlify Functions com configuração otimizada
     const browser = await puppeteer.launch({
       args: isNetlify ? [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--no-first-run',
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
+        '--no-first-run',
         '--disable-extensions',
         '--disable-plugins',
         '--disable-images',
         '--disable-javascript',
-        '--disable-dev-tools'
+        '--disable-dev-tools',
+        '--single-process',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
       ] : chromium.args,
       executablePath: await chromium.executablePath(),
       headless: true,
       ignoreHTTPSErrors: true,
-      timeout: 30000, // 30 seconds timeout
+      timeout: 60000, // 60 seconds timeout
     });
 
     try {
+      console.log('Creating new page...');
       const page = await browser.newPage();
 
       // Configurar viewport para melhor qualidade
@@ -798,8 +796,10 @@ exports.handler = async (event, context) => {
         deviceScaleFactor: 1,
       });
 
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      console.log('Setting page content...');
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 30000 });
 
+      console.log('Generating PDF...');
       // Gerar PDF com configurações otimizadas para Netlify
       const pdfBuffer = await page.pdf({
         format: 'A4',
@@ -813,8 +813,11 @@ exports.handler = async (event, context) => {
         preferCSSPageSize: true,
         displayHeaderFooter: false,
         tagged: true,
-        outline: true
+        outline: true,
+        timeout: 30000
       });
+
+      console.log('PDF generated successfully, size:', pdfBuffer.length);
 
       // Retornar PDF como base64
       const pdfBase64 = pdfBuffer.toString('base64');
@@ -834,11 +837,13 @@ exports.handler = async (event, context) => {
       };
 
     } finally {
+      console.log('Closing browser...');
       await browser.close();
     }
 
   } catch (error) {
     console.error('Erro ao gerar PDF:', error);
+    console.error('Error stack:', error.stack);
 
     return {
       statusCode: 500,
@@ -847,7 +852,8 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         error: 'Erro ao gerar PDF',
-        details: error.message
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       })
     };
   }
