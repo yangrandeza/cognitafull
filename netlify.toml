@@ -59,10 +59,11 @@
 [functions]
   directory = "netlify/functions"
 
-# Configurações específicas para Puppeteer
+# Configurações específicas para PDF generation
 [functions.generate-pdf]
   max_age = 10
-  timeout = 60
+  timeout = 30
+  memory = 512
 
 # Configurações específicas para Email
 [functions.sendEmail]
