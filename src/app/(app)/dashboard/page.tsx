@@ -38,10 +38,12 @@ export default function DashboardPage() {
     }
   }, [user, loadingAuth]);
 
-  // Redirect admin users to admin dashboard
+  // Redirect admin and superadmin users to their respective dashboards
   useEffect(() => {
     if (!loadingProfile && userProfile?.role === 'admin') {
       router.push('/admin?tab=classes');
+    } else if (!loadingProfile && userProfile?.role === 'superadmin') {
+      router.push('/superadmin/system');
     }
   }, [userProfile, loadingProfile, router]);
 
@@ -57,8 +59,8 @@ export default function DashboardPage() {
     )
   }
 
-  // Don't render anything for admin users (they will be redirected)
-  if (userProfile?.role === 'admin') {
+  // Don't render anything for admin or superadmin users (they will be redirected)
+  if (userProfile?.role === 'admin' || userProfile?.role === 'superadmin') {
     return null;
   }
   
