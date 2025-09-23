@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import { jsPDF } from 'jspdf';
 
 function generateStudentInsights(profile: any, student: any) {
   // Análise dinâmica baseada nos resultados dos testes
@@ -258,54 +258,139 @@ export async function POST(request: NextRequest) {
     // Gerar insights
     const insights = generateStudentInsights(profile, student);
 
-    // Criar template HTML
-    const htmlContent = createHTMLTemplate(student, profile, insights);
+    // Criar documento PDF usando jsPDF
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - 2 * margin;
+    let yPosition = margin;
 
-    // Gerar PDF com Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage'
-      ]
+    // Helper function para adicionar texto com quebra de linha
+    const addText = (text: string, fontSize = 12, fontWeight: 'normal' | 'bold' = 'normal', maxWidth = contentWidth) => {
+      doc.setFontSize(fontSize);
+      if (fontWeight === 'bold') {
+        doc.setFont('helvetica', 'bold');
+      } else {
+        doc.setFont('helvetica', 'normal');
+      }
+
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        if (yPosition > pageHeight - 30) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        doc.text(line, margin, yPosition);
+        yPosition += fontSize * 0.4;
+      });
+      yPosition += 5; // Espaço extra após o parágrafo
+    };
+
+    // Header
+    doc.setFillColor(236, 155, 42);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MUDEAI', pageWidth / 2, 20, { align: 'center' });
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Relatório de Perfil de Aprendizagem', pageWidth / 2, 30, { align: 'center' });
+
+    yPosition = 60;
+    doc.setTextColor(0, 0, 0);
+
+    // Student Information
+    addText('Informações do Aluno', 18, 'bold');
+    yPosition += 10;
+
+    const studentData = [
+      ['Nome', student.name],
+      ['Idade', `${student.age} anos`],
+      ['Gênero', student.gender || 'Não informado'],
+      ['Data da Avaliação', student.createdAt ? new Date(student.createdAt).toLocaleDateString('pt-BR') : 'N/A']
+    ];
+
+    studentData.forEach(([label, value]) => {
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${label}:`, margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.text(value, margin + 50, yPosition);
+      yPosition += 8;
     });
 
-    try {
-      const page = await browser.newPage();
-      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    yPosition += 10;
 
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20px',
-          right: '20px',
-          bottom: '20px',
-          left: '20px'
-        },
-        preferCSSPageSize: true,
-        displayHeaderFooter: false,
-        // Configurações para máxima compatibilidade
-        tagged: true,
-        outline: true
-      });
+    // Test Results
+    addText('Seu Perfil de Aprendizagem', 18, 'bold');
+    yPosition += 10;
 
-      // Retornar o Buffer diretamente (Next.js lida com a conversão)
-      return new NextResponse(pdfBuffer as any, {
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="relatorio-${student.name.toLowerCase().replace(/\s+/g, '-')}.pdf"`,
-          'Content-Length': pdfBuffer.length.toString(),
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      });
+    const testData = [
+      ['Estilo VARK', profile.varkProfile?.dominant || 'Não determinado'],
+      ['Perfil DISC', profile.discProfile?.dominant || 'Não determinado'],
+      ['Tipo Jung', profile.jungianProfile?.type || 'Não determinado'],
+      ['Valores Schwartz', profile.schwartzValues?.top_values?.slice(0, 2).join(', ') || 'Não determinado']
+    ];
 
-    } finally {
-      await browser.close();
-    }
+    testData.forEach(([label, value]) => {
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${label}:`, margin, yPosition);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(236, 155, 42);
+      doc.text(value, margin + 50, yPosition);
+      doc.setTextColor(0, 0, 0);
+      yPosition += 8;
+    });
+
+    yPosition += 10;
+
+    // Insights
+    addText('Seus Insights Personalizados', 18, 'bold');
+    yPosition += 10;
+
+    const insightSections = [
+      { title: '🧠 Minha Mente em Foco', content: insights.mind },
+      { title: '🚀 Meus Superpoderes', content: insights.superpowers },
+      { title: '❤️ O Que Me Move', content: insights.motivation },
+      { title: '📖 Meu Manual de Instruções', content: insights.manual }
+    ];
+
+    insightSections.forEach(section => {
+      addText(section.title, 14, 'bold');
+      addText(section.content, 11);
+      yPosition += 5;
+    });
+
+    // Tips
+    addText('🎯 Dicas para Voar Mais Alto', 18, 'bold');
+    yPosition += 10;
+
+    insights.tips.forEach((tip: string, index: number) => {
+      addText(`${index + 1}. ${tip}`, 11);
+    });
+
+    // Footer
+    const footerY = pageHeight - 30;
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text('MUDEAI - Plataforma de Perfil de Aprendizagem', pageWidth / 2, footerY, { align: 'center' });
+    doc.text('https://ai.mudeeducacao.com.br | contato@mudeeducacao.com.br', pageWidth / 2, footerY + 5, { align: 'center' });
+
+    // Obter o PDF como buffer
+    const pdfBuffer = Buffer.from(doc.output('arraybuffer'));
+
+    // Retornar o Buffer diretamente (Next.js lida com a conversão)
+    return new NextResponse(pdfBuffer as any, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="relatorio-${student.name.toLowerCase().replace(/\s+/g, '-')}.pdf"`,
+        'Content-Length': pdfBuffer.length.toString(),
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
 
   } catch (error) {
     console.error('Erro ao gerar PDF:', error);
