@@ -252,128 +252,269 @@ function generatePersonalizedTips(vark: string, disc: string, jung: string, gene
 }
 
 export async function POST(request: NextRequest) {
+  console.log('PDF generation started for Next.js API route - THIS IS THE NEXT.JS API ROUTE');
   try {
     const { student, profile } = await request.json();
 
     // Gerar insights
     const insights = generateStudentInsights(profile, student);
 
-    // Criar documento PDF usando jsPDF
-    const doc = new jsPDF();
+    // Criar documento PDF usando jsPDF com configurações otimizadas
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      putOnlyUsedFonts: true,
+      compress: true
+    });
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
+    const margin = 25;
     const contentWidth = pageWidth - 2 * margin;
     let yPosition = margin;
 
-    // Helper function para adicionar texto com quebra de linha
-    const addText = (text: string, fontSize = 12, fontWeight: 'normal' | 'bold' = 'normal', maxWidth = contentWidth) => {
+    // Função para adicionar texto com melhor formatação
+    const addText = (text: string, options: any = {}) => {
+      const {
+        fontSize = 12,
+        fontWeight = 'normal',
+        maxWidth = contentWidth,
+        align = 'left',
+        color = [0, 0, 0],
+        lineHeight = 1.4
+      } = options;
+
       doc.setFontSize(fontSize);
+      doc.setTextColor(color[0], color[1], color[2]);
+
       if (fontWeight === 'bold') {
         doc.setFont('helvetica', 'bold');
       } else {
         doc.setFont('helvetica', 'normal');
       }
 
+      // Melhor quebra de linha para texto português
       const lines = doc.splitTextToSize(text, maxWidth);
+
       lines.forEach((line: string) => {
-        if (yPosition > pageHeight - 30) {
+        if (yPosition > pageHeight - 50) {
           doc.addPage();
           yPosition = margin;
         }
-        doc.text(line, margin, yPosition);
-        yPosition += fontSize * 0.4;
+
+        let xPos = margin;
+        if (align === 'center') {
+          xPos = pageWidth / 2;
+        } else if (align === 'right') {
+          xPos = pageWidth - margin;
+        }
+
+        doc.text(line, xPos, yPosition, { align, maxWidth });
+        yPosition += fontSize * 0.4 * lineHeight;
       });
-      yPosition += 5; // Espaço extra após o parágrafo
+
+      yPosition += 4; // Espaço extra após o parágrafo
     };
 
-    // Header
-    doc.setFillColor(236, 155, 42);
-    doc.rect(0, 0, pageWidth, 40, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('MUDEAI', pageWidth / 2, 20, { align: 'center' });
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Relatório de Perfil de Aprendizagem', pageWidth / 2, 30, { align: 'center' });
+    // Função para adicionar tabela com bordas transparentes
+    const addTable = (data: Array<{ label: string; value: string }>, title?: string) => {
+      if (title) {
+        addText(title, {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: [236, 155, 42],
+          lineHeight: 1.3
+        });
+        yPosition += 3;
+      }
 
-    yPosition = 60;
+      const rowHeight = 12;
+      const labelWidth = contentWidth * 0.35;
+      const valueWidth = contentWidth * 0.65;
+
+      data.forEach((row, index) => {
+        if (yPosition > pageHeight - 60) {
+          doc.addPage();
+          yPosition = margin;
+        }
+
+        // Fundo alternado suave
+        if (index % 2 === 1) {
+          doc.setFillColor(248, 250, 252); // Cinza muito claro
+          doc.rect(margin, yPosition - 3, contentWidth, rowHeight, 'F');
+        }
+
+        // Label (negrito)
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(31, 41, 55); // Cinza escuro
+        const labelLines = doc.splitTextToSize(row.label, labelWidth);
+        doc.text(labelLines, margin + 2, yPosition);
+
+        // Value (normal)
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        doc.setTextColor(55, 65, 81); // Cinza médio
+        const valueLines = doc.splitTextToSize(row.value, valueWidth);
+        doc.text(valueLines, margin + labelWidth + 5, yPosition);
+
+        // Linha separadora sutil
+        doc.setDrawColor(229, 231, 235); // Cinza muito claro
+        doc.setLineWidth(0.1);
+        doc.line(margin, yPosition + rowHeight - 2, pageWidth - margin, yPosition + rowHeight - 2);
+
+        yPosition += Math.max(labelLines.length, valueLines.length) * 5 + 3;
+      });
+
+      yPosition += 8; // Espaço após a tabela
+    };
+
+    // Função para adicionar seção com título e conteúdo
+    const addSection = (title: string, content: string, icon?: string) => {
+      // Verificar se precisa de nova página
+      if (yPosition > pageHeight - 80) {
+        doc.addPage();
+        yPosition = margin;
+      }
+
+      // Título da seção com ícone
+      const fullTitle = icon ? `${icon} ${title}` : title;
+      addText(fullTitle, {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: [236, 155, 42],
+        lineHeight: 1.3
+      });
+      yPosition += 5;
+
+      // Conteúdo
+      addText(content, {
+        fontSize: 11,
+        lineHeight: 1.5,
+        maxWidth: contentWidth - 5
+      });
+
+      yPosition += 10; // Espaço maior entre seções
+    };
+
+    // Header com gradiente visual melhorado
+    doc.setFillColor(236, 155, 42);
+    doc.rect(0, 0, pageWidth, 50, 'F');
+
+    // Gradiente overlay
+    doc.setFillColor(255, 255, 255);
+    doc.setGState(new (doc as any).GState({ opacity: 0.1 }));
+    doc.rect(0, 0, pageWidth, 50, 'F');
+    doc.setGState(new (doc as any).GState({ opacity: 1 }));
+
+    // Logo
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(32);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MUDEAI', pageWidth / 2, 28, { align: 'center' });
+
+    // Subtítulo
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Relatório de Perfil de Aprendizagem', pageWidth / 2, 38, { align: 'center' });
+
+    // Data no canto superior direito
+    const currentDate = new Date().toLocaleDateString('pt-BR');
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${currentDate}`, pageWidth - margin, 20, { align: 'right' });
+
+    yPosition = 70;
     doc.setTextColor(0, 0, 0);
 
-    // Student Information
-    addText('Informações do Aluno', 18, 'bold');
-    yPosition += 10;
+    // Informações do Aluno - usando tabela
+    addTable([
+      { label: 'Nome:', value: student.name },
+      { label: 'Idade:', value: `${student.age} anos` },
+      { label: 'Gênero:', value: student.gender || 'Não informado' },
+      { label: 'Data da Avaliação:', value: student.createdAt ? new Date(student.createdAt).toLocaleDateString('pt-BR') : 'N/A' }
+    ], 'INFORMAÇÕES DO ALUNO');
 
-    const studentData = [
-      ['Nome', student.name],
-      ['Idade', `${student.age} anos`],
-      ['Gênero', student.gender || 'Não informado'],
-      ['Data da Avaliação', student.createdAt ? new Date(student.createdAt).toLocaleDateString('pt-BR') : 'N/A']
-    ];
+    // Perfil de Aprendizagem - usando tabela
+    addTable([
+      { label: 'Estilo VARK:', value: profile.varkProfile?.dominant || 'Não determinado' },
+      { label: 'Perfil DISC:', value: profile.discProfile?.dominant || 'Não determinado' },
+      { label: 'Tipo Jung:', value: profile.jungianProfile?.type || 'Não determinado' },
+      { label: 'Valores Schwartz:', value: profile.schwartzValues?.top_values?.slice(0, 2).join(', ') || 'Não determinado' }
+    ], 'SEU PERFIL DE APRENDIZAGEM');
 
-    studentData.forEach(([label, value]) => {
-      doc.setFont('helvetica', 'bold');
-      doc.text(`${label}:`, margin, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.text(value, margin + 50, yPosition);
-      yPosition += 8;
+    // Insights Personalizados
+    addText('SEUS INSIGHTS PERSONALIZADOS', {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: [236, 155, 42],
+      align: 'center',
+      lineHeight: 1.3
     });
-
-    yPosition += 10;
-
-    // Test Results
-    addText('Seu Perfil de Aprendizagem', 18, 'bold');
-    yPosition += 10;
-
-    const testData = [
-      ['Estilo VARK', profile.varkProfile?.dominant || 'Não determinado'],
-      ['Perfil DISC', profile.discProfile?.dominant || 'Não determinado'],
-      ['Tipo Jung', profile.jungianProfile?.type || 'Não determinado'],
-      ['Valores Schwartz', profile.schwartzValues?.top_values?.slice(0, 2).join(', ') || 'Não determinado']
-    ];
-
-    testData.forEach(([label, value]) => {
-      doc.setFont('helvetica', 'bold');
-      doc.text(`${label}:`, margin, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(236, 155, 42);
-      doc.text(value, margin + 50, yPosition);
-      doc.setTextColor(0, 0, 0);
-      yPosition += 8;
-    });
-
-    yPosition += 10;
-
-    // Insights
-    addText('Seus Insights Personalizados', 18, 'bold');
-    yPosition += 10;
+    yPosition += 8;
 
     const insightSections = [
-      { title: '🧠 Minha Mente em Foco', content: insights.mind },
-      { title: '🚀 Meus Superpoderes', content: insights.superpowers },
-      { title: '❤️ O Que Me Move', content: insights.motivation },
-      { title: '📖 Meu Manual de Instruções', content: insights.manual }
+      { title: 'Minha Mente em Foco', content: insights.mind, icon: '🧠' },
+      { title: 'Meus Superpoderes', content: insights.superpowers, icon: '🚀' },
+      { title: 'O Que Me Move', content: insights.motivation, icon: '❤️' },
+      { title: 'Meu Manual de Instruções', content: insights.manual, icon: '📖' }
     ];
 
     insightSections.forEach(section => {
-      addText(section.title, 14, 'bold');
-      addText(section.content, 11);
-      yPosition += 5;
+      addSection(section.title, section.content, section.icon);
     });
 
-    // Tips
-    addText('🎯 Dicas para Voar Mais Alto', 18, 'bold');
-    yPosition += 10;
+    // Dicas - usando lista numerada melhorada
+    addText('DICAS PARA VOAR MAIS ALTO', {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: [236, 155, 42],
+      align: 'center',
+      lineHeight: 1.3
+    });
+    yPosition += 8;
 
     insights.tips.forEach((tip: string, index: number) => {
-      addText(`${index + 1}. ${tip}`, 11);
+      if (yPosition > pageHeight - 60) {
+        doc.addPage();
+        yPosition = margin;
+      }
+
+      // Número da dica em círculo
+      doc.setFillColor(236, 155, 42);
+      doc.circle(margin + 6, yPosition + 2, 4, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text((index + 1).toString(), margin + 6, yPosition + 3, { align: 'center' });
+
+      // Texto da dica
+      doc.setTextColor(55, 65, 81);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      const tipLines = doc.splitTextToSize(tip, contentWidth - 20);
+      doc.text(tipLines, margin + 15, yPosition);
+
+      yPosition += tipLines.length * 5 + 6;
     });
 
-    // Footer
+    // Footer melhorado
+    if (yPosition > pageHeight - 40) {
+      doc.addPage();
+      yPosition = margin;
+    }
+
     const footerY = pageHeight - 30;
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
+
+    // Linha separadora
+    doc.setDrawColor(229, 231, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin, footerY - 8, pageWidth - margin, footerY - 8);
+
+    // Texto do footer
+    doc.setFontSize(9);
+    doc.setTextColor(107, 114, 128);
+    doc.setFont('helvetica', 'normal');
     doc.text('MUDEAI - Plataforma de Perfil de Aprendizagem', pageWidth / 2, footerY, { align: 'center' });
     doc.text('https://ai.mudeeducacao.com.br | contato@mudeeducacao.com.br', pageWidth / 2, footerY + 5, { align: 'center' });
 
@@ -399,481 +540,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function createHTMLTemplate(student: any, profile: any, insights: any): string {
-  const currentDate = new Date().toLocaleDateString('pt-BR');
-
-  // Dados do aluno
-  const studentName = student.name;
-  const studentAge = `${student.age} anos`;
-  const studentGender = student.gender || 'Não informado';
-  const completionDate = student.createdAt
-    ? new Date(student.createdAt).toLocaleDateString('pt-BR')
-    : 'N/A';
-
-  // Resultados dos testes
-  const varkResult = profile.varkProfile?.dominant || 'Não determinado';
-  const discResult = profile.discProfile?.dominant || 'Não determinado';
-  const jungResult = profile.jungianProfile?.type || 'Não determinado';
-  const schwartzValues = profile.schwartzValues?.top_values;
-  const schwartzResult = schwartzValues && schwartzValues.length > 0
-    ? schwartzValues.slice(0, 2).join(', ')
-    : 'Não determinado';
-
-  return `
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Relatório de Perfil de Aprendizagem - ${studentName}</title>
-      <script src="https://cdn.tailwindcss.com"></script>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        body {
-          font-family: 'Inter', sans-serif;
-          margin: 0;
-          padding: 20px;
-          background: white;
-          color: #1f2937;
-          line-height: 1.6;
-        }
-
-        .header {
-          background: linear-gradient(135deg, #ec9b2a 0%, #884cff 100%);
-          padding: 40px 30px;
-          text-align: center;
-          border-radius: 20px;
-          margin-bottom: 30px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .header::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 20px;
-        }
-
-        .logo {
-          position: relative;
-          z-index: 2;
-          font-size: 48px;
-          font-weight: 700;
-          color: white;
-          margin-bottom: 10px;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-          letter-spacing: 3px;
-        }
-
-        .subtitle {
-          position: relative;
-          z-index: 2;
-          font-size: 20px;
-          color: rgba(255, 255, 255, 0.9);
-          font-weight: 400;
-        }
-
-        .date {
-          position: absolute;
-          top: 30px;
-          right: 30px;
-          color: rgba(255, 255, 255, 0.8);
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .section {
-          background: white;
-          border-radius: 16px;
-          padding: 30px;
-          margin-bottom: 25px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-          border: 1px solid #f3f4f6;
-        }
-
-        .section-title {
-          font-size: 24px;
-          font-weight: 600;
-          color: #1f2937;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .section-icon {
-          width: 36px;
-          height: 36px;
-          background: linear-gradient(135deg, #ec9b2a, #884cff);
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 18px;
-        }
-
-        .table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 20px 0;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .table th {
-          background: linear-gradient(135deg, #ec9b2a, #884cff);
-          color: white;
-          padding: 16px;
-          text-align: left;
-          font-weight: 600;
-          font-size: 14px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .table td {
-          padding: 16px;
-          border-bottom: 1px solid #f3f4f6;
-          font-size: 14px;
-        }
-
-        .table tr:nth-child(even) {
-          background: #f8fafc;
-        }
-
-        .insight-card {
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          border-radius: 12px;
-          padding: 24px;
-          margin: 16px 0;
-          border-left: 4px solid #884cff;
-        }
-
-        .insight-title {
-          font-size: 18px;
-          font-weight: 600;
-          color: #1f2937;
-          margin-bottom: 12px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .insight-icon {
-          width: 32px;
-          height: 32px;
-          background: linear-gradient(135deg, #ec9b2a, #884cff);
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 16px;
-        }
-
-        .insight-text {
-          font-size: 15px;
-          line-height: 1.6;
-          color: #4b5563;
-        }
-
-        .tips-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 16px;
-          margin: 20px 0;
-        }
-
-        .tip-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 16px;
-          padding: 20px;
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          border-radius: 12px;
-          border-left: 4px solid #ec9b2a;
-        }
-
-        .tip-number {
-          width: 32px;
-          height: 32px;
-          background: linear-gradient(135deg, #ec9b2a, #884cff);
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 14px;
-          flex-shrink: 0;
-        }
-
-        .tip-text {
-          font-size: 15px;
-          line-height: 1.6;
-          color: #4b5563;
-          margin-top: 2px;
-        }
-
-        .buttons-section {
-          text-align: center;
-          margin: 30px 0;
-        }
-
-        .buttons-title {
-          font-size: 20px;
-          font-weight: 600;
-          color: #1f2937;
-          margin-bottom: 20px;
-        }
-
-        .buttons-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          max-width: 600px;
-          margin: 0 auto;
-        }
-
-        .button {
-          background: linear-gradient(135deg, #ec9b2a, #884cff);
-          color: white;
-          padding: 16px 20px;
-          border-radius: 12px;
-          text-align: center;
-          font-weight: 600;
-          font-size: 14px;
-          text-decoration: none;
-          display: block;
-          transition: transform 0.2s ease;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .footer {
-          margin-top: 40px;
-          padding: 30px;
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          border-radius: 16px;
-          text-align: center;
-          border: 1px solid #e5e7eb;
-        }
-
-        .footer-logo {
-          font-size: 24px;
-          font-weight: 700;
-          color: #1f2937;
-          margin-bottom: 8px;
-        }
-
-        .footer-tagline {
-          font-size: 14px;
-          color: #6b7280;
-          margin-bottom: 20px;
-        }
-
-        .footer-links {
-          display: flex;
-          justify-content: center;
-          gap: 30px;
-          font-size: 12px;
-          color: #9ca3af;
-        }
-
-        @media print {
-          body {
-            padding: 0;
-          }
-          .header {
-            margin-bottom: 20px;
-          }
-          .section {
-            page-break-inside: avoid;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <!-- Header -->
-      <div class="header">
-        <div class="logo">MUDEAI</div>
-        <div class="subtitle">Relatório de Perfil de Aprendizagem</div>
-        <div class="date">Gerado em: ${currentDate}</div>
-      </div>
-
-      <!-- Student Information -->
-      <div class="section">
-        <div class="section-title">
-          <div class="section-icon">👤</div>
-          Informações do Aluno
-        </div>
-
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Campo</th>
-              <th>Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Nome</strong></td>
-              <td>${studentName}</td>
-            </tr>
-            <tr>
-              <td><strong>Idade</strong></td>
-              <td>${studentAge}</td>
-            </tr>
-            <tr>
-              <td><strong>Gênero</strong></td>
-              <td>${studentGender}</td>
-            </tr>
-            <tr>
-              <td><strong>Data da Avaliação</strong></td>
-              <td>${completionDate}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Test Results -->
-      <div class="section">
-        <div class="section-title">
-          <div class="section-icon">📊</div>
-          Seu Perfil de Aprendizagem
-        </div>
-
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Teste Psicométrico</th>
-              <th>Resultado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Estilo VARK</strong></td>
-              <td style="color: #ec9b2a; font-weight: 600;">${varkResult}</td>
-            </tr>
-            <tr>
-              <td><strong>Perfil DISC</strong></td>
-              <td style="color: #ec9b2a; font-weight: 600;">${discResult}</td>
-            </tr>
-            <tr>
-              <td><strong>Tipo Jung</strong></td>
-              <td style="color: #ec9b2a; font-weight: 600;">${jungResult}</td>
-            </tr>
-            <tr>
-              <td><strong>Valores Schwartz</strong></td>
-              <td style="color: #ec9b2a; font-weight: 600;">${schwartzResult}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Insights -->
-      <div class="section">
-        <div class="section-title">
-          <div class="section-icon">💡</div>
-          Seus Insights Personalizados
-        </div>
-
-        <div class="insight-card">
-          <div class="insight-title">
-            <div class="insight-icon">🧠</div>
-            Minha Mente em Foco
-          </div>
-          <div class="insight-text">${insights.mind}</div>
-        </div>
-
-        <div class="insight-card">
-          <div class="insight-title">
-            <div class="insight-icon">🚀</div>
-            Meus Superpoderes
-          </div>
-          <div class="insight-text">${insights.superpowers}</div>
-        </div>
-
-        <div class="insight-card">
-          <div class="insight-title">
-            <div class="insight-icon">❤️</div>
-            O Que Me Move
-          </div>
-          <div class="insight-text">${insights.motivation}</div>
-        </div>
-
-        <div class="insight-card">
-          <div class="insight-title">
-            <div class="insight-icon">📖</div>
-            Meu Manual de Instruções
-          </div>
-          <div class="insight-text">${insights.manual}</div>
-        </div>
-      </div>
-
-      <!-- Tips -->
-      <div class="section">
-        <div class="section-title">
-          <div class="section-icon">🎯</div>
-          Dicas para Voar Mais Alto
-        </div>
-
-        <div class="tips-grid">
-          ${insights.tips.map((tip: string, index: number) => `
-            <div class="tip-item">
-              <div class="tip-number">${index + 1}</div>
-              <div class="tip-text">${tip}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <!-- Buttons Section -->
-      <div class="section">
-        <div class="buttons-section">
-          <div class="buttons-title">Compartilhe Seu Perfil!</div>
-          <p style="color: #6b7280; margin-bottom: 30px; font-size: 14px;">
-            Este relatório contém uma análise completa do seu perfil de aprendizagem baseada em metodologias científicas reconhecidas internacionalmente.
-          </p>
-
-          <div class="buttons-grid">
-            <a href="https://ai.mudeeducacao.com.br" class="button">
-              🌐 Plataforma MUDEAI
-            </a>
-            <a href="https://wa.me/5511999999999" class="button">
-              💬 WhatsApp
-            </a>
-            <a href="mailto:contato@mudeeducacao.com.br" class="button">
-              📧 Email
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="footer">
-        <div class="footer-logo">MUDEAI</div>
-        <div class="footer-tagline">DHO de empresas e gestor escolar solicitem demonstração de toda a ferramenta para conhecer todo o seu potencial.</div>
-        <div class="footer-links">
-          <span>Visite: https://ai.mudeeducacao.com.br</span>
-          <span>Contato: contato@mudeeducacao.com.br</span>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
 }
