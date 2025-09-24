@@ -371,16 +371,15 @@ export async function POST(request: NextRequest) {
     };
 
     // Função para adicionar seção com título e conteúdo
-    const addSection = (title: string, content: string, icon?: string) => {
+    const addSection = (title: string, content: string) => {
       // Verificar se precisa de nova página
       if (yPosition > pageHeight - 80) {
         doc.addPage();
         yPosition = margin;
       }
 
-      // Título da seção com ícone
-      const fullTitle = icon ? `${icon} ${title}` : title;
-      addText(fullTitle, {
+      // Título da seção
+      addText(title, {
         fontSize: 18,
         fontWeight: 'bold',
         color: [236, 155, 42],
@@ -454,14 +453,14 @@ export async function POST(request: NextRequest) {
     yPosition += 8;
 
     const insightSections = [
-      { title: 'Minha Mente em Foco', content: insights.mind, icon: '🧠' },
-      { title: 'Meus Superpoderes', content: insights.superpowers, icon: '🚀' },
-      { title: 'O Que Me Move', content: insights.motivation, icon: '❤️' },
-      { title: 'Meu Manual de Instruções', content: insights.manual, icon: '📖' }
+      { title: 'Minha Mente em Foco', content: insights.mind },
+      { title: 'Meus Superpoderes', content: insights.superpowers },
+      { title: 'O Que Me Move', content: insights.motivation },
+      { title: 'Meu Manual de Instruções', content: insights.manual }
     ];
 
     insightSections.forEach(section => {
-      addSection(section.title, section.content, section.icon);
+      addSection(section.title, section.content);
     });
 
     // Dicas - usando lista numerada melhorada
