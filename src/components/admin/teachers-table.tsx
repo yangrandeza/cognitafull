@@ -111,11 +111,21 @@ export function TeachersTable() {
       setTeachers(fetchedTeachers);
     } catch (error) {
       console.error("Error creating teacher:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao adicionar professor",
-        description: "Não foi possível adicionar o professor. Tente novamente.",
-      });
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+
+      if (errorMessage.includes("Já existe um usuário com este e-mail")) {
+        toast({
+          variant: "destructive",
+          title: "E-mail já cadastrado",
+          description: "Já existe um usuário com este e-mail. Verifique se o professor já foi convidado ou se o e-mail está correto.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro ao adicionar professor",
+          description: "Não foi possível adicionar o professor. Tente novamente.",
+        });
+      }
     } finally {
       setIsCreating(false);
     }

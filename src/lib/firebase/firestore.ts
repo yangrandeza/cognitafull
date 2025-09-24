@@ -496,10 +496,10 @@ export const submitQuizAnswers = async (classId: string, studentInfo: { name: st
                 classData.name,
                 studentId,
                 {
-                    vark: (processedProfile as any).vark || 'Não determinado',
-                    disc: (processedProfile as any).disc || 'Não determinado',
-                    jung: (processedProfile as any).jung || 'Não determinado',
-                    schwartz: (processedProfile as any).schwartz || 'Não determinado',
+                    vark: processedProfile.varkProfile?.dominant || 'Não determinado',
+                    disc: processedProfile.discProfile?.dominant || 'Não determinado',
+                    jung: processedProfile.jungianProfile?.type || 'Não determinado',
+                    schwartz: processedProfile.schwartzValues?.top_values?.join(', ') || 'Não determinado',
                 },
                 undefined, // whatsappNumber (not available in quiz submission)
                 teacherProfile?.name
