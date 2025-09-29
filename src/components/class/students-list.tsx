@@ -31,6 +31,7 @@ import { StudentDetailsModal } from "./student-details-modal";
 import { deleteStudent, getProfilesByClass, getClassById } from "@/lib/firebase/firestore";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { RawUnifiedProfile } from "@/lib/types";
+import { CsvExportModal } from "./csv-export-modal";
 
 
 const varkOptions = ['Visual', 'Auditivo', 'Leitura/Escrita', 'Cinestésico'];
@@ -171,6 +172,14 @@ export function StudentsList({ students: initialStudents, profiles, classId }: {
         <CardDescription>
           Visualize, pesquise, edite e remova os alunos da sua turma.
         </CardDescription>
+        <div className="pt-4 flex justify-end">
+          <CsvExportModal
+            students={filteredStudents}
+            profiles={profiles}
+            customFields={classConfig?.customFields || []}
+            classId={classId}
+          />
+        </div>
         <div className="pt-4 flex flex-col md:flex-row gap-4">
           <Input
             placeholder="Pesquisar por nome..."
