@@ -24,7 +24,6 @@ import {
   Loader2,
   BookOpen,
   BarChart3,
-  Building2,
   PieChart,
   Shield,
   Mail,
@@ -41,7 +40,6 @@ const navItems = [
   // Super Admin sections
   { href: "/superadmin/system", icon: Shield, label: "Sistema", roles: ["superadmin"] },
   { href: "/superadmin/emails", icon: Mail, label: "Emails", roles: ["superadmin"] },
-  { href: "/superadmin/organizations", icon: Building2, label: "Organizações", roles: ["superadmin"] },
   { href: "/superadmin/users", icon: Users, label: "Usuários", roles: ["superadmin"] },
   { href: "/superadmin/classes", icon: BookOpen, label: "Turmas", roles: ["superadmin"] },
   { href: "/superadmin/analytics", icon: PieChart, label: "Analytics", roles: ["superadmin"] },

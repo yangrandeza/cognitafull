@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getAllOrganizations, getAllUsers, getAllClasses, deleteClass } from "@/lib/firebase/firestore";
-import type { Organization, UserProfile, Class } from "@/lib/types";
-import { BookOpen, Plus, Edit, Trash2, Search } from "lucide-react";
+import { getAllOrganizations, getAllUsers, getAllClasses, deleteClass, getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
+import type { Organization, UserProfile, Class, Student, RawUnifiedProfile, UnifiedProfile } from "@/lib/types";
+import { BookOpen, Plus, Edit, Trash2, Search, Eye, Users, BarChart3, Settings, Sparkles } from "lucide-react";
+import { InsightsDashboard } from "@/components/class/insights-dashboard";
+import { SuperAdminClassDialog } from "./superadmin-class-dialog";
 
 export function SuperAdminClasses() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -17,6 +21,10 @@ export function SuperAdminClasses() {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+  const [showClassDetails, setShowClassDetails] = useState(false);
+  const [showClassDialog, setShowClassDialog] = useState(false);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -64,6 +72,31 @@ export function SuperAdminClasses() {
     }
   };
 
+  const viewClassDetails = (classItem: Class) => {
+    setSelectedClass(classItem);
+    setShowClassDetails(true);
+  };
+
+  const handleCreateClass = () => {
+    setEditingClass(null);
+    setShowClassDialog(true);
+  };
+
+  const handleEditClass = (classItem: Class) => {
+    setEditingClass(classItem);
+    setShowClassDialog(true);
+  };
+
+  const handleClassSaved = async () => {
+    // Refresh the classes list
+    try {
+      const allClasses = await getAllClasses();
+      setClasses(allClasses);
+    } catch (error) {
+      console.error("Error refreshing classes:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center rounded-lg border bg-card p-8">
@@ -93,7 +126,7 @@ export function SuperAdminClasses() {
               className="pl-10 w-64"
             />
           </div>
-          <Button>
+          <Button onClick={handleCreateClass}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Turma
           </Button>
@@ -139,7 +172,19 @@ export function SuperAdminClasses() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => viewClassDetails(cls)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Ver Detalhes
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditClass(cls)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
@@ -157,6 +202,41 @@ export function SuperAdminClasses() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Class Details Modal */}
+      <Dialog open={showClassDetails} onOpenChange={setShowClassDetails}>
+        <DialogContent className="max-w-7xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              {selectedClass?.name} - Dashboard Completo
+            </DialogTitle>
+            <DialogDescription>
+              Visualização completa dos insights e dados da turma
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-auto min-h-0">
+            {selectedClass && (
+              <InsightsDashboard classId={selectedClass.id} />
+            )}
+          </div>
+
+          <DialogFooter className="flex-shrink-0">
+            <Button onClick={() => setShowClassDetails(false)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create/Edit Class Dialog */}
+      <SuperAdminClassDialog
+        open={showClassDialog}
+        onOpenChange={setShowClassDialog}
+        editingClass={editingClass}
+        onClassSaved={handleClassSaved}
+      />
     </div>
   );
 }

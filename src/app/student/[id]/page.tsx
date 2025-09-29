@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, User } from "lucide-react";
 
 
-export default async function StudentPage({ params }: { params: { id: string } }) {
+export default async function StudentPage({ params }: { params: Promise<{ id: string }> }) {
     // Directly use params.id as it's available in Server Components
-    const data = await getStudentAndProfileById(params.id);
+    const data = await getStudentAndProfileById((await params).id);
 
     if (!data) {
         return (

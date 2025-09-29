@@ -1,11 +1,10 @@
 import { InsightsDashboard } from "@/components/class/insights-dashboard";
-import { getSavedLessonPlans } from "@/lib/actions";
 import { getClassById } from "@/lib/firebase/firestore";
 import { AlertTriangle, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default async function ClassDetailsPage({ params }: { params: { id: string } }) {
-  const classId = params.id;
+export default async function ClassDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const classId = (await params).id;
   
   // Fetch only the essential data on the server first
   const classData = await getClassById(classId);

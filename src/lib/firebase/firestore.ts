@@ -364,6 +364,42 @@ export const updateClass = async (classId: string, updates: Partial<Pick<Class, 
     }
 };
 
+// Superadmin functions for managing classes across organizations
+export const createClassForSuperadmin = async (className: string, teacherId: string, organizationId: string) => {
+    const newClass: NewClass = {
+        name: className,
+        teacherId,
+        organizationId,
+        studentCount: 0,
+        responsesCount: 0,
+        createdAt: serverTimestamp(),
+    };
+    const docRef = await addDoc(collection(db, "classes"), newClass);
+    return docRef.id;
+};
+
+export const updateClassForSuperadmin = async (classId: string, updates: Partial<Pick<Class, 'name' | 'teacherId' | 'organizationId' | 'enableCustomFields' | 'customFields'>>) => {
+    const classRef = doc(db, 'classes', classId);
+
+    // Filter out undefined values to avoid Firestore errors
+    const cleanUpdates: Record<string, any> = {};
+    Object.entries(updates).forEach(([key, value]) => {
+        if (value !== undefined) {
+            cleanUpdates[key] = value;
+        } else {
+            console.log(`Filtering out undefined value for key: ${key}`);
+        }
+    });
+
+    console.log('Clean updates for superadmin:', cleanUpdates);
+
+    if (Object.keys(cleanUpdates).length > 0) {
+        await updateDoc(classRef, cleanUpdates);
+    } else {
+        console.log('No valid updates to save');
+    }
+};
+
 
 // Student and Profile Functions
 
@@ -675,5 +711,76 @@ export const deleteClass = async (classId: string): Promise<void> => {
 
         // Finally, delete the class itself
         transaction.delete(classRef);
+    });
+};
+
+// Organization Functions
+export const createOrganization = async (name: string): Promise<string> => {
+    const orgData: Omit<Organization, 'id'> = {
+        name,
+        createdAt: serverTimestamp(),
+    };
+    const docRef = await addDoc(collection(db, 'organizations'), orgData);
+    return docRef.id;
+}
+
+export const updateOrganization = async (organizationId: string, updates: Partial<Pick<Organization, 'name'>>) => {
+    const orgRef = doc(db, 'organizations', organizationId);
+    await updateDoc(orgRef, updates);
+}
+
+export const deleteOrganization = async (organizationId: string): Promise<void> => {
+    await runTransaction(db, async (transaction) => {
+        // Get all users in the organization
+        const usersQuery = query(collection(db, 'users'), where('organizationId', '==', organizationId));
+        const usersSnapshot = await getDocs(usersQuery);
+
+        // Get all classes in the organization
+        const classesQuery = query(collection(db, 'classes'), where('organizationId', '==', organizationId));
+        const classesSnapshot = await getDocs(classesQuery);
+
+        // Delete all classes and their related data
+        for (const classDoc of classesSnapshot.docs) {
+            const classId = classDoc.id;
+
+            // Get all students in the class
+            const studentsQuery = query(collection(db, 'students'), where('classId', '==', classId));
+            const studentsSnapshot = await getDocs(studentsQuery);
+
+            // Get all profiles in the class
+            const profilesQuery = query(collection(db, 'unifiedProfiles'), where('classId', '==', classId));
+            const profilesSnapshot = await getDocs(profilesQuery);
+
+            // Get all strategies in the class
+            const strategiesQuery = query(collection(db, 'learningStrategies'), where('classId', '==', classId));
+            const strategiesSnapshot = await getDocs(strategiesQuery);
+
+            // Delete all students
+            studentsSnapshot.docs.forEach((studentDoc) => {
+                transaction.delete(studentDoc.ref);
+            });
+
+            // Delete all profiles
+            profilesSnapshot.docs.forEach((profileDoc) => {
+                transaction.delete(profileDoc.ref);
+            });
+
+            // Delete all strategies
+            strategiesSnapshot.docs.forEach((strategyDoc) => {
+                transaction.delete(strategyDoc.ref);
+            });
+
+            // Delete the class
+            transaction.delete(classDoc.ref);
+        }
+
+        // Delete all users
+        usersSnapshot.docs.forEach((userDoc) => {
+            transaction.delete(userDoc.ref);
+        });
+
+        // Finally, delete the organization itself
+        const orgRef = doc(db, 'organizations', organizationId);
+        transaction.delete(orgRef);
     });
 };
