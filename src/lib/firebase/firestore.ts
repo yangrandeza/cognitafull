@@ -384,12 +384,15 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
         const studentData = studentDoc.data() as Student;
         const classId = studentData.classId;
         const profileId = studentData.unifiedProfileId;
-        
-        let classRef;
+
+        // Perform all reads first
+        let classDoc = null;
         if (classId) {
-            classRef = doc(db, 'classes', classId);
+            const classRef = doc(db, 'classes', classId);
+            classDoc = await transaction.get(classRef);
         }
 
+        // Now perform all writes
         transaction.delete(studentRef);
 
         if (profileId) {
@@ -397,22 +400,20 @@ export const deleteStudent = async (studentId: string): Promise<void> => {
             transaction.delete(profileRef);
         }
 
-        if (classRef) {
-            const classDoc = await transaction.get(classRef);
-            if (classDoc.exists()) {
-                const currentStudentCount = classDoc.data().studentCount || 0;
-                const currentResponsesCount = classDoc.data().responsesCount || 0;
-                
-                const newStudentCount = Math.max(0, currentStudentCount - 1);
-                const newResponsesCount = studentData.quizStatus === 'completed' 
-                    ? Math.max(0, currentResponsesCount - 1)
-                    : currentResponsesCount;
-                
-                transaction.update(classRef, { 
-                    studentCount: newStudentCount,
-                    responsesCount: newResponsesCount,
-                });
-            }
+        if (classDoc && classDoc.exists()) {
+            const currentStudentCount = classDoc.data().studentCount || 0;
+            const currentResponsesCount = classDoc.data().responsesCount || 0;
+
+            const newStudentCount = Math.max(0, currentStudentCount - 1);
+            const newResponsesCount = studentData.quizStatus === 'completed'
+                ? Math.max(0, currentResponsesCount - 1)
+                : currentResponsesCount;
+
+            const classRef = doc(db, 'classes', classId!);
+            transaction.update(classRef, {
+                studentCount: newStudentCount,
+                responsesCount: newResponsesCount,
+            });
         }
     });
 };
