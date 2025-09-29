@@ -1,0 +1,146 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin';
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isTeacher() {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    function userOrganizationId() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId;
+    }
+
+    function isInSameOrganization(resourceOrgId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.organizationId == resourceOrgId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read and update their own profile
+      allow read, update: if isOwner(userId);
+
+      // Superadmins can do anything
+      allow read, write: if isSuperAdmin();
+
+      // Admins can read/write users in their organization
+      allow read, write: if isAdmin() && isInSameOrganization(resource.data.organizationId);
+
+      // Allow creating pending teacher invitations (for admin-created teachers)
+      allow create: if resource.data.role == 'teacher' &&
+                       resource.data.status == 'pending' &&
+                       (!resource.data.organizationId ||
+                        (isAdmin() && resource.data.organizationId == userOrganizationId()));
+    }
+
+    // Organizations collection
+    match /organizations/{orgId} {
+      // Superadmins can do anything
+      allow read, write: if isSuperAdmin();
+
+      // Users can read organizations they belong to
+      allow read: if isAuthenticated() && isInSameOrganization(orgId);
+
+      // Admins can update their own organization
+      allow update: if isAdmin() && orgId == userOrganizationId();
+    }
+
+    // Classes collection
+    match /classes/{classId} {
+      // Superadmins can do anything
+      allow read, write: if isSuperAdmin();
+
+      // Teachers can read/write their own classes
+      allow read, write: if isTeacher() &&
+                            exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                            resource.data.teacherId == request.auth.uid;
+
+      // On create, allow if teacher is creating for their organization
+      allow create: if isTeacher() &&
+                       request.resource.data.teacherId == request.auth.uid &&
+                       isInSameOrganization(request.resource.data.organizationId);
+
+      // Admins can read classes in their organization
+      allow read: if isAdmin() && isInSameOrganization(resource.data.organizationId);
+    }
+
+    // Students collection
+    match /students/{studentId} {
+      // Superadmins can do anything
+      allow read, write: if isSuperAdmin();
+
+      // Teachers can manage students in their classes
+      allow read, write: if isTeacher() &&
+                            exists(/databases/$(database)/documents/classes/$(resource.data.classId)) &&
+                            get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+
+      // Admins can read students in their organization classes
+      allow read: if isAdmin() &&
+                     exists(/databases/$(database)/documents/classes/$(resource.data.classId)) &&
+                     isInSameOrganization(get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.organizationId);
+
+      // Allow quiz submissions (public access for student quiz completion)
+      // This allows unauthenticated users to create students via quiz
+      allow create: if true;
+    }
+
+    // Unified Profiles collection
+    match /unifiedProfiles/{profileId} {
+      // Superadmins can do anything
+      allow read, write: if isSuperAdmin();
+
+      // Teachers can manage profiles for students in their classes
+      allow read, write: if isTeacher() &&
+                            exists(/databases/$(database)/documents/classes/$(resource.data.classId)) &&
+                            get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+
+      // Admins can read profiles in their organization classes
+      allow read: if isAdmin() &&
+                     exists(/databases/$(database)/documents/classes/$(resource.data.classId)) &&
+                     isInSameOrganization(get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.organizationId);
+
+      // Allow quiz submissions (public access for profile creation)
+      allow create: if true;
+    }
+
+    // Learning Strategies collection
+    match /learningStrategies/{strategyId} {
+      // Superadmins can do anything
+      allow read, write: if isSuperAdmin();
+
+      // Teachers can manage strategies for their classes
+      allow read, write: if isTeacher() &&
+                            exists(/databases/$(database)/documents/classes/$(resource.data.classId)) &&
+                            get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.teacherId == request.auth.uid;
+
+      // Admins can read strategies in their organization classes
+      allow read: if isAdmin() &&
+                     exists(/databases/$(database)/documents/classes/$(resource.data.classId)) &&
+                     isInSameOrganization(get(/databases/$(database)/documents/classes/$(resource.data.classId)).data.organizationId);
+    }
+  }
+}
