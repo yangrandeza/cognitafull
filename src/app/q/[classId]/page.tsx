@@ -18,6 +18,7 @@ import { submitQuizAnswers, getClassById } from '@/lib/firebase/firestore';
 import type { QuizAnswers, Class, CustomField } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { QuizConsentDialog } from '@/components/common/quiz-consent-dialog';
+import { PhoneInputWithCountry } from '@/components/ui/phone-input';
 
 
 const questions = [
@@ -281,7 +282,7 @@ export default function QuestionnairePage() {
   const { toast } = useToast();
   const classId = params.classId as string;
 
-  const currentQuestion = questions[step];
+  const currentQuestion = questions[step] as any;
   const isLastQuestion = step === totalQuestions;
 
   // Fetch class configuration on component mount
@@ -341,16 +342,16 @@ export default function QuestionnairePage() {
   };
   
   const validateCurrentStep = () => {
-    if (!currentQuestion || !('id' in currentQuestion)) {
+    if (!currentQuestion || !('id' in currentQuestion) || !currentQuestion.id) {
       return true;
     }
-    
+
     const questionId = currentQuestion.id;
 
     if (currentQuestion.type === 'radio' || currentQuestion.type === 'scale') {
         return !!answers[questionId];
     }
-    
+
     if (currentQuestion.type === 'disc') {
         return !!answers[`${questionId}_most`] && !!answers[`${questionId}_least`];
     }
@@ -605,12 +606,12 @@ export default function QuestionnairePage() {
                                     )}
 
                                     {field.type === 'phone' && (
-                                        <Input
+                                        <PhoneInputWithCountry
                                             id={`custom_${field.id}`}
-                                            type="tel"
-                                            placeholder={`Digite ${field.label.toLowerCase()}`}
                                             value={customFieldValues[field.id] || ''}
-                                            onChange={(e) => handleCustomFieldChange(field.id, e.target.value)}
+                                            onChange={(value) => handleCustomFieldChange(field.id, value)}
+                                            defaultCountry={field.defaultCountry || "BR"}
+                                            supportedCountries={field.supportedCountries}
                                             required={field.required}
                                         />
                                     )}
@@ -664,13 +665,13 @@ export default function QuestionnairePage() {
                 {currentQuestion.type !== 'disc' && currentQuestion.instruction && <CardDescription>{currentQuestion.instruction}</CardDescription>}
             </CardHeader>
             <CardContent>
-              {currentQuestion.type === 'radio' && (
-                <RadioGroup 
+              {currentQuestion.type === 'radio' && currentQuestion.options && (
+                <RadioGroup
                   className="space-y-3"
                   value={answers[currentQuestion.id] || ''}
                   onValueChange={(value) => handleAnswerChange(currentQuestion.id, value)}
                 >
-                  {currentQuestion.options.map(opt => (
+                  {currentQuestion.options.map((opt: { value: string; label: string }) => (
                     <div key={opt.value} className="flex items-center space-x-2 p-4 border rounded-md has-[:checked]:bg-primary/10 has-[:checked]:border-primary transition-colors">
                       <RadioGroupItem value={opt.value} id={`${currentQuestion.id}_${opt.value}`} />
                       <Label htmlFor={`${currentQuestion.id}_${opt.value}`} className="flex-1 cursor-pointer">{opt.label}</Label>
@@ -678,17 +679,17 @@ export default function QuestionnairePage() {
                   ))}
                 </RadioGroup>
               )}
-              {currentQuestion.type === 'disc' && (
+              {currentQuestion.type === 'disc' && currentQuestion.words && (
                    <div className="space-y-4">
                      <div className="grid grid-cols-3 gap-2 text-center items-center px-4">
                         <span className="font-medium text-sm text-muted-foreground text-left">MAIS parecido</span>
                         <span></span>
                         <span className="font-medium text-sm text-muted-foreground text-right">MENOS parecido</span>
                      </div>
-                      {currentQuestion.words.map((word, index) => (
+                      {currentQuestion.words.map((word: string, index: number) => (
                          <div key={index} className="grid grid-cols-3 gap-2 border p-3 rounded-md items-center has-[:checked]:bg-primary/5">
                             <div className="flex justify-start">
-                                <RadioGroup 
+                                <RadioGroup
                                     value={answers[`${currentQuestion.id}_most`] || ''}
                                     onValueChange={(value) => handleDiscAnswerChange(currentQuestion.id, 'most', value)}
                                 >
@@ -697,7 +698,7 @@ export default function QuestionnairePage() {
                             </div>
                             <Label className="text-center font-medium">{word}</Label>
                             <div className="flex justify-end">
-                                <RadioGroup 
+                                <RadioGroup
                                     value={answers[`${currentQuestion.id}_least`] || ''}
                                     onValueChange={(value) => handleDiscAnswerChange(currentQuestion.id, 'least', value)}
                                 >

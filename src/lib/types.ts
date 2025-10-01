@@ -43,12 +43,23 @@ export type Class = {
   customFields?: CustomField[];
 };
 
+export type Country = {
+  code: string; // ISO 3166-1 alpha-2
+  name: string;
+  flag: string;
+  phoneCode: string;
+  mask: string; // Phone mask pattern
+  example: string; // Example formatted number
+};
+
 export type CustomField = {
   id: string;
   label: string;
   type: 'text' | 'number' | 'email' | 'phone' | 'select' | 'textarea';
   required: boolean;
   options?: string[]; // For select fields
+  defaultCountry?: string; // ISO country code for phone fields
+  supportedCountries?: string[]; // Array of ISO codes for phone fields
 };
 
 export type Student = {
