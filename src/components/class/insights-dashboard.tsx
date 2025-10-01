@@ -18,6 +18,8 @@ import { AnalysisCard } from "./analysis-card";
 import { ShareClassDialog } from "./share-class-dialog";
 import { SavedStrategies } from "@/components/class/saved-strategies";
 import { ClassSettings } from "@/components/class/class-settings";
+import { TeamFormation } from "./team-formation";
+import { DissonanceAlerts } from "./dissonance-alerts";
 import { getSavedLearningStrategies } from "@/lib/actions";
 
 
@@ -99,6 +101,26 @@ export function InsightsDashboard({ classId }: { classId: string }) {
   const { teacherId } = classData;
   const { compassData, insightCards, classProfileSummary, teamsData, dissonanceData, communicationData, workPaceData } = dashboardData;
 
+  // Generate generational insights based on dominant generation
+  const getGenerationalInsights = (generation: string): string => {
+    switch (generation) {
+      case 'Alpha':
+        return 'Geração conectada digitalmente. Prefere aprendizado interativo, gamificado e com tecnologia integrada.';
+      case 'Gen Z':
+        return 'Nativos digitais com foco em autenticidade. Valorizam propósito, diversidade e aprendizado prático.';
+      case 'Millennial':
+        return 'Buscam equilíbrio trabalho-vida. Preferem colaboração, feedback frequente e aprendizado autodirigido.';
+      case 'Gen X':
+        return 'Independentes e pragmáticos. Valorizam eficiência, resultados práticos e respeito à autoridade estabelecida.';
+      case 'Boomer':
+        return 'Orientados para carreira e estabilidade. Preferem estrutura, experiência prática e aplicações do mundo real.';
+      case 'Silent':
+        return 'Valorizam tradição e trabalho em equipe. Preferem aprendizado sequencial e respeito às normas estabelecidas.';
+      default:
+        return 'Adapte as estratégias pedagógicas considerando as características etárias e experiências de vida do grupo.';
+    }
+  };
+
   return (
     <Tabs defaultValue="insights" className="space-y-4">
       <div className="flex justify-between items-center">
@@ -127,7 +149,7 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         ) : (
           <>
             {demographicsData && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Idade média</CardTitle>
@@ -153,6 +175,17 @@ export function InsightsDashboard({ classId }: { classId: string }) {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{demographicsData.dominantGender}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Insights geracionais</CardTitle>
+                <BookMarked className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm text-muted-foreground">
+                  {getGenerationalInsights(demographicsData.dominantGeneration)}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -221,45 +254,13 @@ export function InsightsDashboard({ classId }: { classId: string }) {
             )}
         </div>
         
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-             <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2">
-                        <Users />
-                        Como formar equipes equilibradas?
-                    </CardTitle>
-                    <CardDescription>Agrupe alunos por perfis complementares para otimizar o trabalho em equipe.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {teamsData.map((team, index) => (
-                    <div key={index}>
-                        <p className="font-semibold">{team.category}</p>
-                        <p className="text-xs text-muted-foreground mb-1">{team.description}</p>
-                        <p className="text-sm text-foreground/80">{team.students.join(', ')}</p>
-                    </div>
-                    ))}
-                </CardContent>
-            </Card>
-             <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline flex items-center gap-2 text-amber-600">
-                        <AlertTriangle />
-                        Quem precisa de mais atenção?
-                    </CardTitle>
-                     <CardDescription>Alunos com perfis potencialmente conflitantes, que podem gastar mais energia para se adaptar às atividades do dia a dia.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                     {dissonanceData.length > 0 ? dissonanceData.map((alert, index) => (
-                        <div key={index} className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                            <p className="font-semibold text-amber-700">{alert.studentName}</p>
-                            <p className="text-sm text-amber-600/80">{alert.note}</p>
-                        </div>
-                        )) : (
-                        <p className="text-center text-muted-foreground">Nenhum ponto de dissonância notável encontrado na turma.</p>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+        <TeamFormation students={students} profiles={processedProfiles} />
+
+        <DissonanceAlerts
+          dissonanceData={dissonanceData}
+          students={students}
+          profiles={processedProfiles}
+        />
           </>
         )}
       </TabsContent>

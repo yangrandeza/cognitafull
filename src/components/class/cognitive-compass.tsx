@@ -33,21 +33,36 @@ export function CognitiveCompass({ data }: CognitiveCompassProps) {
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square h-[350px]"
+      className="mx-auto aspect-square h-[600px]"
     >
-        <RadarChart 
-            data={data} 
-            margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+        <RadarChart
+            data={data}
+            margin={{ top: 120, right: 120, bottom: 120, left: 120 }}
         >
           <PolarGrid />
-          <PolarAngleAxis 
-            dataKey="axis" 
-            tick={{ fill: 'hsl(var(--foreground))', fontSize: 14 }}
+          <PolarAngleAxis
+            dataKey="axis"
+            tick={{
+              fill: 'hsl(var(--foreground))',
+              fontSize: 14,
+              fontWeight: 500
+            }}
+            tickFormatter={(value) => {
+              // Use shorter, abbreviated labels that fit better
+              const labels = {
+                "Ritmo & Estrutura": "Ritmo &\nEstrutura",
+                "Interação Social": "Interação\nSocial",
+                "Fonte de Energia": "Fonte de\nEnergia",
+                "Absorção de Conteúdo": "Absorção\nConteúdo"
+              };
+              return labels[value as keyof typeof labels] || value;
+            }}
+            dy={15}
           />
-          <PolarRadiusAxis 
-            angle={45} 
-            domain={[0, 100]} 
-            tick={false} 
+          <PolarRadiusAxis
+            angle={45}
+            domain={[0, 100]}
+            tick={false}
             axisLine={false}
           />
           <Radar
