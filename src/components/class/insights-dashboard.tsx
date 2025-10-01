@@ -8,7 +8,7 @@ import { LessonOptimizer } from "@/components/class/lesson-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getClassById, getClassWithStudentsAndProfiles } from "@/lib/firebase/firestore";
 import type { Class, ClassWithStudentData, UnifiedProfile, Student, RawUnifiedProfile, LearningStrategy } from "@/lib/types";
-import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby, BookMarked } from "lucide-react";
+import { Loader2, Share2, Brain, Sparkles, Wind, Users, FileText, AlertTriangle, MessageSquare, Rabbit, Snail, Telescope, Mic, Cake, Baby, BookMarked, Play, Target, Heart, Zap, Clock, CheckCircle, Lightbulb, Users2, Gamepad2, Star, TrendingUp } from "lucide-react";
 import { getDashboardData, processProfiles, getDemographicsData } from "@/lib/insights-generator";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -121,6 +121,188 @@ export function InsightsDashboard({ classId }: { classId: string }) {
     }
   };
 
+  // Generate perfect lesson plan based on all class data (formatted version)
+  const generatePerfectLessonPlanFormatted = (dashboardData: any, demographicsData: any): Array<{title: string, description: string, icon: React.ReactNode}> => {
+    if (!dashboardData || !demographicsData) return [{ title: "Dados insuficientes", description: "Não há dados suficientes para gerar um plano de aula personalizado.", icon: <AlertTriangle className="h-4 w-4" /> }];
+
+    const { compassData, communicationData, workPaceData, dissonanceData } = dashboardData;
+    const { dominantGeneration } = demographicsData;
+
+    const planItems: Array<{title: string, description: string, icon: React.ReactNode}> = [];
+
+    // 1. Opening/Engagement Strategy based on compass and generation
+    if (compassData) {
+      const socialScore = compassData.find((d: any) => d.axis === "Interação Social")?.value || 50;
+      const energyScore = compassData.find((d: any) => d.axis === "Fonte de Energia")?.value || 50;
+
+      if (socialScore > 60) {
+        planItems.push({
+          title: "Abertura colaborativa",
+          description: "Comece com atividade em grupo para energizar a turma social e promover interação imediata.",
+          icon: <Users2 className="h-4 w-4" />
+        });
+      } else {
+        planItems.push({
+          title: "Abertura reflexiva",
+          description: "Inicie com momento individual de reflexão antes da interação em grupo.",
+          icon: <Brain className="h-4 w-4" />
+        });
+      }
+
+      if (energyScore > 60) {
+        planItems.push({
+          title: "Gancho motivacional",
+          description: "Conecte o tema com propósito maior e impacto comunitário para despertar engajamento.",
+          icon: <Star className="h-4 w-4" />
+        });
+      } else {
+        planItems.push({
+          title: "Gancho competitivo",
+          description: "Use desafio e metas claras para despertar interesse e motivação competitiva.",
+          icon: <Target className="h-4 w-4" />
+        });
+      }
+    }
+
+    // 2. Communication Strategy
+    if (communicationData) {
+      if (communicationData.style === 'Relacional') {
+        planItems.push({
+          title: "Comunicação empática",
+          description: "Use storytelling e considere contexto emocional dos alunos em todas as interações.",
+          icon: <Heart className="h-4 w-4" />
+        });
+      } else {
+        planItems.push({
+          title: "Comunicação objetiva",
+          description: "Foque em fatos, dados e clareza lógica para transmitir informações de forma direta.",
+          icon: <FileText className="h-4 w-4" />
+        });
+      }
+
+      if (communicationData.feedback === 'Empático') {
+        planItems.push({
+          title: "Feedback emocional",
+          description: "Elogie esforços e progresso pessoal, considerando o impacto emocional das observações.",
+          icon: <MessageSquare className="h-4 w-4" />
+        });
+      } else {
+        planItems.push({
+          title: "Feedback direto",
+          description: "Forneça correções específicas e acionáveis baseadas em observações concretas.",
+          icon: <CheckCircle className="h-4 w-4" />
+        });
+      }
+    }
+
+    // 3. Pace and Structure Strategy
+    if (workPaceData) {
+      if (workPaceData.pace === 'Rápido') {
+        planItems.push({
+          title: "Ritmo dinâmico",
+          description: "Alterne atividades curtas e varie o foco frequentemente para manter o engajamento.",
+          icon: <Zap className="h-4 w-4" />
+        });
+      } else {
+        planItems.push({
+          title: "Ritmo cadenciado",
+          description: "Permita tempo adequado para processamento e reflexão entre atividades.",
+          icon: <Clock className="h-4 w-4" />
+        });
+      }
+
+      if (workPaceData.focus === 'Visão Geral') {
+        planItems.push({
+          title: "Abordagem holística",
+          description: "Comece com visão geral do tema antes de mergulhar nos detalhes específicos.",
+          icon: <Telescope className="h-4 w-4" />
+        });
+      } else {
+        planItems.push({
+          title: "Abordagem detalhada",
+          description: "Construa compreensão passo a passo, focando nos detalhes fundamentais.",
+          icon: <Lightbulb className="h-4 w-4" />
+        });
+      }
+    }
+
+    // 4. Generational Strategy
+    const genStrategies = getGenerationalStrategies(dominantGeneration);
+    planItems.push(...genStrategies);
+
+    // 5. Dissonance Mitigation
+    if (dissonanceData && dissonanceData.length > 0) {
+      planItems.push({
+        title: "Atenção especial",
+        description: "Monitore alunos com possíveis conflitos de perfil e adapte estratégias conforme necessário.",
+        icon: <AlertTriangle className="h-4 w-4" />
+      });
+    }
+
+    // 6. Closing Strategy
+    planItems.push({
+      title: "Encerramento reflexivo",
+      description: "Termine conectando o aprendizado com aplicações práticas do mundo real.",
+      icon: <TrendingUp className="h-4 w-4" />
+    });
+
+    planItems.push({
+      title: "Feedback contínuo",
+      description: "Incentive reflexão pessoal sobre o processo de aprendizagem e crescimento individual.",
+      icon: <Play className="h-4 w-4" />
+    });
+
+    return planItems;
+  };
+
+  // Helper function for generational teaching strategies
+  const getGenerationalStrategies = (generation: string): Array<{title: string, description: string, icon: React.ReactNode}> => {
+    switch (generation) {
+      case 'Alpha':
+        return [{
+          title: "Tecnologia integrada",
+          description: "Use apps, jogos e ferramentas digitais durante toda a aula para manter o engajamento.",
+          icon: <Gamepad2 className="h-4 w-4" />
+        }];
+      case 'Gen Z':
+        return [{
+          title: "Autenticidade",
+          description: "Conecte conteúdo com questões sociais e permita expressão pessoal e criativa.",
+          icon: <Star className="h-4 w-4" />
+        }];
+      case 'Millennial':
+        return [{
+          title: "Colaboração",
+          description: "Inclua trabalho em equipe e oportunidades de liderança compartilhada.",
+          icon: <Users2 className="h-4 w-4" />
+        }];
+      case 'Gen X':
+        return [{
+          title: "Praticidade",
+          description: "Foque em aplicações reais e demonstre valor prático do conhecimento adquirido.",
+          icon: <Target className="h-4 w-4" />
+        }];
+      case 'Boomer':
+        return [{
+          title: "Estrutura clara",
+          description: "Forneça roteiro detalhado e conexões com carreira profissional e aplicações práticas.",
+          icon: <FileText className="h-4 w-4" />
+        }];
+      case 'Silent':
+        return [{
+          title: "Respeito tradicional",
+          description: "Mantenha decoro e enfatize trabalho em equipe cooperativo e valores tradicionais.",
+          icon: <BookMarked className="h-4 w-4" />
+        }];
+      default:
+        return [{
+          title: "Adaptação contextual",
+          description: "Considere experiências de vida dos alunos no planejamento pedagógico.",
+          icon: <Lightbulb className="h-4 w-4" />
+        }];
+    }
+  };
+
   return (
     <Tabs defaultValue="insights" className="space-y-4">
       <div className="flex justify-between items-center">
@@ -204,19 +386,19 @@ export function InsightsDashboard({ classId }: { classId: string }) {
         </Card>
         
         <div className="grid gap-6 md:grid-cols-3">
-            <InsightCard 
+            <InsightCard
                 icon={<Wind className="h-8 w-8 text-blue-500" />}
                 title="O clima da sala 🌡️"
                 subtitle="Como eles se sentem mais confortáveis para aprender?"
                 text={insightCards.climate}
             />
-            <InsightCard 
+            <InsightCard
                 icon={<Sparkles className="h-8 w-8 text-amber-500" />}
                 title="A faísca do engajamento ✨"
                 subtitle="O que os faz inclinar para a frente na cadeira?"
                 text={insightCards.engagement}
             />
-            <InsightCard 
+            <InsightCard
                 icon={<Brain className="h-8 w-8 text-violet-500" />}
                 title="A melhor forma de explicação 🧠"
                 subtitle="Qual abordagem de ensino ressoará mais forte?"
@@ -253,7 +435,36 @@ export function InsightsDashboard({ classId }: { classId: string }) {
                 />
             )}
         </div>
-        
+
+        <Card className="border-2 border-emerald-200 bg-gradient-to-r from-emerald-50/50 to-green-50/30">
+            <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                    <BookMarked className="h-8 w-8 text-emerald-600" />
+                    <div>
+                        <CardTitle className="text-xl text-emerald-800">Aula perfeita para sua turma 🎯</CardTitle>
+                        <CardDescription className="text-emerald-600">
+                            Plano personalizado baseado em todos os dados da turma
+                        </CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                    {generatePerfectLessonPlanFormatted(dashboardData, demographicsData).map((item, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-emerald-100">
+                            <div className="p-1 bg-emerald-100 rounded-md flex-shrink-0 mt-0.5">
+                                {item.icon}
+                            </div>
+                            <div className="flex-1">
+                                <div className="font-medium text-emerald-800 text-sm">{item.title}</div>
+                                <div className="text-emerald-700 text-sm mt-1">{item.description}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+
         <TeamFormation students={students} profiles={processedProfiles} />
 
         <DissonanceAlerts
